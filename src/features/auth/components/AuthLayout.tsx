@@ -32,7 +32,7 @@ export function AuthLayout({ imageSrc, imageAlt, children }: AuthLayoutProps) {
       >
         <img
           src={logoDarkFont}
-          alt="Mind Health Group"
+          alt="Test"
           className="mb-4 h-14 w-auto self-start"
         />
         <div className="mx-auto flex w-full max-w-[520px] flex-1 flex-col justify-center">

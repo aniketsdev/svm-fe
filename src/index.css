@@ -3,7 +3,7 @@
 /**
  * Design tokens — single source of truth for the application's colors,
  * typography, radii, and shadows. Originally derived from the project's
- * MUI palette (Mind Health Group brand); the legacy MUI palette module
+ * MUI palette; the legacy MUI palette module
  * has been deleted in feature 003. Consumed by Tailwind v4 via the
  * @theme block — declaring a `--color-x` here auto-generates the
  * matching `bg-x`, `text-x`, `border-x`, etc utilities.

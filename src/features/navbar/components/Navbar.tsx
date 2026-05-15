@@ -37,7 +37,7 @@ export function Navbar() {
         {/* Logo */}
         <img
           src={logoLight}
-          alt="Mind Health Group"
+          alt="Test"
           className="h-8 w-auto shrink-0"
         />
 

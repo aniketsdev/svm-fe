@@ -64,7 +64,7 @@ export function SignInPage() {
     <AuthLayout imageSrc={signInImage} imageAlt="Therapy session illustration">
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <h1 className="mb-1 text-xl font-semibold text-foreground sm:text-2xl md:text-3xl">
-          Welcome to Mind Health Group
+          Welcome to Test
         </h1>
         <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
           Please sign in using credentials provided.
