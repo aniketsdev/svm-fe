@@ -6,17 +6,7 @@ import tseslint from 'typescript-eslint';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
-  // Quarantined paths (will be migrated in feature 003):
-  //   - src/features/navbar/** — full navbar feature still on MUI.
-  //   - src/theme/components.ts / index.ts — MUI Theme objects, deleted in feature 003.
-  globalIgnores([
-    'dist',
-    'node_modules',
-    'coverage',
-    'src/features/navbar/**',
-    'src/theme/components.ts',
-    'src/theme/index.ts',
-  ]),
+  globalIgnores(['dist', 'node_modules', 'coverage']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

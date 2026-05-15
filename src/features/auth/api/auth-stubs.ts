@@ -122,6 +122,42 @@ export function authSetPasswordCreateMutation() {
   };
 }
 
+// ── Logout + profile (used by the navbar UserMenu) ──────────────────────────
+
+export interface LogoutResponse { message?: string }
+export interface ProfileResponse {
+  uuid: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role_name?: string;
+  avatar_thumb_url?: string;
+}
+
+export function authLogoutCreateMutation() {
+  return {
+    mutationFn: async (_vars: Record<string, never> = {}): Promise<LogoutResponse> => {
+      void _vars;
+      return delivery({ message: 'Logged out.' });
+    },
+  };
+}
+
+export function authProfileRetrieveOptions() {
+  return {
+    queryKey: ['auth', 'profile'] as const,
+    queryFn: async (): Promise<ProfileResponse> => {
+      return delivery({
+        uuid: SAMPLE_USER.uuid,
+        first_name: SAMPLE_USER.first_name,
+        last_name: SAMPLE_USER.last_name,
+        email: SAMPLE_USER.email,
+        role_name: SAMPLE_USER.role_name,
+      });
+    },
+  };
+}
+
 // ── Test helper ─────────────────────────────────────────────────────────────
 
 /**

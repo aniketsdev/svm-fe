@@ -22,10 +22,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "vitest.setup.ts"],
-  "exclude": [
-    "src/features/navbar/**",
-    "src/theme/components.ts",
-    "src/theme/index.ts"
-  ]
+  "include": ["src", "vitest.setup.ts"]
 }

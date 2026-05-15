@@ -1,34 +1,18 @@
-import { AppBar, Toolbar, Box } from '@mui/material';
+import logoLight from '../../../assets/logo-light-font.svg';
 import { NAVBAR_HEIGHT } from '../constants';
 
 export function LogoOnlyNavbar() {
   return (
-    <AppBar
-      position="fixed"
-      elevation={0}
-      sx={{
-        bgcolor: 'primary.08',
-        height: NAVBAR_HEIGHT,
-        justifyContent: 'center',
-      }}
+    <header
+      className="fixed inset-x-0 top-0 z-40 flex items-center bg-primary-08 px-2 md:px-4"
+      style={{ height: NAVBAR_HEIGHT }}
+      data-slot="logo-only-navbar"
     >
-      <Toolbar
-        sx={{
-          minHeight: `${NAVBAR_HEIGHT}px !important`,
-          px: { xs: 1, md: 2 },
-        }}
-      >
-        <Box
-          component="img"
-          src="/logo-dark-bg.svg"
-          alt="Mind Health Group"
-          sx={{
-            height: 34,
-            width: 'auto',
-            flexShrink: 0,
-          }}
-        />
-      </Toolbar>
-    </AppBar>
+      <img
+        src={logoLight}
+        alt="Mind Health Group"
+        className="h-8 w-auto shrink-0"
+      />
+    </header>
   );
 }

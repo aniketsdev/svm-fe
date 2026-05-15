@@ -1,26 +1,19 @@
-import { Box, Skeleton } from '@mui/material';
-
+/**
+ * Skeleton rows shown inside the GlobalSearch dropdown while a query is
+ * pending. Pure Tailwind — no MUI Skeleton component.
+ */
 export function GlobalSearchSkeleton() {
   return (
-    <Box sx={{ p: 1 }}>
+    <div className="p-1">
       {[0, 1, 2].map((i) => (
-        <Box
-          key={i}
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-            px: 1.5,
-            py: 1,
-          }}
-        >
-          <Skeleton variant="circular" width={32} height={32} />
-          <Box sx={{ flex: 1 }}>
-            <Skeleton variant="text" width="60%" sx={{ fontSize: 14 }} />
-            <Skeleton variant="text" width="40%" sx={{ fontSize: 11 }} />
-          </Box>
-        </Box>
+        <div key={i} className="flex items-center gap-3 px-3 py-2">
+          <span className="size-8 shrink-0 animate-pulse rounded-full bg-secondary" />
+          <div className="flex-1 space-y-2">
+            <span className="block h-3 w-3/5 animate-pulse rounded bg-secondary" />
+            <span className="block h-2.5 w-2/5 animate-pulse rounded bg-secondary" />
+          </div>
+        </div>
       ))}
-    </Box>
+    </div>
   );
 }

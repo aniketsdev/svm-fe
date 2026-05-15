@@ -1,32 +1,26 @@
-import { useState, memo } from 'react';
-import { Box, IconButton, Menu, MenuItem, Typography, Divider } from '@mui/material';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
-import LogoutIcon from '@mui/icons-material/Logout';
-import { useNavigate } from 'react-router-dom';
+import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { ChevronDown, LogOut, UserRound } from 'lucide-react';
+import { memo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
+import { UserAvatar } from '../../../common/user-avatar';
+import { cn } from '../../../lib/cn';
 import {
   authLogoutCreateMutation,
   authProfileRetrieveOptions,
-} from '../../../sdk/@tanstack/react-query.gen';
+} from '../../auth/api/auth-stubs';
 import { useAuth } from '../../auth/hooks/useAuth';
-import ConfirmationPopUp from '../../../components/common/confirmation-pop-up/confirmation-pop-up';
-import { UserAvatar } from '../../../components/common';
 
 export const UserMenu = memo(function UserMenu() {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
-  const open = Boolean(anchorEl);
   const navigate = useNavigate();
   const { user, logout, isAuthenticated } = useAuth();
+
   const logoutMutation = useMutation({
     ...authLogoutCreateMutation(),
-    onSuccess: () => {
-      logout();
-    },
-    onError: () => {
-      logout();
-    },
+    onSuccess: () => logout(),
+    onError: () => logout(), // best-effort — still clears local state.
   });
 
   const { data: profile } = useQuery({
@@ -34,11 +28,6 @@ export const UserMenu = memo(function UserMenu() {
     enabled: isAuthenticated,
     staleTime: 60 * 60 * 1000,
   });
-
-  const handleLogoutClick = () => {
-    setAnchorEl(null);
-    setLogoutConfirmOpen(true);
-  };
 
   const handleLogoutConfirm = () => {
     setLogoutConfirmOpen(false);
@@ -48,63 +37,62 @@ export const UserMenu = memo(function UserMenu() {
   const firstName = profile?.first_name ?? user?.first_name ?? '';
   const lastName = profile?.last_name ?? user?.last_name ?? '';
   const displayName = firstName || lastName ? `${firstName} ${lastName}`.trim() : 'User';
+  const avatarSrc = (profile as { avatar_thumb_url?: string })?.avatar_thumb_url;
 
   return (
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-      <IconButton
-        onClick={(e) => setAnchorEl(e.currentTarget)}
-        aria-label="User menu"
-        sx={{ p: 0, gap: 0.5, '&:focus-visible': { outline: '2px solid white', outlineOffset: '2px' } }}
-      >
-        <UserAvatar
-          src={profile?.avatar_thumb_url}
-          firstName={firstName}
-          lastName={lastName}
-          size={32}
-          variant="soft"
-        />
-        <KeyboardArrowDownIcon sx={{ color: 'solid.white', fontSize: 18 }} />
-      </IconButton>
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={() => setAnchorEl(null)}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        slotProps={{
-          paper: {
-            sx: {
-              minWidth: 180,
-              boxShadow: '0px 4px 16px rgba(0, 0, 0, 0.08)',
-              borderRadius: '8px',
-              '& .MuiMenuItem-root': {
-                fontSize: '16px !important',
-                lineHeight: '1.4 !important',
-                py: 0.75,
-                px: 1.5,
-                minHeight: 'unset',
-              },
-            },
-          },
-        }}
-      >
-        <MenuItem disabled sx={{ opacity: '0.7 !important' }}>
-          <Typography sx={{ fontSize: '16px !important', lineHeight: '1.4 !important', fontWeight: 500 }}>
-            {displayName}
-          </Typography>
-        </MenuItem>
-        <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={() => { setAnchorEl(null); navigate('/admin/profile'); }}>
-          <PersonOutlineIcon sx={{ fontSize: 18, mr: 1, color: 'text.secondary' }} />
-          <Typography sx={{ fontSize: '16px !important', lineHeight: '1.4 !important' }}>Profile</Typography>
-        </MenuItem>
-        <MenuItem onClick={handleLogoutClick} disabled={logoutMutation.isPending}>
-          <LogoutIcon sx={{ fontSize: 18, mr: 1, color: 'text.secondary' }} />
-          <Typography sx={{ fontSize: '16px !important', lineHeight: '1.4 !important' }}>
-            {logoutMutation.isPending ? 'Logging out...' : 'Logout'}
-          </Typography>
-        </MenuItem>
-      </Menu>
+    <div className="flex items-center" data-slot="user-menu">
+      <DropdownMenuPrimitive.Root>
+        <DropdownMenuPrimitive.Trigger asChild>
+          <button
+            type="button"
+            aria-label="User menu"
+            className={cn(
+              'inline-flex items-center gap-1 rounded-full p-0.5',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+            )}
+          >
+            <UserAvatar
+              src={avatarSrc}
+              firstName={firstName}
+              lastName={lastName}
+              size={32}
+              variant="soft"
+            />
+            <ChevronDown aria-hidden className="size-4 text-white" />
+          </button>
+        </DropdownMenuPrimitive.Trigger>
+        <DropdownMenuPrimitive.Portal>
+          <DropdownMenuPrimitive.Content
+            align="end"
+            sideOffset={8}
+            className={cn(
+              'z-50 min-w-[180px] overflow-hidden rounded-lg border border-border bg-background p-1 shadow-lg',
+              'data-[state=open]:animate-in data-[state=closed]:animate-out',
+            )}
+          >
+            <div className="px-3 py-2 text-sm font-medium text-foreground/80">{displayName}</div>
+            <div className="my-1 h-px bg-border" />
+            <DropdownMenuPrimitive.Item
+              onSelect={() => navigate('/admin/profile')}
+              className="flex cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm outline-none data-[highlighted]:bg-secondary"
+            >
+              <UserRound aria-hidden className="size-4 text-muted-foreground" />
+              <span>Profile</span>
+            </DropdownMenuPrimitive.Item>
+            <DropdownMenuPrimitive.Item
+              onSelect={(e) => {
+                e.preventDefault();
+                setLogoutConfirmOpen(true);
+              }}
+              disabled={logoutMutation.isPending}
+              className="flex cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm outline-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60 data-[highlighted]:bg-secondary"
+            >
+              <LogOut aria-hidden className="size-4 text-muted-foreground" />
+              <span>{logoutMutation.isPending ? 'Logging out…' : 'Logout'}</span>
+            </DropdownMenuPrimitive.Item>
+          </DropdownMenuPrimitive.Content>
+        </DropdownMenuPrimitive.Portal>
+      </DropdownMenuPrimitive.Root>
 
       <ConfirmationPopUp
         open={logoutConfirmOpen}
@@ -112,6 +100,6 @@ export const UserMenu = memo(function UserMenu() {
         onConfirm={handleLogoutConfirm}
         message="Do you really want to logout?"
       />
-    </Box>
+    </div>
   );
 });

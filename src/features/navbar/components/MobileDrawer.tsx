@@ -1,11 +1,12 @@
-import { startTransition } from 'react';
-import { Drawer, List, ListItemButton, ListItemIcon, ListItemText, Box } from '@mui/material';
+import { startTransition, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { CustomDrawer } from '../../../common/custom-drawer';
+import { cn } from '../../../lib/cn';
 
 interface NavLink {
   label: string;
   path: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }
 
 interface MobileDrawerProps {
@@ -24,48 +25,42 @@ export function MobileDrawer({ open, onClose, navLinks }: MobileDrawerProps) {
   };
 
   return (
-    <Drawer
+    <CustomDrawer
       anchor="left"
       open={open}
       onClose={onClose}
-      PaperProps={{
-        sx: {
-          bgcolor: 'primary.dark',
-          color: 'solid.white',
-          width: { xs: '80vw', sm: 260 },
-          maxWidth: 320,
-        },
-      }}
+      title=""
+      drawerWidth="80vw"
+      className="bg-primary-08 text-white"
     >
-      <Box sx={{ pt: 2 }}>
-        <List>
-          {navLinks.map((link) => (
-            <ListItemButton
-              key={link.path}
-              onClick={() => handleNav(link.path)}
-              selected={location.pathname.startsWith(link.path)}
-              sx={{
-                '&.Mui-selected': {
-                  bgcolor: 'rgba(255, 255, 255, 0.12)',
-                },
-                '&:hover': {
-                  bgcolor: 'rgba(255, 255, 255, 0.08)',
-                },
-              }}
-            >
-              <ListItemIcon sx={{ color: 'inherit', minWidth: 36 }}>
-                {link.icon}
-              </ListItemIcon>
-              <ListItemText
-                primary={link.label}
-                primaryTypographyProps={{
-                  sx: { fontSize: '14px !important', lineHeight: '1.4 !important', fontWeight: 500 },
-                }}
-              />
-            </ListItemButton>
-          ))}
-        </List>
-      </Box>
-    </Drawer>
+      <nav className="-mx-6 pt-2" aria-label="Mobile primary navigation">
+        <ul className="flex flex-col">
+          {navLinks.map((link) => {
+            const isActive = location.pathname.startsWith(link.path);
+            return (
+              <li key={link.path}>
+                <button
+                  type="button"
+                  onClick={() => handleNav(link.path)}
+                  className={cn(
+                    'flex w-full items-center gap-3 px-6 py-3 text-left text-sm font-medium transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+                    isActive
+                      ? 'bg-white/15 text-white'
+                      : 'text-white/85 hover:bg-white/10 hover:text-white',
+                  )}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <span aria-hidden className="inline-flex size-5 items-center justify-center">
+                    {link.icon}
+                  </span>
+                  {link.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </CustomDrawer>
   );
 }

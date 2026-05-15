@@ -1,18 +1,10 @@
-import { useRef, useEffect, memo } from 'react';
-import {
-  Box,
-  IconButton,
-  InputBase,
-  Paper,
-  Typography,
-  Avatar,
-  ClickAwayListener,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import CloseIcon from '@mui/icons-material/Close';
 import { useQuery } from '@tanstack/react-query';
+import { Search, X } from 'lucide-react';
+import { memo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listClientsOptions } from '@/sdk/@tanstack/react-query.gen';
+import { cn } from '../../../lib/cn';
+import { UserAvatar } from '../../../common/user-avatar';
+import { listClientsOptions } from '../../clients/api/clients-stubs';
 import { useGlobalSearch } from '../hooks/useGlobalSearch';
 import { GlobalSearchSkeleton } from './GlobalSearchSkeleton';
 import { NAVBAR_HEIGHT } from '../constants';
@@ -20,6 +12,7 @@ import { NAVBAR_HEIGHT } from '../constants';
 export const GlobalSearch = memo(function GlobalSearch() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const {
     isExpanded,
     searchTerm,
@@ -33,30 +26,34 @@ export const GlobalSearch = memo(function GlobalSearch() {
 
   // Focus input when expanded
   useEffect(() => {
-    if (isExpanded && inputRef.current) {
-      inputRef.current.focus();
-    }
+    if (isExpanded && inputRef.current) inputRef.current.focus();
   }, [isExpanded]);
 
-  // Handle Escape key
+  // Escape to collapse + click-outside collapse.
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isExpanded) {
-        collapse();
-      }
+    if (!isExpanded) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') collapse();
     };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    const handleClick = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(e.target as Node)) collapse();
+    };
+    document.addEventListener('keydown', handleKey);
+    document.addEventListener('mousedown', handleClick);
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      document.removeEventListener('mousedown', handleClick);
+    };
   }, [isExpanded, collapse]);
 
   const { data, isLoading, isError } = useQuery({
-    ...listClientsOptions({
-      query: { search: debouncedTerm, page_size: 5 },
-    }),
+    ...listClientsOptions({ query: { search: debouncedTerm, page_size: 5 } }),
     enabled: isQueryEnabled,
   });
 
   const results = data?.results ?? [];
+  const isSearchPending = isLoading || (searchTerm !== debouncedTerm && searchTerm.length >= 1);
 
   const handleResultClick = (uuid: string) => {
     collapse();
@@ -69,234 +66,108 @@ export const GlobalSearch = memo(function GlobalSearch() {
     navigate(`/admin/clients?search=${encodeURIComponent(term)}`);
   };
 
-  // Show skeleton while debounce hasn't caught up yet or query is loading
-  const isSearchPending = isLoading || (searchTerm !== debouncedTerm && searchTerm.length >= 1);
-
-  const getInitials = (firstName: string, lastName: string) => {
-    const f = firstName.charAt(0) || '?';
-    const l = lastName.charAt(0) || '?';
-    return `${f}${l}`.toUpperCase();
-  };
-
   return (
-    <ClickAwayListener onClickAway={() => { if (isExpanded) collapse(); }}>
-      <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-        {/* Collapsed: search icon (always rendered so layout stays stable) */}
-        {!isExpanded && (
-          <Box
-            onClick={expand}
-            sx={{
-              color: 'solid.white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: 40,
-              height: 40,
-              borderRadius: '50%',
-              cursor: 'pointer',
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' },
-            }}
-            role="button"
+    <div ref={containerRef} className="relative flex items-center" data-slot="global-search">
+      {/* Collapsed trigger */}
+      {!isExpanded && (
+        <button
+          type="button"
+          onClick={expand}
+          aria-label="Search clients"
+          className="inline-flex size-10 items-center justify-center rounded-full text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        >
+          <Search aria-hidden className="size-5" />
+        </button>
+      )}
+
+      {/* Expanded input */}
+      {isExpanded && (
+        <div
+          className={cn(
+            'flex items-center gap-2',
+            // Mobile (xs): fixed full-navbar overlay; sm+: inline pill.
+            'fixed inset-x-0 top-0 z-50 h-[var(--mhg-nav-h)] bg-primary-08 px-3 sm:static sm:h-auto sm:w-60 md:w-64 lg:w-72',
+            'sm:rounded-md sm:border sm:border-white/30 sm:bg-white/10 sm:px-3 sm:py-2',
+          )}
+          style={{ ['--mhg-nav-h' as never]: `${NAVBAR_HEIGHT}px` } as React.CSSProperties}
+        >
+          <Search aria-hidden className="size-5 shrink-0 text-white/70" />
+          <input
+            ref={inputRef}
+            type="text"
+            value={searchTerm}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Search clients..."
+            role="combobox"
             aria-label="Search clients"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') expand(); }}
+            aria-expanded={showDropdown}
+            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-white/70 focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={collapse}
+            aria-label="Close search"
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-white hover:bg-white/10 sm:hidden"
           >
-            <SearchIcon />
-          </Box>
-        )}
+            <X aria-hidden className="size-5" />
+          </button>
+        </div>
+      )}
 
-        {/* Expanded: input. On xs, becomes a fixed full-navbar overlay so it doesn't crowd UserMenu. */}
-        {isExpanded && (
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              bgcolor: { xs: 'primary.08', sm: 'rgba(255,255,255,0.15)' },
-              border: { sm: '1px solid rgba(255,255,255,0.3)' },
-              borderRadius: { xs: 0, sm: '6px' },
-              px: { xs: 1, sm: 1.5 },
-              py: { xs: 0, sm: 0.5 },
-              height: { xs: NAVBAR_HEIGHT, sm: 'auto' },
-              width: { xs: '100vw', sm: 240, md: 260, lg: 280 },
-              position: { xs: 'fixed', sm: 'static' },
-              top: { xs: 0, sm: 'auto' },
-              left: { xs: 0, sm: 'auto' },
-              right: { xs: 0, sm: 'auto' },
-              zIndex: { xs: (theme) => theme.zIndex.appBar + 1, sm: 'auto' },
-              transition: 'width 0.2s ease-in-out',
-            }}
-          >
-            <SearchIcon sx={{ color: 'rgba(255,255,255,0.7)', fontSize: 20, mr: 1, flexShrink: 0 }} />
-            <InputBase
-              inputRef={inputRef}
-              value={searchTerm}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="Search clients..."
-              role="combobox"
-              aria-label="Search clients"
-              aria-expanded={showDropdown}
-              sx={{
-                flex: 1,
-                minWidth: 0,
-                color: 'solid.white',
-                fontSize: '14px !important',
-                lineHeight: '1.4 !important',
-                '& input': {
-                  fontSize: '14px !important',
-                  lineHeight: '1.4 !important',
-                  p: 0,
-                },
-                '& ::placeholder': {
-                  color: 'rgba(255,255,255,0.7)',
-                  opacity: 1,
-                },
-              }}
-            />
-            {/* Close button — only visible on mobile overlay */}
-            <IconButton
-              onClick={collapse}
-              size="small"
-              aria-label="Close search"
-              sx={{
-                display: { xs: 'inline-flex', sm: 'none' },
-                color: 'solid.white',
-                ml: 0.5,
-                flexShrink: 0,
-              }}
-            >
-              <CloseIcon sx={{ fontSize: 20 }} />
-            </IconButton>
-          </Box>
-        )}
-
-        {/* Results dropdown */}
-        {showDropdown && (
-          <Paper
-            elevation={8}
-            sx={{
-              position: { xs: 'fixed', sm: 'absolute' },
-              top: { xs: NAVBAR_HEIGHT, sm: '100%' },
-              right: { xs: 0, sm: 0 },
-              left: { xs: 0, sm: 'auto' },
-              mt: { sm: 1 },
-              width: { xs: '100vw', sm: 320, md: 340 },
-              maxHeight: { xs: `calc(100vh - ${NAVBAR_HEIGHT}px)`, sm: 420 },
-              overflowY: 'auto',
-              borderRadius: { xs: 0, sm: '8px' },
-              zIndex: (theme) => theme.zIndex.appBar + 2,
-            }}
-            role="listbox"
-          >
-            {isSearchPending ? (
-              <GlobalSearchSkeleton />
-            ) : isError ? (
-              <Typography
-                sx={{
-                  p: 2,
-                  textAlign: 'center',
-                  color: 'text.secondary',
-                  fontSize: '14px !important',
-                  lineHeight: '1.4 !important',
-                }}
-              >
-                Something went wrong
-              </Typography>
-            ) : results.length === 0 ? (
-              <Typography
-                sx={{
-                  p: 2,
-                  textAlign: 'center',
-                  color: 'text.secondary',
-                  fontSize: '14px !important',
-                  lineHeight: '1.4 !important',
-                }}
-              >
-                No clients found
-              </Typography>
-            ) : (
-              <Box>
-                {results.map((client) => (
-                  <Box
-                    key={client.uuid}
-                    onClick={() => handleResultClick(client.uuid)}
-                    role="option"
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1.5,
-                      px: 2,
-                      py: 1,
-                      cursor: 'pointer',
-                      '&:hover': { bgcolor: 'action.hover' },
-                    }}
-                  >
-                    <Avatar
-                      sx={{
-                        width: 32,
-                        height: 32,
-                        bgcolor: 'primary.main',
-                        fontSize: '13px !important',
-                        fontWeight: 600,
-                        flexShrink: 0,
-                      }}
-                    >
-                      {getInitials(client.first_name, client.last_name)}
-                    </Avatar>
-                    <Box sx={{ minWidth: 0 }}>
-                      <Typography
-                        noWrap
-                        sx={{
-                          fontSize: '14px !important',
-                          lineHeight: '1.3 !important',
-                          fontWeight: 500,
-                          color: 'text.primary',
-                        }}
-                      >
-                        {client.first_name} {client.last_name}
-                      </Typography>
-                      <Typography
-                        noWrap
-                        sx={{
-                          fontSize: '11px !important',
-                          lineHeight: '1.3 !important',
-                          color: 'text.secondary',
-                        }}
-                      >
-                        MRN: {client.mrn ?? '—'}
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))}
-
-                {/* View all results link */}
-                <Box
-                  onClick={handleViewAll}
-                  sx={{
-                    px: 2,
-                    py: 1.5,
-                    textAlign: 'center',
-                    borderTop: '1px solid',
-                    borderColor: 'divider',
-                    cursor: 'pointer',
-                    '&:hover': { bgcolor: 'action.hover' },
-                  }}
+      {/* Results dropdown */}
+      {showDropdown && (
+        <div
+          role="listbox"
+          className={cn(
+            'absolute right-0 top-full mt-2 max-h-[420px] w-80 overflow-y-auto rounded-lg border border-border bg-background shadow-xl',
+            'sm:right-0 md:w-[340px]',
+            // Mobile full-width overlay.
+            'max-sm:fixed max-sm:inset-x-0 max-sm:top-[var(--mhg-nav-h,64px)] max-sm:mt-0 max-sm:w-screen max-sm:rounded-none max-sm:max-h-[calc(100vh-var(--mhg-nav-h,64px))]',
+          )}
+        >
+          {isSearchPending ? (
+            <GlobalSearchSkeleton />
+          ) : isError ? (
+            <p className="p-4 text-center text-sm text-muted-foreground">Something went wrong</p>
+          ) : results.length === 0 ? (
+            <p className="p-4 text-center text-sm text-muted-foreground">No clients found</p>
+          ) : (
+            <div>
+              {results.map((client) => (
+                <button
+                  key={client.uuid}
+                  type="button"
+                  role="option"
+                  onClick={() => handleResultClick(client.uuid)}
+                  aria-selected={false}
+                  className="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-secondary"
                 >
-                  <Typography
-                    sx={{
-                      fontSize: '13px !important',
-                      lineHeight: '1.4 !important',
-                      color: 'primary.main',
-                      fontWeight: 500,
-                    }}
-                  >
-                    View all results
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-          </Paper>
-        )}
-      </Box>
-    </ClickAwayListener>
+                  <UserAvatar
+                    firstName={client.first_name}
+                    lastName={client.last_name}
+                    size={32}
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {client.first_name} {client.last_name}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      MRN: {client.mrn ?? '—'}
+                    </p>
+                  </div>
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={handleViewAll}
+                className="block w-full border-t border-border px-4 py-3 text-center text-sm font-medium text-primary hover:bg-secondary"
+              >
+                View all results
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 });
