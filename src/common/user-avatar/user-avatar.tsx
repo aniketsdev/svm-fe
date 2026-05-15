@@ -1,6 +1,6 @@
-import { useEffect, useReducer } from 'react';
-import { Avatar, Box, CircularProgress, type SxProps, type Theme } from '@mui/material';
-import { palette } from '../../../theme/palette';
+import { Loader2 } from 'lucide-react';
+import { useEffect, useReducer, type CSSProperties } from 'react';
+import { cn } from '../../lib/cn';
 
 export type UserAvatarVariant = 'solid' | 'soft';
 
@@ -12,14 +12,14 @@ export interface UserAvatarProps {
   /** Square size in px. Default 28 (table rows). */
   size?: number;
   /**
-   * Color style. 'solid' (default) = dark blue bg + white text.
-   * 'soft' = light blue bg + dark blue text (used by the navbar only).
+   * 'solid' (default): primary background + light text.
+   * 'soft': light primary background + primary text (e.g. navbar).
    */
   variant?: UserAvatarVariant;
-  /** Extra sx overrides. */
-  sx?: SxProps<Theme>;
-  /** Click handler (e.g. to open detail). */
+  /** Inline style escape hatch (legacy `sx` passthrough). */
+  sx?: CSSProperties;
   onClick?: () => void;
+  className?: string;
 }
 
 function initialsOf(first?: string | null, last?: string | null): string {
@@ -35,18 +35,10 @@ function fontSizeFor(size: number): string {
   return '28px';
 }
 
-function variantColors(variant: UserAvatarVariant): { bgcolor: string; color: string } {
-  if (variant === 'soft') {
-    return { bgcolor: palette.primary['01'], color: palette.primary.main };
-  }
-  return { bgcolor: palette.primary.main, color: '#ffffff' };
-}
-
 interface ImgState {
   readySrc: string | null;
   loading: boolean;
 }
-
 type ImgAction =
   | { type: 'START_LOAD' }
   | { type: 'LOADED'; src: string }
@@ -71,6 +63,7 @@ export function UserAvatar({
   variant = 'solid',
   sx,
   onClick,
+  className,
 }: UserAvatarProps) {
   const [{ readySrc, loading }, dispatch] = useReducer(imgReducer, {
     readySrc: null,
@@ -82,9 +75,7 @@ export function UserAvatar({
       dispatch({ type: 'RESET' });
       return;
     }
-
     dispatch({ type: 'START_LOAD' });
-
     let cancelled = false;
     const img = new Image();
     img.onload = () => {
@@ -96,7 +87,6 @@ export function UserAvatar({
       dispatch({ type: 'RESET' });
     };
     img.src = src;
-
     return () => {
       cancelled = true;
       img.onload = null;
@@ -105,50 +95,49 @@ export function UserAvatar({
   }, [src]);
 
   const spinnerSize = Math.max(14, Math.floor(size / 3));
-  const colors = variantColors(variant);
+  const variantClasses =
+    variant === 'soft'
+      ? 'bg-primary/10 text-primary'
+      : 'bg-primary text-primary-foreground';
 
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        display: 'inline-flex',
-        flexShrink: 0,
-        cursor: onClick ? 'pointer' : undefined,
-      }}
+    <span
       onClick={onClick}
+      className={cn(
+        'relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full font-semibold',
+        onClick && 'cursor-pointer',
+        variantClasses,
+        className,
+      )}
+      style={{
+        width: size,
+        height: size,
+        fontSize: fontSizeFor(size),
+        ...sx,
+      }}
+      data-slot="root"
+      data-variant={variant}
     >
-      <Avatar
-        src={readySrc || undefined}
-        sx={{
-          width: size,
-          height: size,
-          bgcolor: colors.bgcolor,
-          color: colors.color,
-          fontSize: fontSizeFor(size),
-          fontWeight: 600,
-          ...sx,
-        }}
-      >
-        {initialsOf(firstName, lastName)}
-      </Avatar>
+      {readySrc ? (
+        <img
+          src={readySrc}
+          alt={`${firstName ?? ''} ${lastName ?? ''}`.trim() || 'User avatar'}
+          className="h-full w-full object-cover"
+          data-slot="image"
+        />
+      ) : (
+        <span data-slot="fallback">{initialsOf(firstName, lastName)}</span>
+      )}
 
       {loading && (
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '50%',
-            bgcolor: 'rgba(255, 255, 255, 0.55)',
-            pointerEvents: 'none',
-          }}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-background/60"
         >
-          <CircularProgress size={spinnerSize} thickness={4} sx={{ color: palette.primary.main }} />
-        </Box>
+          <Loader2 className="animate-spin text-primary" style={{ width: spinnerSize, height: spinnerSize }} />
+        </span>
       )}
-    </Box>
+    </span>
   );
 }
 

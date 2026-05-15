@@ -1,15 +1,17 @@
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import ArrowDropDown from "@mui/icons-material/ArrowDropDown";
-import ArrowDropUp from "@mui/icons-material/ArrowDropUp";
-import Search from "@mui/icons-material/Search";
-import { Box, IconButton, Typography, InputAdornment } from "@mui/material";
-import { type ChangeEvent, useEffect, useState, useRef } from "react";
-import { customInputStyles, errorStyle } from "./custom-input-styles";
-import { palette } from '../../../theme/palette';
+import { ArrowDownCircle, ArrowUpCircle, Eye, EyeOff, Search } from 'lucide-react';
+import {
+  forwardRef,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type ReactNode,
+} from 'react';
+import { cn } from '../../lib/cn';
 
-
-interface CustomInputProps {
+export interface CustomInputProps {
   placeholder: string;
   name: string;
   value: string | number | undefined;
@@ -31,385 +33,329 @@ interface CustomInputProps {
   hasOpenListArrow?: boolean;
   required?: boolean;
   maxValue?: number;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
+  /** Legacy `format="phone"` opts into phone formatting via a different code path. */
   format?: string;
   phone?: boolean;
   zipCode?: boolean;
   ssn?: boolean;
   InputProps?: {
-    startAdornment?: React.ReactNode;
-    endAdornment?: React.ReactNode;
+    startAdornment?: ReactNode;
+    endAdornment?: ReactNode;
   };
   autoComplete?: string;
+  className?: string;
+  id?: string;
 }
 
+// ── Formatting helpers (preserved verbatim from legacy behavior) ────────────
 
-export default function CustomInput(props: CustomInputProps) {
-  const {
-    bgWhite,
-    onClickNotify,
-    maxLength,
-    hasStartSearchIcon,
-    startSearchIconOnRight,
-    hasOpenListArrow,
-    required = false,
-    icon,
-    InputProps
-  } = props;
+function formatPhoneNumber(value: string): string {
+  const cleaned = value.replace(/\D/g, '');
+  if (cleaned.length === 0) return '';
+  if (cleaned.length <= 3) return `(${cleaned}`;
+  if (cleaned.length <= 6)
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
+  if (cleaned.length <= 10) {
+    const area = cleaned.slice(0, 3);
+    const a = cleaned.slice(3, 6);
+    const b = cleaned.slice(6, 10);
+    return `(${area}) ${a}${b ? `-${b}` : ''}`;
+  }
+  return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
+}
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [inputValue, setInputValue] = useState<string | number>(props.value ?? "");
-  const [_isFocused, setIsFocused] = useState(false);
-  const phoneDisplayValue = useRef<string>("");
-  const ssnDisplayValue = useRef<string>("");
+function formatSSN(value: string): string {
+  const cleaned = value.replace(/\D/g, '');
+  if (cleaned.length === 0) return '';
+  if (cleaned.length <= 3) return cleaned;
+  if (cleaned.length <= 5) return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
+  return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 5)}-${cleaned.slice(5, 9)}`;
+}
 
+function formatZipCode(value: string): string {
+  const cleaned = value.replace(/\D/g, '');
+  if (cleaned.length <= 5) return cleaned;
+  return `${cleaned.slice(0, 5)}-${cleaned.slice(5, 9)}`;
+}
 
-  useEffect(() => {
-    if (props.phone) {
-      // For phone inputs, format the value for display
-      const value = props.value ?? "";
-      const formattedValue = formatPhoneNumber(String(value));
+export const CustomInput = forwardRef<HTMLInputElement | HTMLTextAreaElement, CustomInputProps>(
+  function CustomInput(props, ref) {
+    const {
+      placeholder,
+      name,
+      value,
+      isNumeric,
+      isDecimal,
+      hasError,
+      errorMessage,
+      isPassword,
+      isEmail,
+      onChange,
+      disableField,
+      bgWhite,
+      maxLength,
+      multiline,
+      rows,
+      hasStartSearchIcon,
+      startSearchIconOnRight,
+      onClickNotify,
+      hasOpenListArrow,
+      required,
+      maxValue,
+      icon,
+      format,
+      phone,
+      zipCode,
+      ssn,
+      InputProps,
+      autoComplete,
+      className,
+      id: idProp,
+    } = props;
 
-      // Only update if the formatted value is different from current display
-      if (phoneDisplayValue.current !== formattedValue) {
-        phoneDisplayValue.current = formattedValue;
-        setInputValue(formattedValue);
+    const autoId = useId();
+    const id = idProp ?? autoId;
+    const helperId = `${id}-helper`;
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [inputValue, setInputValue] = useState<string | number>(value ?? '');
+    const phoneDisplay = useRef('');
+    const ssnDisplay = useRef('');
+
+    useEffect(() => {
+      if (phone) {
+        const next = formatPhoneNumber(String(value ?? ''));
+        if (phoneDisplay.current !== next) {
+          phoneDisplay.current = next;
+          setInputValue(next);
+        }
+      } else if (ssn) {
+        const next = formatSSN(String(value ?? ''));
+        if (ssnDisplay.current !== next) {
+          ssnDisplay.current = next;
+          setInputValue(next);
+        }
+      } else {
+        setInputValue(value ?? '');
       }
-    } else if (props.ssn) {
-      // For SSN inputs, format the value for display
-      const value = props.value ?? "";
-      const formattedValue = formatSSN(String(value));
+    }, [value, phone, ssn]);
 
-      // Only update if the formatted value is different from current display
-      if (ssnDisplayValue.current !== formattedValue) {
-        ssnDisplayValue.current = formattedValue;
-        setInputValue(formattedValue);
-      }
-    } else {
-      setInputValue(props.value ?? "");
-    }
-  }, [props.value, props.phone, props.ssn]);
+    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+      let raw = e.target.value;
 
-
-  const handleClickShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
-
-
-  const handleClickArrow = () => {
-    if (onClickNotify) {
-      onClickNotify();
-    }
-  };
-
-
-  const handleMouseDownPassword = (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    event.preventDefault();
-  };
-
-
-  const formatZipCode = (value: string) => {
-    const cleaned = value.replace(/\D/g, ""); // Remove non-numeric characters
-
-
-    // Format as 12345 or 12345-6789
-    if (cleaned.length <= 5) return cleaned;
-    return `${cleaned.slice(0, 5)}-${cleaned.slice(5, 9)}`;
-  };
-
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
-    const maxValue = props.maxValue;
-
-
-    if (props.phone) {
-      // For phone input, handle real-time formatting
-      const cleaned = value.replace(/\D/g, "");
-      const limitedDigits = cleaned.substring(0, 10);
-      const formattedValue = formatPhoneNumber(limitedDigits);
-
-      // Update display value immediately
-      phoneDisplayValue.current = formattedValue;
-      setInputValue(formattedValue);
-
-      // Send clean numeric value to form
-      props.onChange({ ...e, target: { ...e.target, value: limitedDigits } });
-      return;
-    } else if (props.ssn) {
-      // For SSN input, handle real-time formatting
-      const cleaned = value.replace(/\D/g, "");
-      const limitedDigits = cleaned.substring(0, 9);
-      const formattedValue = formatSSN(limitedDigits);
-
-      // Update display value immediately
-      ssnDisplayValue.current = formattedValue;
-      setInputValue(formattedValue);
-
-      // Send clean numeric value to form (without dashes)
-      props.onChange({ ...e, target: { ...e.target, value: limitedDigits } });
-      return;
-    } else if (props.format === "phone") {
-      value = formatPhoneNumber(value);
-    }
-
-
-    if (props.isNumeric && maxValue !== undefined) {
-      const numericValue = parseInt(value, 10);
-      if (numericValue <= maxValue || value === "") {
-        setInputValue(value);
-        props.onChange({ ...e, target: { ...e.target, value } });
+      if (phone) {
+        const cleaned = raw.replace(/\D/g, '').slice(0, 10);
+        const formatted = formatPhoneNumber(cleaned);
+        phoneDisplay.current = formatted;
+        setInputValue(formatted);
+        onChange({ ...e, target: { ...e.target, value: cleaned } });
         return;
       }
-    } else if (props.zipCode) {
-      // Handle ZIP code formatting
-      const cleaned = value.replace(/\D/g, "").slice(0, 9); // Max 9 digits
-      const formatted = formatZipCode(cleaned);
-      setInputValue(formatted);
+      if (ssn) {
+        const cleaned = raw.replace(/\D/g, '').slice(0, 9);
+        const formatted = formatSSN(cleaned);
+        ssnDisplay.current = formatted;
+        setInputValue(formatted);
+        onChange({ ...e, target: { ...e.target, value: cleaned } });
+        return;
+      }
+      if (format === 'phone') {
+        raw = formatPhoneNumber(raw);
+      }
+      if (isNumeric && maxValue !== undefined) {
+        const n = parseInt(raw, 10);
+        if (raw === '' || n <= maxValue) {
+          setInputValue(raw);
+          onChange({ ...e, target: { ...e.target, value: raw } });
+          return;
+        }
+        return;
+      }
+      if (zipCode) {
+        const cleaned = raw.replace(/\D/g, '').slice(0, 9);
+        const formatted = formatZipCode(cleaned);
+        setInputValue(formatted);
+        onChange({ ...e, target: { ...e.target, value: formatted } });
+        return;
+      }
+      setInputValue(raw);
+      onChange({ ...e, target: { ...e.target, value: raw } });
+    };
 
+    const constrainOnInput = (e: FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const el = e.target as HTMLInputElement | HTMLTextAreaElement;
+      if (phone) {
+        const cleaned = el.value.replace(/\D/g, '').slice(0, 10);
+        const formatted = formatPhoneNumber(cleaned);
+        el.value = formatted;
+        phoneDisplay.current = formatted;
+        setInputValue(formatted);
+        return;
+      }
+      if (ssn) {
+        const cleaned = el.value.replace(/\D/g, '').slice(0, 9);
+        const formatted = formatSSN(cleaned);
+        el.value = formatted;
+        ssnDisplay.current = formatted;
+        setInputValue(formatted);
+        return;
+      }
+      if (isNumeric) {
+        el.value = el.value.replace(/[^0-9]/g, '');
+        return;
+      }
+      if (isDecimal) {
+        el.value = el.value.replace(/[^0-9.]/g, '');
+      }
+    };
 
-      // Send clean value (without formatting) to form state if you prefer,
-      // or send formatted value (common for display forms)
-      props.onChange({ ...e, target: { ...e.target, value: formatted } });
-    } else {
-      setInputValue(value);
-      props.onChange({ ...e, target: { ...e.target, value } });
-    }
-  };
+    const showStart = Boolean(
+      InputProps?.startAdornment || icon || (hasStartSearchIcon && !startSearchIconOnRight),
+    );
+    const showEnd = Boolean(
+      InputProps?.endAdornment ||
+        isPassword ||
+        hasOpenListArrow ||
+        (hasStartSearchIcon && startSearchIconOnRight),
+    );
 
+    const fieldType = showPassword
+      ? 'text'
+      : isPassword
+        ? 'password'
+        : isEmail
+          ? 'email'
+          : 'text';
 
-  const formatPhoneNumber = (value: string) => {
-    const cleaned = value.replace(/\D/g, ""); // Remove non-numeric characters
+    const inputMode = phone
+      ? 'tel'
+      : ssn
+        ? 'numeric'
+        : isNumeric
+          ? 'numeric'
+          : isDecimal
+            ? 'decimal'
+            : 'text';
 
-    // Handle different lengths of input for real-time formatting
-    if (cleaned.length === 0) return "";
-    if (cleaned.length <= 3) return `(${cleaned}`;
-    if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
-    if (cleaned.length <= 10) {
-      const areaCode = cleaned.slice(0, 3);
-      const firstPart = cleaned.slice(3, 6);
-      const secondPart = cleaned.slice(6, 10);
-      return `(${areaCode}) ${firstPart}${secondPart ? `-${secondPart}` : ''}`;
-    }
+    const fieldClasses = cn(
+      'block w-full bg-transparent text-foreground placeholder:text-muted-foreground',
+      'focus:outline-none',
+      'disabled:cursor-not-allowed disabled:opacity-60',
+      multiline ? 'resize-y py-2.5' : 'h-11', // ≥44 px on md+
+      // Padding handled by the wrapper so adornments don't double-pad.
+    );
 
-    // If more than 10 digits, truncate to 10
-    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
-  };
+    const wrapperClasses = cn(
+      'flex items-center gap-2 rounded-md border px-3',
+      'border-input focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/40',
+      bgWhite ? 'bg-white' : 'bg-background',
+      hasError && 'border-destructive focus-within:border-destructive focus-within:ring-destructive/30',
+      disableField && 'opacity-60',
+      className,
+    );
 
+    return (
+      <div data-slot="root" className="flex w-full flex-col">
+        <div data-slot="control-wrapper" className={wrapperClasses}>
+          {showStart && (
+            <span data-slot="start-adornment" className="flex shrink-0 items-center text-muted-foreground">
+              {InputProps?.startAdornment ?? icon ?? (
+                <Search aria-hidden="true" className="size-4" />
+              )}
+            </span>
+          )}
 
-  const formatSSN = (value: string) => {
-    const cleaned = value.replace(/\D/g, ""); // Remove non-numeric characters
+          {multiline ? (
+            <textarea
+              ref={ref as React.Ref<HTMLTextAreaElement>}
+              id={id}
+              name={name}
+              placeholder={placeholder}
+              value={inputValue}
+              onChange={(e) => handleChange(e as unknown as ChangeEvent<HTMLInputElement>)}
+              disabled={disableField}
+              required={required}
+              maxLength={maxLength}
+              rows={rows}
+              onInput={constrainOnInput}
+              data-slot="control"
+              aria-invalid={hasError || undefined}
+              aria-describedby={hasError ? helperId : undefined}
+              className={fieldClasses}
+              style={rows ? { minHeight: `${rows * 1.5}em` } : undefined}
+            />
+          ) : (
+            <input
+              ref={ref as React.Ref<HTMLInputElement>}
+              id={id}
+              name={name}
+              type={fieldType}
+              placeholder={placeholder}
+              value={inputValue}
+              onChange={handleChange}
+              disabled={disableField}
+              required={required}
+              maxLength={phone ? 14 : ssn ? 11 : maxLength}
+              inputMode={inputMode}
+              autoComplete={autoComplete ?? 'new'}
+              onInput={constrainOnInput}
+              data-slot="control"
+              aria-invalid={hasError || undefined}
+              aria-describedby={hasError ? helperId : undefined}
+              className={fieldClasses}
+            />
+          )}
 
-    // Format as XXX-XX-XXXX
-    if (cleaned.length === 0) return "";
-    if (cleaned.length <= 3) return cleaned;
-    if (cleaned.length <= 5) return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`;
-    if (cleaned.length <= 9) {
-      return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 5)}-${cleaned.slice(5, 9)}`;
-    }
+          {showEnd && (
+            <span data-slot="end-adornment" className="flex shrink-0 items-center gap-1 text-muted-foreground">
+              {isPassword && (
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="rounded p-1 hover:bg-secondary"
+                >
+                  {showPassword ? (
+                    <Eye aria-hidden="true" className="size-4" />
+                  ) : (
+                    <EyeOff aria-hidden="true" className="size-4" />
+                  )}
+                </button>
+              )}
+              {hasOpenListArrow && (
+                <button
+                  type="button"
+                  onClick={() => onClickNotify?.()}
+                  className="rounded p-1 hover:bg-secondary"
+                  aria-label="Toggle list"
+                >
+                  {showPassword ? (
+                    <ArrowUpCircle aria-hidden="true" className="size-4" />
+                  ) : (
+                    <ArrowDownCircle aria-hidden="true" className="size-4" />
+                  )}
+                </button>
+              )}
+              {InputProps?.endAdornment && !isPassword && !hasOpenListArrow && (
+                <span>{InputProps.endAdornment}</span>
+              )}
+              {hasStartSearchIcon && startSearchIconOnRight && !InputProps?.endAdornment && (
+                <Search aria-hidden="true" className="size-4" />
+              )}
+            </span>
+          )}
+        </div>
 
-    // If more than 9 digits, truncate to 9
-    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 5)}-${cleaned.slice(5, 9)}`;
-  };
-
-
-  const rootStyles = {
-    ...customInputStyles.textFieldRoot,
-    ...(props.hasError && customInputStyles.textFieldError),
-    ...(props.disableField && customInputStyles.textFieldDisabled),
-    background: bgWhite ? "white" : customInputStyles.textFieldRoot.background,
-  };
-
-  // Determine if we should show start adornment
-  const showStartAdornment = InputProps?.startAdornment || icon || (hasStartSearchIcon && !startSearchIconOnRight);
-
-  // Determine if we should show end adornment
-  const showEndAdornment = InputProps?.endAdornment || props.isPassword || hasOpenListArrow || (hasStartSearchIcon && startSearchIconOnRight);
-
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <Box sx={rootStyles}>
-        {/* Start Adornment - Priority: InputProps > icon > search icon */}
-        {/* Start Adornment - Priority: InputProps > icon > search icon */}
-        {showStartAdornment && (
-          <InputAdornment
-            position="start"
-            sx={{
-              marginRight: InputProps?.startAdornment ? '-4px' : '0px', // Reduce gap only for custom adornments
-              color: InputProps?.startAdornment ? palette.text.primary : 'inherit', // Darker color for custom adornments
-              '& .MuiTypography-root': {
-                color: InputProps?.startAdornment ? palette.text.primary : 'inherit',
-                fontWeight: InputProps?.startAdornment ? 500 : 'normal',
-              }
-            }}
-          >
-            {InputProps?.startAdornment || icon || (
-              <Search
-                sx={{
-                  width: 18,
-                  height: 18,
-                  color: palette.text.secondary // Neutral/60
-                }}
-              />
-            )}
-          </InputAdornment>
+        {hasError && errorMessage && (
+          <p id={helperId} role="alert" data-slot="helper" className="mt-1 text-xs leading-tight text-destructive">
+            {errorMessage}
+          </p>
         )}
+      </div>
+    );
+  },
+);
 
-
-        {/* Input Field */}
-        {props.multiline ? (
-          <Box
-            component="textarea"
-            name={props.name}
-            placeholder={props.placeholder}
-            value={inputValue}
-            onChange={(e: ChangeEvent<HTMLTextAreaElement>) => handleInputChange(e as unknown as ChangeEvent<HTMLInputElement>)}
-            disabled={props.disableField}
-            required={required}
-            maxLength={maxLength}
-            rows={props.rows}
-            sx={{
-              ...customInputStyles.textFieldInput,
-              resize: 'vertical',
-              minHeight: props.rows ? `${props.rows * 1.5}em` : '60px',
-            }}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            onInput={
-              props.isNumeric
-                ? (e: React.FormEvent<HTMLTextAreaElement>) => {
-                  (e.target as HTMLTextAreaElement).value = (e.target as HTMLTextAreaElement).value.replace(/[^0-9]/g, "");
-                }
-                : props.isDecimal
-                  ? (e: React.FormEvent<HTMLTextAreaElement>) => {
-                    (e.target as HTMLTextAreaElement).value = (e.target as HTMLTextAreaElement).value.replace(/[^0-9.]/g, "");
-                  }
-                  : undefined
-            }
-          />
-        ) : (
-          <Box
-            component="input"
-            name={props.name}
-            type={showPassword ? "text" : props.isPassword ? "password" : props.isEmail ? "email" : "text"}
-            placeholder={props.placeholder}
-            value={inputValue}
-            onChange={handleInputChange}
-            disabled={props.disableField}
-            required={required}
-            maxLength={props.phone ? 14 : props.ssn ? 11 : maxLength} // 14 chars for (XXX) XXX-XXXX format, 11 for XXX-XX-XXXX
-            inputMode={
-              props.phone ? "tel" : props.ssn ? "numeric" : props.isNumeric ? "numeric" : props.isDecimal ? "decimal" : "text"
-            }
-            sx={customInputStyles.textFieldInput}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            autoComplete={props.autoComplete ?? "new"} // ✅ Prevents Chrome autofill blue expansion
-            onInput={
-              props.phone
-                ? (e: React.FormEvent<HTMLInputElement>) => {
-                  // Handle real-time phone formatting without triggering form validation
-                  const target = e.target as HTMLInputElement;
-                  const value = target.value;
-                  const cleaned = value.replace(/\D/g, "");
-                  const limitedDigits = cleaned.substring(0, 10);
-                  const formattedValue = formatPhoneNumber(limitedDigits);
-
-                  // Update the input value immediately for visual feedback
-                  target.value = formattedValue;
-                  phoneDisplayValue.current = formattedValue;
-                  setInputValue(formattedValue);
-                }
-                : props.ssn
-                  ? (e: React.FormEvent<HTMLInputElement>) => {
-                    // Handle real-time SSN formatting without triggering form validation
-                    const target = e.target as HTMLInputElement;
-                    const value = target.value;
-                    const cleaned = value.replace(/\D/g, "");
-                    const limitedDigits = cleaned.substring(0, 9);
-                    const formattedValue = formatSSN(limitedDigits);
-
-                    // Update the input value immediately for visual feedback
-                    target.value = formattedValue;
-                    ssnDisplayValue.current = formattedValue;
-                    setInputValue(formattedValue);
-                  }
-                  : props.isNumeric
-                    ? (e: React.FormEvent<HTMLInputElement>) => {
-                      (e.target as HTMLInputElement).value = (e.target as HTMLInputElement).value.replace(/[^0-9]/g, "");
-                    }
-                    : props.isDecimal
-                      ? (e: React.FormEvent<HTMLInputElement>) => {
-                        (e.target as HTMLInputElement).value = (e.target as HTMLInputElement).value.replace(/[^0-9.]/g, "");
-                      }
-                      : undefined
-            }
-          />
-        )}
-
-        {/* End Adornment - Priority: Password toggle > Arrow > InputProps > Search icon */}
-        {showEndAdornment && (
-          <>
-            {/* Password Toggle */}
-            {props.isPassword && (
-              <IconButton
-                onClick={handleClickShowPassword}
-                onMouseDown={handleMouseDownPassword}
-                sx={customInputStyles.iconStyle}
-                size="small"
-              >
-                {showPassword ? <Visibility /> : <VisibilityOff />}
-              </IconButton>
-            )}
-
-            {/* Arrow Dropdown */}
-            {hasOpenListArrow && (
-              <IconButton
-                onClick={handleClickArrow}
-                sx={customInputStyles.iconStyle}
-                size="small"
-              >
-                {showPassword ? <ArrowDropUp /> : <ArrowDropDown />}
-              </IconButton>
-            )}
-
-            {/* InputProps End Adornment */}
-            {InputProps?.endAdornment && !props.isPassword && !hasOpenListArrow && (
-              <InputAdornment position="end">
-                {InputProps.endAdornment}
-              </InputAdornment>
-            )}
-
-            {/* End Search Icon */}
-            {hasStartSearchIcon && startSearchIconOnRight && !InputProps?.endAdornment && (
-              <InputAdornment position="end">
-                <Search
-                  sx={{
-                    width: 18,
-                    height: 18,
-                    color: palette.text.secondary // Neutral/60
-                  }}
-                />
-              </InputAdornment>
-            )}
-          </>
-        )}
-      </Box>
-
-
-      {/* Error Message */}
-      <Typography
-        sx={{
-          ...errorStyle,
-          fontSize: "0.75rem",
-          lineHeight: 1.66,
-          letterSpacing: "0.03333em",
-        }}
-      >
-        {props.hasError ? props.errorMessage : ""}
-      </Typography>
-    </Box>
-  );
-}
+export default CustomInput;

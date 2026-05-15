@@ -1,208 +1,163 @@
-import {
-  Box,
-  MenuItem,
-  Pagination,
-  PaginationItem,
-  Select,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import { palette } from '../../../theme/palette';
-import { ChevronLeft, ChevronRight } from "@mui/icons-material";
-import type { SxProps, Theme } from "@mui/material/styles";
-import { useEffect, useState } from "react";
-import type { ChangeEvent } from "react";
-import {
-  paginatorContainerStyles,
-  paginationControlsStyles,
-  paginationMainStyles,
-  paginationItemStyles,
-  navigationButtonStyles,
-  recordsSelectStyles,
-  entriesTextStyles,
-  rowsPerPageContainerStyles,
-  rowsPerPageLabelStyles,
-} from "./pagination-styles";
+import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { useMemo, useState, type ChangeEvent } from 'react';
+import { cn } from '../../lib/cn';
 
-export type PaginatorProps = {
+export interface PaginatorProps {
+  /** Current page index (0-based, matching the legacy API). */
   page: number;
+  /** Total number of pages. */
   totalPages: number;
+  /** Total number of records (used for "X-Y of Z Rows"). */
   totalRecord: number;
+  /** Fires when the user changes the page. `event` is null for programmatic changes. */
   onPageChange: (event: ChangeEvent<unknown> | null, page: number) => void;
+  /** Fires when the user changes the rows-per-page selector. Omit to hide the selector. */
   onRecordsPerPageChange?: (recordsPerPage: number) => void;
+  /** Initial page size (default 5). */
   defaultSize?: number;
-};
+  className?: string;
+}
 
-const Paginator = (props: PaginatorProps) => {
-  const { onPageChange, onRecordsPerPageChange, defaultSize, totalRecord } =
-    props;
+const PAGE_SIZES = [5, 10, 20, 50, 100] as const;
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+/**
+ * Build the array of page-button items (1-based) with `…` ellipses, matching
+ * the standard "1 … 4 5 6 … 12" shape used by MUI Pagination.
+ */
+function buildRange(currentPage1: number, totalPages: number, siblingCount: number): (number | 'ellipsis')[] {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+  const first = 1;
+  const last = totalPages;
+  const start = Math.max(currentPage1 - siblingCount, first + 1);
+  const end = Math.min(currentPage1 + siblingCount, last - 1);
+  const range: (number | 'ellipsis')[] = [first];
+  if (start > first + 1) range.push('ellipsis');
+  for (let i = start; i <= end; i += 1) range.push(i);
+  if (end < last - 1) range.push('ellipsis');
+  range.push(last);
+  return range;
+}
 
-  const [page, setPage] = useState(props.page);
-  const [size, setSize] = useState(5);
-  const [totalPages, setTotalPages] = useState(props.totalPages);
+const Paginator = ({
+  page,
+  totalPages,
+  totalRecord,
+  onPageChange,
+  onRecordsPerPageChange,
+  defaultSize,
+  className,
+}: PaginatorProps) => {
+  // `defaultSize` is used as the initial value only — consumers wanting to
+  // imperatively reset the size should remount the component.
+  const [size, setSize] = useState(defaultSize ?? 5);
 
-  useEffect(() => {
-    if (defaultSize) {
-      setSize(defaultSize);
-    }
-  }, [defaultSize]);
-
-  useEffect(() => {
-    setTotalPages(props.totalPages);
-  }, [props.totalPages]);
-
-  useEffect(() => {
-    setPage(props.page);
-  }, [props.page]);
-
+  const current1 = page + 1;
   const startRecord = page * size + 1;
   const endRecord = Math.min((page + 1) * size, totalRecord);
 
+  // Hooks MUST be unconditional — keep this above the early return below.
+  const range = useMemo(() => buildRange(current1, totalPages, 1), [current1, totalPages]);
+
+  if (totalPages === 0) return null;
+
+  const goto = (next1: number, e: ChangeEvent<unknown> | null = null) => {
+    if (next1 < 1 || next1 > totalPages || next1 === current1) return;
+    onPageChange(e, next1 - 1);
+  };
+
   return (
-    <>
-      {totalPages !== 0 && (
-        <Box sx={paginatorContainerStyles}>
-          <Box>
-            {!isSmallScreen ? (
-              <Typography sx={entriesTextStyles}>
-                <Box component="span" sx={{ fontWeight: 700 }}>
-                  {startRecord}-{endRecord}
-                </Box>{" "}
-                of{" "}
-                <Box component="span" sx={{ fontWeight: 700 }}>
-                  {totalRecord}
-                </Box>{" "}
-                Rows
-              </Typography>
-            ) : (
-              ""
-            )}
-          </Box>
-          <Box sx={paginationControlsStyles}>
-            {onRecordsPerPageChange && !isMobile && (
-              <Box sx={rowsPerPageContainerStyles}>
-                <Typography sx={rowsPerPageLabelStyles}>
-                  Rows per page:
-                </Typography>
-                <Select
-                  size="small"
-                  value={size}
-                  aria-label="Rows per page"
-                  onChange={(e) => {
-                    onRecordsPerPageChange(+e.target.value);
-                    onPageChange(null, 0);
-                    setSize(e.target.value as number);
-                  }}
-                  sx={recordsSelectStyles}
-                  variant="standard"
-                  disableUnderline
-                  MenuProps={{
-                    PaperProps: {
-                      sx: {
-                        mt: 0.5,
-                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                        borderRadius: '8px',
-                        '& .MuiMenuItem-root': {
-                          fontSize: '14px !important',
-                          lineHeight: '1.4 !important',
-                          fontFamily: '"Figtree", sans-serif',
-                          fontWeight: 400,
-                          color: palette.neutral['80'],
-                          py: 1,
-                          px: 2,
-                          minHeight: 'auto',
-                          '&.Mui-selected': {
-                            backgroundColor: 'transparent',
-                            fontWeight: 500,
-                            '&:hover': {
-                              backgroundColor: palette.neutral['00'],
-                            },
-                          },
-                          '&:hover': {
-                            backgroundColor: palette.neutral['00'],
-                          },
-                        },
-                      },
-                    },
-                  }}
-                >
-                  <MenuItem value={5}>05</MenuItem>
-                  <MenuItem value={10}>10</MenuItem>
-                  <MenuItem value={20}>20</MenuItem>
-                  <MenuItem value={50}>50</MenuItem>
-                  <MenuItem value={100}>100</MenuItem>
-                </Select>
-              </Box>
-            )}
-            <Box sx={paginationMainStyles}>
-              <Pagination
-                page={page + 1}
-                count={totalPages}
-                variant="text"
-                shape="rounded"
-                siblingCount={isMobile ? 0 : 1}
-                boundaryCount={isMobile ? 1 : 1}
-                renderItem={(item) => (
-                  <PaginationItem
-                    sx={{
-                      ...(item.type === "previous" || item.type === "next"
-                        ? navigationButtonStyles
-                        : paginationItemStyles) as SxProps<Theme>,
-                      width: { xs: "44px", sm: "40px" },
-                      height: { xs: "44px", sm: "40px" },
-                      minWidth: { xs: "44px", sm: "40px" },
-                      fontSize: { xs: "12px", sm: "14px" },
-                    }}
-                    components={{
-                      previous: PreviousBtn,
-                      next: NextBtn,
-                    }}
-                    {...item}
-                  />
-                )}
-                onChange={(e, page) => onPageChange(e, +page - 1)}
-              />
-            </Box>
-          </Box>
-        </Box>
+    <div
+      className={cn(
+        'flex flex-col items-stretch justify-between gap-3 px-2 py-3 text-sm',
+        'sm:flex-row sm:items-center',
+        className,
       )}
-    </>
+      data-slot="root"
+    >
+      <p className="hidden text-muted-foreground sm:block" data-slot="summary">
+        <span className="font-semibold text-foreground">
+          {startRecord}-{endRecord}
+        </span>{' '}
+        of <span className="font-semibold text-foreground">{totalRecord}</span> Rows
+      </p>
+
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center" data-slot="controls">
+        {onRecordsPerPageChange && (
+          <label className="hidden items-center gap-2 text-muted-foreground sm:flex">
+            <span>Rows per page:</span>
+            <select
+              value={size}
+              onChange={(e) => {
+                const next = parseInt(e.target.value, 10);
+                setSize(next);
+                onRecordsPerPageChange(next);
+                onPageChange(null, 0);
+              }}
+              aria-label="Rows per page"
+              className="h-9 rounded-md border border-input bg-background px-2 text-sm focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/40"
+            >
+              {PAGE_SIZES.map((n) => (
+                <option key={n} value={n}>
+                  {String(n).padStart(2, '0')}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        <nav className="flex items-center gap-1" aria-label="Pagination" data-slot="pages">
+          <button
+            type="button"
+            onClick={(e) => goto(current1 - 1, e)}
+            disabled={current1 === 1}
+            aria-label="Previous page"
+            className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary disabled:opacity-40 disabled:hover:bg-transparent sm:size-10"
+          >
+            <ChevronLeft aria-hidden className="size-4 sm:size-[18px]" />
+          </button>
+
+          {range.map((item, i) =>
+            item === 'ellipsis' ? (
+              <span
+                key={`e-${i}`}
+                aria-hidden
+                className="inline-flex size-9 items-center justify-center text-muted-foreground sm:size-10"
+              >
+                <MoreHorizontal className="size-4" />
+              </span>
+            ) : (
+              <button
+                key={item}
+                type="button"
+                onClick={(e) => goto(item, e)}
+                aria-current={item === current1 ? 'page' : undefined}
+                aria-label={`Page ${item}`}
+                className={cn(
+                  'inline-flex size-9 items-center justify-center rounded-md text-sm sm:size-10',
+                  item === current1
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-foreground hover:bg-secondary',
+                )}
+              >
+                {item}
+              </button>
+            ),
+          )}
+
+          <button
+            type="button"
+            onClick={(e) => goto(current1 + 1, e)}
+            disabled={current1 === totalPages}
+            aria-label="Next page"
+            className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary disabled:opacity-40 disabled:hover:bg-transparent sm:size-10"
+          >
+            <ChevronRight aria-hidden className="size-4 sm:size-[18px]" />
+          </button>
+        </nav>
+      </div>
+    </div>
   );
 };
 
 export default Paginator;
-
-const PreviousBtn = () => {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-  
-  return (
-    <ChevronLeft
-      sx={{
-        width: isSmallScreen ? "16px" : "18px",
-        height: isSmallScreen ? "16px" : "18px",
-        fill: palette.neutral['60'],
-      }}
-    />
-  );
-};
-
-const NextBtn = () => {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
-
-  return (
-    <ChevronRight
-      sx={{
-        width: isSmallScreen ? "16px" : "18px",
-        height: isSmallScreen ? "16px" : "18px",
-        fill: palette.neutral['60'],
-      }}
-    />
-  );
-};
+export { Paginator };

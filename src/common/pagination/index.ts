@@ -1,2 +1,2 @@
-export { default as Paginator } from "./pagination";
-export type { PaginatorProps } from "./pagination";
+export { default as Paginator, Paginator as PaginatorNamed } from './pagination';
+export type { PaginatorProps } from './pagination';

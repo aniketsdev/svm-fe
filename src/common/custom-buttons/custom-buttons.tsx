@@ -1,233 +1,145 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { Box, Typography } from '@mui/material';
-import { palette } from '../../../theme/palette';
-import {
-  getButtonStyles,
-  customButtonStyles,
-  type ButtonVariant,
-  type ButtonSize
-} from './custom-buttons-styles';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { Loader2 } from 'lucide-react';
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { cn } from '../../lib/cn';
 
-export interface CustomButtonProps {
-  children?: React.ReactNode;
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-  fullWidth?: boolean;
-  disabled?: boolean;
+/**
+ * Variant + size definitions. The list of variants intentionally includes the
+ * legacy domain-specific ones (`icon`, `floating`, `black-filled`) so existing
+ * call sites keep compiling.
+ */
+const buttonVariants = cva(
+  // base
+  cn(
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium',
+    'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+    'disabled:cursor-not-allowed disabled:opacity-50',
+  ),
+  {
+    variants: {
+      variant: {
+        primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        outline:
+          'border border-input bg-background text-foreground hover:bg-secondary hover:text-secondary-foreground',
+        ghost: 'bg-transparent text-foreground hover:bg-secondary',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+        icon: 'bg-transparent text-foreground hover:bg-secondary p-0',
+        floating:
+          'bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 rounded-full',
+        'black-filled': 'bg-foreground text-background hover:bg-foreground/90',
+      },
+      size: {
+        sm: 'h-9 px-3 text-sm',
+        md: 'h-11 px-4 text-base', // ≥44 px tap target (constitution Principle V)
+        lg: 'h-12 px-6 text-base',
+      },
+      fullWidth: {
+        true: 'w-full',
+        false: '',
+      },
+    },
+    compoundVariants: [
+      // Icon-only buttons get square sizing instead of horizontal padding.
+      { variant: 'icon', size: 'sm', class: 'size-9 p-0' },
+      { variant: 'icon', size: 'md', class: 'size-11 p-0' },
+      { variant: 'icon', size: 'lg', class: 'size-12 p-0' },
+      { variant: 'floating', size: 'sm', class: 'size-9 p-0' },
+      { variant: 'floating', size: 'md', class: 'size-11 p-0' },
+      { variant: 'floating', size: 'lg', class: 'size-14 p-0' },
+    ],
+    defaultVariants: {
+      variant: 'primary',
+      size: 'md',
+      fullWidth: false,
+    },
+  },
+);
+
+export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>['variant']>;
+export type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>['size']>;
+
+export interface CustomButtonProps
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'>,
+    VariantProps<typeof buttonVariants> {
+  children?: ReactNode;
+  /** Renders a spinner and disables clicks. Children stay in place to avoid layout shift. */
   loading?: boolean;
-  icon?: React.ReactNode;
+  /** Optional icon node. Renders on left or right based on `iconPosition`. */
+  icon?: ReactNode;
+  /** Where to place `icon` relative to the children. */
   iconPosition?: 'left' | 'right';
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  onMouseEnter?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  onMouseLeave?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  onFocus?: (event: React.FocusEvent<HTMLButtonElement>) => void;
-  onBlur?: (event: React.FocusEvent<HTMLButtonElement>) => void;
-  className?: string;
+  /** Render the variant's classes onto the immediate child (e.g. an <a>) instead of a <button>. */
+  asChild?: boolean;
+  /** Legacy escape hatch — merged into `className`. */
   sx?: React.CSSProperties;
-  type?: 'button' | 'submit' | 'reset';
-  'aria-label'?: string;
-  'aria-describedby'?: string;
   'data-testid'?: string;
 }
 
-export default function CustomButton({
-  children,
-  variant = 'primary',
-  size = 'md',
-  fullWidth = false,
-  disabled = false,
-  loading = false,
-  icon,
-  iconPosition = 'left',
-  onClick,
-  onMouseEnter,
-  onMouseLeave,
-  onFocus,
-  onBlur,
-  className,
-  sx,
-  type = 'button',
-  'aria-label': ariaLabel,
-  'aria-describedby': ariaDescribedBy,
-  'data-testid': dataTestId,
-}: CustomButtonProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-  const [isActive, setIsActive] = useState(false);
-  const buttonRef = useRef<HTMLButtonElement>(null);
+export const CustomButton = forwardRef<HTMLButtonElement, CustomButtonProps>(
+  function CustomButton(
+    {
+      children,
+      variant,
+      size,
+      fullWidth,
+      loading = false,
+      disabled,
+      icon,
+      iconPosition = 'left',
+      asChild = false,
+      className,
+      sx,
+      type = 'button',
+      ...rest
+    },
+    ref,
+  ) {
+    const Comp = asChild ? Slot : 'button';
+    const isDisabled = disabled || loading;
 
-  const styles = getButtonStyles(variant, size, fullWidth);
-
-  const handleMouseEnter = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    if (!disabled && !loading) {
-      setIsHovered(true);
-      onMouseEnter?.(event);
-    }
-  }, [disabled, loading, onMouseEnter]);
-
-  const handleMouseLeave = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    setIsHovered(false);
-    onMouseLeave?.(event);
-  }, [onMouseLeave]);
-
-  const handleFocus = useCallback((event: React.FocusEvent<HTMLButtonElement>) => {
-    if (!disabled && !loading) {
-      setIsFocused(true);
-      onFocus?.(event);
-    }
-  }, [disabled, loading, onFocus]);
-
-  const handleBlur = useCallback((event: React.FocusEvent<HTMLButtonElement>) => {
-    setIsFocused(false);
-    onBlur?.(event);
-  }, [onBlur]);
-
-  const handleMouseDown = useCallback(() => {
-    if (!disabled && !loading) {
-      setIsActive(true);
-    }
-  }, [disabled, loading]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsActive(false);
-  }, []);
-
-  const handleClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    if (!disabled && !loading && onClick) {
-      onClick(event);
-    }
-  }, [disabled, loading, onClick]);
-
-  // Get current button styles based on state
-  const getCurrentButtonStyles = (): React.CSSProperties => {
-    let currentStyles = { ...styles.button };
-
-    if (disabled || loading) {
-      currentStyles = { ...currentStyles, ...styles.buttonDisabled };
-    } else if (isActive) {
-      currentStyles = { ...currentStyles, ...styles.buttonActive };
-    } else if (isFocused) {
-      currentStyles = { ...currentStyles, ...styles.buttonFocus };
-    } else if (isHovered) {
-      currentStyles = { ...currentStyles, ...styles.buttonHover };
-    }
-
-    return { ...currentStyles, ...sx };
-  };
-
-  // Get current text styles based on state
-  const getCurrentTextStyles = (): React.CSSProperties => {
-    let textStyles = { ...styles.text };
-    
-    // Set text color based on variant
-    if (variant === 'primary' || variant === 'black-filled') {
-      textStyles.color = palette.solid.white;
-    }
-    
-    if (disabled || loading) {
-      return { ...textStyles, ...styles.textDisabled };
-    }
-    return textStyles;
-  };
-
-  // Get current icon styles based on state
-  const getCurrentIconStyles = (): React.CSSProperties => {
-    if (disabled || loading) {
-      return { ...styles.icon, ...styles.iconDisabled };
-    }
-    return styles.icon;
-  };
-
-  const renderIcon = () => {
-    if (!icon) return null;
-    
-    return (
-      <Box sx={getCurrentIconStyles()}>
-        {icon}
-      </Box>
-    );
-  };
-
-  const renderContent = () => {
-    if (loading) {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Box
-            sx={{
-              width: '16px',
-              height: '16px',
-              border: '2px solid transparent',
-              borderTop: `2px solid ${disabled ? palette.neutral['20'] : 'currentColor'}`,
-              borderRadius: '50%',
-              animation: 'spin 1s linear infinite',
-              '@keyframes spin': {
-                '0%': { transform: 'rotate(0deg)' },
-                '100%': { transform: 'rotate(360deg)' },
-              },
-            }}
+    const content = (
+      <>
+        {loading && (
+          <Loader2
+            aria-hidden="true"
+            data-slot="spinner"
+            className="size-4 animate-spin"
           />
-          {children && (
-            <Typography component="div" sx={getCurrentTextStyles()}>
-              {children}
-            </Typography>
-          )}
-        </Box>
-      );
-    }
+        )}
+        {!loading && icon && iconPosition === 'left' && (
+          <span data-slot="icon" data-position="left">
+            {icon}
+          </span>
+        )}
+        {children}
+        {!loading && icon && iconPosition === 'right' && (
+          <span data-slot="icon" data-position="right">
+            {icon}
+          </span>
+        )}
+      </>
+    );
 
-    if (variant === 'icon' || variant === 'floating') {
-      return icon || children;
-    }
-
-    if (icon && children) {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {iconPosition === 'left' && renderIcon()}
-          <Typography component="div" sx={getCurrentTextStyles()}>
-            {children}
-          </Typography>
-          {iconPosition === 'right' && renderIcon()}
-        </Box>
-      );
-    }
-
-    if (icon) {
-      return renderIcon();
-    }
-
-    if (children) {
-      return (
-        <Typography component="div" sx={getCurrentTextStyles()}>
-          {children}
-        </Typography>
-      );
-    }
-
-    return null;
-  };
-
-  return (
-    <Box sx={customButtonStyles}>
-      <button
-        ref={buttonRef}
-        type={type}
-        disabled={disabled || loading}
-        onClick={handleClick}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        className={className}
-        style={getCurrentButtonStyles()}
-        aria-label={ariaLabel}
-        aria-describedby={ariaDescribedBy}
-        data-testid={dataTestId}
-        aria-disabled={disabled || loading}
+    return (
+      <Comp
+        ref={ref}
+        type={asChild ? undefined : type}
+        disabled={isDisabled}
+        aria-disabled={isDisabled || undefined}
+        aria-busy={loading || undefined}
+        data-slot="root"
+        data-variant={variant ?? 'primary'}
+        data-size={size ?? 'md'}
+        className={cn(buttonVariants({ variant, size, fullWidth }), className)}
+        style={sx}
+        {...rest}
       >
-        {renderContent()}
-      </button>
-    </Box>
-  );
-}
+        {content}
+      </Comp>
+    );
+  },
+);
+
+export default CustomButton;

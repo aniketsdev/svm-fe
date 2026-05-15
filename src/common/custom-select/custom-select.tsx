@@ -1,28 +1,29 @@
-import {
-  Grid,
-  MenuItem,
-  Select,
-  type SelectChangeEvent,
-  Typography,
-} from "@mui/material";
-import { useMemo, useRef, useState, useEffect } from "react";
-import { errorStyle } from "../custom-input/custom-input-styles";
-import {
-  customSelectStyles,
-  selectInputStyle,
-} from "./widgets/custom-select-widgets";
-import { palette } from '../../../theme/palette';
+import * as SelectPrimitive from '@radix-ui/react-select';
+import { Check, ChevronDown } from 'lucide-react';
+import { forwardRef, type ChangeEventHandler, type ReactElement } from 'react';
+import { cn } from '../../lib/cn';
 
-interface CustomSelectProps {
+/**
+ * Legacy SelectChangeEvent shape — preserved so existing consumers don't
+ * need to change their submit handlers.
+ */
+export interface SelectChangeEvent<T = string> {
+  target: { name: string; value: T };
+}
+
+export interface SelectItem {
+  value: string;
+  label: string;
+  disabled?: boolean;
+  /** Optional fully-custom rendering for this item (legacy `child` prop). */
+  child?: ReactElement;
+}
+
+export interface CustomSelectProps {
   placeholder: string;
   name: string;
   value: string | undefined;
-  items: {
-    value: string;
-    label: string;
-    disabled?: boolean;
-    child?: React.ReactElement;
-  }[];
+  items: SelectItem[];
   onChange: (e: SelectChangeEvent<string>) => void;
   onOpen?: () => void;
   hasError?: boolean;
@@ -30,212 +31,177 @@ interface CustomSelectProps {
   errorMessage?: string;
   isDisabled?: boolean;
   bgWhite?: boolean;
+  /** Adds a "None" item at the top of the list. */
   enableDeselect?: boolean;
+  /** Legacy variant: shows the active item as a status pill (used by the legacy app). */
   statusPillMode?: boolean;
   height?: string | number;
   fontSize?: string;
-  menuProps?: {
-    PaperProps?: {
-      style?: {
-        maxHeight: number;
-        width: number | string;
-        zIndex?: number;
-      };
-    };
-  };
+  /** Forwarded for legacy compat — height is mapped to a Tailwind class. */
+  className?: string;
 }
 
-function CustomSelect(props: CustomSelectProps) {
-  const { items, bgWhite, enableDeselect, height, fontSize: customFontSize } = props;
-  const resolvedFontSize = customFontSize || "16px";
+const STATUS_STYLES: Record<string, string> = {
+  UNDER_REVIEW: 'bg-blue-50 text-blue-700',
+  COMPLETED: 'bg-green-50 text-green-700',
+  REJECTED: 'bg-red-50 text-red-700',
+  DRAFT: 'bg-gray-100 text-gray-700',
+  DOCS_PENDING: 'bg-amber-50 text-amber-700',
+  ONBOARDING_IN_PROGRESS: 'bg-blue-50 text-blue-700',
+  REQUESTED: 'bg-blue-50 text-blue-600',
+};
 
-  const handleValue = (e: SelectChangeEvent<string>) => {
-    const selectedLabel = e.target.value;
-    const selectedKey =
-      props.items.find((item) => item.label === selectedLabel)?.value || "";
-    e.target.value = selectedKey;
-
-    props.onChange(e);
-  };
-
-  const getLabel = (value: string) => {
-    const item = items?.find((item) => item.value === value);
-    return item ? item.label : "";
-  };
-
-  // Detect if this select is inside a drawer by walking up the DOM tree from the actual element
-  const selectRef = useRef<HTMLDivElement>(null);
-  const [isInsideDrawer, setIsInsideDrawer] = useState(false);
-
-  useEffect(() => {
-    if (selectRef.current) {
-      setIsInsideDrawer(selectRef.current.closest('.MuiDrawer-root') !== null);
-    }
-  }, []);
-
-  // Default MenuProps with proper z-index and positioning
-  // Always use portal (disablePortal: false) so dropdown isn't clipped by overflow containers.
-  // Set z-index above drawer (1400) when inside one.
-  const defaultMenuProps = useMemo(() => ({
-    PaperProps: {
-      style: {
-        maxHeight: props.menuProps?.PaperProps?.style?.maxHeight ?? 300,
-        maxWidth: props.menuProps?.PaperProps?.style?.width ?? 250,
-        backgroundColor: 'white',
-        boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.15)',
-        ...(props.menuProps?.PaperProps?.style?.zIndex && { zIndex: props.menuProps.PaperProps.style.zIndex }),
-      },
-      sx: {
-        scrollbarWidth: "none",
-        msOverflowStyle: "none",
-        "&::-webkit-scrollbar": { display: "none" },
-        "& .MuiList-root": {
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          "&::-webkit-scrollbar": { display: "none" },
-        },
-      },
+export const CustomSelect = forwardRef<HTMLButtonElement, CustomSelectProps>(
+  function CustomSelect(
+    {
+      placeholder,
+      name,
+      value,
+      items,
+      onChange,
+      onOpen,
+      hasError,
+      errorMessage,
+      isDisabled,
+      bgWhite,
+      enableDeselect,
+      statusPillMode,
+      height,
+      fontSize,
+      className,
     },
-    BackdropProps: {
-      style: {
-        backgroundColor: 'transparent',
-      },
-    },
-    ...(isInsideDrawer && { sx: { zIndex: 1500 } }),
-  }), [isInsideDrawer, props.menuProps]);
+    ref,
+  ) {
+    const helperId = `${name}-helper`;
 
-  const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
-    UNDER_REVIEW: { bg: palette.informative['05'], color: palette.informative['50'] },
-    COMPLETED: { bg: palette.positive['05'], color: palette.positive['50'] },
-    REJECTED: { bg: palette.negative['05'], color: palette.negative['50'] },
-    DRAFT: { bg: palette.neutral['05'], color: palette.neutral['50'] },
-    DOCS_PENDING: { bg: palette.warning['05'], color: palette.warning['50'] },
-    ONBOARDING_IN_PROGRESS: { bg: palette.informative['05'], color: palette.informative['50'] },
-    REQUESTED: { bg: palette.informative['05'], color: palette.informative['40'] },
-  };
+    const handleChange: NonNullable<ChangeEventHandler<HTMLSelectElement>> | undefined = undefined;
+    void handleChange; // (placeholder — Radix Select drives changes via onValueChange below)
 
-  return (
-    <>
-      <Select
-        ref={selectRef}
-        disabled={props.isDisabled && props.isDisabled}
-        MenuProps={defaultMenuProps}
-        onOpen={props.onOpen}
-        sx={{
-          ...selectInputStyle,
-          backgroundColor: bgWhite ? "white" : "inherit",
-          ...(height && { height }), // Apply custom height when provided
-        }}
-        displayEmpty
-        name={props?.name}
-        value={getLabel(props.value ?? "")}
-        onChange={handleValue}
-        error={props.hasError}
-        renderValue={(selected) => (
-          <Typography
-            className={`${customSelectStyles.headerLabel}`}
-            sx={{
-              color: selected
-                ? palette.text.primary
-                : palette.neutral['40'],
-              fontWeight: 400,
-              fontSize: `${resolvedFontSize} !important`,
-              lineHeight: "1.5 !important",
-              letterSpacing: "normal",
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              display: 'block',
-              maxWidth: '100%',
-              mr: 3,
-            }}
-          >
-            {selected || props?.placeholder}
-          </Typography>
-        )}
-      >
-        {enableDeselect && (
-          <MenuItem value="">
-            <Typography
-              className={`${customSelectStyles.headerLabel}`}
-              sx={{
-                fontWeight: 400,
-                fontSize: `${resolvedFontSize} !important`,
-                lineHeight: "1.5 !important",
-                letterSpacing: "normal",
-                color: palette.neutral['40'],
-                fontStyle: 'italic',
-              }}
-            >
-              None
-            </Typography>
-          </MenuItem>
-        )}
-        {props?.items?.length > 0 &&
-          props.items.map((option) => (
-            <MenuItem
-              key={option.value}
-              value={option.label}
-              disabled={option.disabled}
-            >
-              {option.child && <Grid width={"100%"}>{option.child}</Grid>}
-              {!option.child && (
-                props.statusPillMode && STATUS_STYLES[option.value] ? (
-                  <Typography
-                    sx={{
-                      px: 1.25,
-                      py: 0.5,
-                      borderRadius: "999px",
-                      fontSize: "12px !important",
-                      lineHeight: "1.4 !important",
-                      fontWeight: 500,
-                      width: "fit-content",
-                      backgroundColor: STATUS_STYLES[option.value].bg,
-                      color: STATUS_STYLES[option.value].color,
-                    }}
-                  >
-                    {option.label}
-                  </Typography>
-                ) : (
-                  <Typography
-                    className={`${customSelectStyles.headerLabel}`}
-                    sx={{
-                      fontWeight: 400,
-                      fontSize: `${resolvedFontSize} !important`,
-                      lineHeight: "1.5 !important",
-                      letterSpacing: "normal",
-                      color: palette.text.primary,
-                      cursor: "pointer",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      display: "block",
-                      maxWidth: "100%",
-                    }}
-                  >
-                    {option.label}
-                  </Typography>
-                )
-              )}
+    const triggerHeight = typeof height === 'number' ? `${height}px` : height;
+    const triggerFontSize = fontSize ?? '16px';
 
-            </MenuItem>
-          ))}
-      </Select>
-      {props.hasError && (
-        <Typography
-          sx={{
-            ...errorStyle,
-            fontSize: "12px", // Match CustomInput error font size
-            lineHeight: "1.2", // Match CustomInput error line height
-            letterSpacing: "normal",
-            fontWeight: 400,
+    const selectedItem = items.find((item) => item.value === value);
+
+    return (
+      <div data-slot="root" className="flex w-full flex-col">
+        <SelectPrimitive.Root
+          name={name}
+          value={value ?? ''}
+          onValueChange={(next) =>
+            onChange({ target: { name, value: next === '__deselect__' ? '' : next } })
+          }
+          onOpenChange={(open) => {
+            if (open) onOpen?.();
           }}
+          disabled={isDisabled}
         >
-          {props.hasError ? props.errorMessage : ""}
-        </Typography>
-      )}
-    </>
-  );
-}
+          <SelectPrimitive.Trigger
+            ref={ref}
+            data-slot="control"
+            aria-invalid={hasError || undefined}
+            aria-describedby={hasError ? helperId : undefined}
+            style={{
+              height: triggerHeight,
+              fontSize: triggerFontSize,
+            }}
+            className={cn(
+              'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left',
+              'border-input text-foreground',
+              'focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/40',
+              'disabled:cursor-not-allowed disabled:opacity-60',
+              bgWhite ? 'bg-white' : 'bg-background',
+              hasError && 'border-destructive focus:border-destructive focus:ring-destructive/30',
+              className,
+            )}
+          >
+            <SelectPrimitive.Value placeholder={placeholder}>
+              {selectedItem
+                ? statusPillMode && STATUS_STYLES[selectedItem.value]
+                  ? (
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                        STATUS_STYLES[selectedItem.value],
+                      )}
+                    >
+                      {selectedItem.label}
+                    </span>
+                  )
+                  : selectedItem.label
+                : null}
+            </SelectPrimitive.Value>
+            <SelectPrimitive.Icon asChild>
+              <ChevronDown aria-hidden="true" className="size-4 shrink-0 opacity-60" />
+            </SelectPrimitive.Icon>
+          </SelectPrimitive.Trigger>
+
+          <SelectPrimitive.Portal>
+            <SelectPrimitive.Content
+              position="popper"
+              sideOffset={4}
+              data-slot="content"
+              className={cn(
+                'z-50 max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden',
+                'rounded-md border border-border bg-background text-foreground shadow-lg',
+                'data-[state=open]:animate-in data-[state=closed]:animate-out',
+                'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+              )}
+            >
+              <SelectPrimitive.Viewport className="p-1">
+                {enableDeselect && (
+                  <SelectPrimitive.Item
+                    value="__deselect__"
+                    className={cn(
+                      'relative flex cursor-pointer select-none items-center rounded px-3 py-2 text-sm italic text-muted-foreground',
+                      'data-[highlighted]:bg-secondary data-[highlighted]:outline-none',
+                    )}
+                  >
+                    <SelectPrimitive.ItemText>None</SelectPrimitive.ItemText>
+                  </SelectPrimitive.Item>
+                )}
+                {items.map((opt) => (
+                  <SelectPrimitive.Item
+                    key={opt.value}
+                    value={opt.value}
+                    disabled={opt.disabled}
+                    className={cn(
+                      'relative flex cursor-pointer select-none items-center rounded px-3 py-2 text-sm',
+                      'data-[highlighted]:bg-secondary data-[highlighted]:text-secondary-foreground data-[highlighted]:outline-none',
+                      'data-[disabled]:cursor-not-allowed data-[disabled]:opacity-50',
+                    )}
+                  >
+                    {opt.child ? (
+                      <span className="w-full">{opt.child}</span>
+                    ) : statusPillMode && STATUS_STYLES[opt.value] ? (
+                      <span
+                        className={cn(
+                          'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                          STATUS_STYLES[opt.value],
+                        )}
+                      >
+                        {opt.label}
+                      </span>
+                    ) : (
+                      <SelectPrimitive.ItemText>{opt.label}</SelectPrimitive.ItemText>
+                    )}
+                    <SelectPrimitive.ItemIndicator className="ml-auto pl-2">
+                      <Check aria-hidden="true" className="size-4" />
+                    </SelectPrimitive.ItemIndicator>
+                  </SelectPrimitive.Item>
+                ))}
+              </SelectPrimitive.Viewport>
+            </SelectPrimitive.Content>
+          </SelectPrimitive.Portal>
+        </SelectPrimitive.Root>
+
+        {hasError && errorMessage && (
+          <p id={helperId} role="alert" className="mt-1 text-xs leading-tight text-destructive">
+            {errorMessage}
+          </p>
+        )}
+      </div>
+    );
+  },
+);
 
 export default CustomSelect;

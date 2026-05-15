@@ -1,343 +1,214 @@
-import { Typography } from "@mui/material";
-import {
-  LocalizationProvider,
-} from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
-import { DateRangeIcon } from "@mui/x-date-pickers/icons";
-import dayjs, { type Dayjs } from "dayjs";
+import * as PopoverPrimitive from '@radix-ui/react-popover';
+import dayjs, { type Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { palette } from '../../../theme/palette';
-import { errorStyle } from "../custom-input/custom-input-styles";
+import { Calendar as CalendarIcon } from 'lucide-react';
+import { memo, useCallback, useMemo, useState, type CSSProperties } from 'react';
+import { DayPicker, type Matcher } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
+import { cn } from '../../lib/cn';
 
-// Enable custom parse format plugin
 dayjs.extend(customParseFormat);
 
 export interface DatePickerProps {
-  /** Field name for form handling */
+  /** Field name for form handling. */
   name?: string;
-  /** Custom styles for the component */
-  styles?: React.CSSProperties;
-  /** Whether to use custom styling */
+  /** Custom styles for the component root. */
+  styles?: CSSProperties;
+  /** Whether to use custom styling (kept for legacy passthrough — no-op in new implementation). */
   useCustomStyle?: boolean;
-  /** Current selected date value */
+  /** Current selected date value. */
   value?: Dayjs | null;
-  /** Maximum selectable date */
+  /** Maximum selectable date. */
   maxDate?: Dayjs;
-  /** Minimum selectable date */
+  /** Minimum selectable date. */
   minDate?: Dayjs;
-  /** Callback fired when date changes */
+  /** Callback fired when date changes. */
   onChange: (date: Dayjs | null) => void;
-  /** Whether field has validation error */
+  /** Whether field has validation error. */
   hasError?: boolean;
-  /** Error message to display */
+  /** Error message to display. */
   errorMessage?: string;
-  /** Disable future dates */
+  /** Disable future dates. */
   disableFuture?: boolean;
-  /** Field label/placeholder */
+  /** Field label/placeholder text shown in the trigger. */
   label?: string;
-  /** Disable past dates */
+  /** Disable past dates. */
   disablePast?: boolean;
-  /** Use white background */
+  /** Use white background. */
   bgWhite?: boolean;
-  /** Date format string */
+  /** Date format string (dayjs syntax). */
   format?: string;
-  /** Whether the field is disabled */
+  /** Whether the field is disabled. */
   disabled?: boolean;
-  /** Whether to show clear icon */
+  /** Whether to show the clear icon. */
   showClearIcon?: boolean;
+  className?: string;
 }
+
+/**
+ * Date picker built on react-day-picker (calendar) inside a Radix Popover.
+ *
+ * Public API preserved from the legacy MUI X DesktopDatePicker:
+ *   `value: Dayjs | null` and `onChange(Dayjs | null)`. Internal validation
+ *   for disablePast/disableFuture/minDate/maxDate runs identically.
+ */
 const DatePickerField = (props: DatePickerProps) => {
   const {
-    hasError = false,
-    onChange,
     value,
-    useCustomStyle = false,
+    onChange,
+    label,
+    format = 'MM-DD-YYYY',
+    minDate,
     maxDate,
     disableFuture = false,
     disablePast = false,
-    label,
-    minDate,
-    format = "MM-DD-YYYY",
-    errorMessage,
+    bgWhite = true,
     disabled = false,
     showClearIcon = true,
+    hasError = false,
+    errorMessage,
+    className,
   } = props;
 
-  const [cleared, setCleared] = useState(false);
-  const [internalValue, setInternalValue] = useState<Dayjs | null>(null);
+  const [open, setOpen] = useState(false);
+  // Internal state survives a no-value parent (consumer of the legacy API
+  // updates `value` from `onChange`, so we use the "derive state from prop"
+  // pattern instead of an effect.
+  const [internalValue, setInternalValue] = useState<Dayjs | null>(() =>
+    value ? dayjs(value) : null,
+  );
   const [validationError, setValidationError] = useState<string | null>(null);
+  // React's "store information from previous renders" pattern — sync the
+  // controlled `value` prop into local state without an effect.
+  const [lastValue, setLastValue] = useState(value);
+  if (lastValue !== value) {
+    setLastValue(value);
+    setInternalValue(value ? dayjs(value) : null);
+    setValidationError(null);
+  }
 
-  useEffect(() => {
-    if (cleared) {
-      const timeout = setTimeout(() => {
-        setCleared(false);
-      }, 1500);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [cleared]);
-
-  // Sync internal value with external value
-  useEffect(() => {
-    if (value) {
-      setInternalValue(dayjs(value));
-      // Clear validation error when value is set externally (e.g., form reset)
-      setValidationError(null);
-    } else {
-      setInternalValue(null);
-      setValidationError(null);
-    }
-  }, [value]);
-
-  const inputValue = useMemo(() => {
-    return internalValue;
-  }, [internalValue]);
-
-  const validateDate = useCallback((
-    dateValue: Dayjs | null,
-  ): string | null => {
-    if (!dateValue) {
-      return null; // Allow null/empty values
-    }
-
-    if (!dateValue.isValid()) {
-      return "Invalid date format";
-    }
-
-    const today = dayjs().startOf('day');
-    const dateToCheck = dateValue.startOf('day');
-
-    // Check disablePast
-    if (disablePast && dateToCheck.isBefore(today)) {
-      return "Past dates are not allowed";
-    }
-
-    // Check disableFuture
-    if (disableFuture && dateToCheck.isAfter(today)) {
-      return "Future dates are not allowed";
-    }
-
-    // Check minDate
-    if (minDate) {
-      const minDateToCheck = dayjs(minDate).startOf('day');
-      if (dateToCheck.isBefore(minDateToCheck)) {
-        return `Date must be on or after ${minDateToCheck.format(format)}`;
+  const validateDate = useCallback(
+    (dateValue: Dayjs | null): string | null => {
+      if (!dateValue) return null;
+      if (!dateValue.isValid()) return 'Invalid date format';
+      const today = dayjs().startOf('day');
+      const d = dateValue.startOf('day');
+      if (disablePast && d.isBefore(today)) return 'Past dates are not allowed';
+      if (disableFuture && d.isAfter(today)) return 'Future dates are not allowed';
+      if (minDate) {
+        const min = dayjs(minDate).startOf('day');
+        if (d.isBefore(min)) return `Date must be on or after ${min.format(format)}`;
       }
-    }
-
-    // Check maxDate
-    if (maxDate) {
-      const maxDateToCheck = dayjs(maxDate).startOf('day');
-      if (dateToCheck.isAfter(maxDateToCheck)) {
-        return `Date must be on or before ${maxDateToCheck.format(format)}`;
+      if (maxDate) {
+        const max = dayjs(maxDate).startOf('day');
+        if (d.isAfter(max)) return `Date must be on or before ${max.format(format)}`;
       }
-    }
+      return null;
+    },
+    [disablePast, disableFuture, minDate, maxDate, format],
+  );
 
-    return null; // No validation error
-  }, [disablePast, disableFuture, minDate, maxDate, format]);
-
-  const handleChange = useCallback((
-    newValue: Dayjs | null,
-  ) => {
-    // Update internal value immediately for UI responsiveness
-    setInternalValue(newValue);
-    
-    // Validate the date
-    const error = validateDate(newValue);
-    setValidationError(error);
-
-    // Only call onChange if we have a valid date with no validation errors
-    if (newValue && newValue.isValid() && !error) {
-      onChange(newValue);
-    } else if (newValue === null) {
-      // Allow clearing the field
-      setValidationError(null);
-      onChange(null);
-    } else if (error) {
-      // If there's a validation error, don't call onChange
-      // This prevents invalid dates from being accepted
-    }
-  }, [onChange, validateDate]);
-
-
-  const textFieldProps = useMemo(() => {
-    const props: Record<string, unknown> = { 
-      fullWidth: true,
-      InputProps: {
-        readOnly: false, // Enable manual date entry
+  const handleSelect = useCallback(
+    (next: Date | undefined) => {
+      const asDayjs = next ? dayjs(next) : null;
+      const err = validateDate(asDayjs);
+      setValidationError(err);
+      setInternalValue(asDayjs);
+      if (asDayjs && asDayjs.isValid() && !err) {
+        onChange(asDayjs);
+        setOpen(false);
+      } else if (!asDayjs) {
+        onChange(null);
       }
-    };
-    if (!useCustomStyle) props["placeholder"] = "Select Date";
-    if (label) props["placeholder"] = label;
-    return props;
-  }, [useCustomStyle, label]);
+    },
+    [onChange, validateDate],
+  );
 
+  const displayValue = useMemo(
+    () => (internalValue && internalValue.isValid() ? internalValue.format(format) : ''),
+    [internalValue, format],
+  );
+
+  const showError = hasError || Boolean(validationError);
+  const disabledMatchers = useMemo<Matcher[]>(() => {
+    const matchers: Matcher[] = [];
+    if (disablePast) matchers.push({ before: new Date() });
+    if (disableFuture) matchers.push({ after: new Date() });
+    if (minDate) matchers.push({ before: minDate.toDate() });
+    if (maxDate) matchers.push({ after: maxDate.toDate() });
+    return matchers;
+  }, [disablePast, disableFuture, minDate, maxDate]);
 
   return (
-    <>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DesktopDatePicker
-          value={inputValue}
-          closeOnSelect={true}
-          onChange={handleChange}
-          format={format}
-          maxDate={maxDate ? dayjs(maxDate) : undefined}
-          minDate={minDate ? dayjs(minDate) : undefined}
-          disableFuture={disableFuture}
-          disablePast={disablePast}
-          disabled={disabled}
-          // Don't show error icon while typing
-          onError={() => {}}
-          slotProps={{
-            textField: {
-              ...textFieldProps,
-              error: hasError || !!validationError,
-              // helperText: hasError ? errorMessage : undefined,
-            },
-            field: { 
-              clearable: showClearIcon, 
-              onClear: () => {
-                setCleared(true);
-                setInternalValue(null);
-                onChange(null);
-              },
-            },
-            openPickerIcon: { children: <DateRangeIcon /> },
-            inputAdornment: {
-              position: "start",
-            },
-            popper: {
-              sx: {
-                zIndex: 1500,
-                // Scale down calendar text to match compact form styling
-                '& .MuiPickersCalendarHeader-label': {
-                  fontSize: '14px',
-                },
-                '& .MuiDayCalendar-weekDayLabel': {
-                  fontSize: '12px',
-                },
-                '& .MuiPickersDay-root': {
-                  fontSize: '13px',
-                },
-                '& .MuiPickersYear-yearButton': {
-                  fontSize: '13px',
-                },
-              },
-            },
-          }}
-          sx={useMemo(
-            () => {
-              const showError = hasError || !!validationError;
-              return {
-                width: '100%',
-                "& .MuiInputBase-input": {
-                  fontSize: "16px", // Match custom input font size (16px per custom-input-styles)
-                  padding: "8px 12px", // Match custom input padding
-                  borderRadius: "6px", // Match custom input border radius
-                  color: palette.neutral['80'], // Match custom input text color
-                  backgroundColor: "transparent",
-                  border: "none",
-                  outline: "none",
-                  "&::placeholder": {
-                    fontSize: "16px",
-                    color: palette.neutral['40'],
-                    opacity: 1,
-                  },
-                  "&:focus": {
-                    outline: "none"
-                  },
-                },
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "6px", // Match custom input border radius
-                  minHeight: "36px", // Match custom input min height
-                  height: "40px", // Set exact height to match custom input
-                  backgroundColor: palette.solid.white, // White background
-                  border: showError ? `1px solid ${errorStyle.color}` : `1px solid ${palette.neutral['10'] as string}`, // Match custom input border
-                  borderWidth: "1px !important", // Keep border width constant
-                  boxShadow: "none",
-                  outline: "none",
-                  "&:hover": {
-                    borderColor: showError ? errorStyle.color : palette.neutral['10'], // Match custom input hover
-                    borderWidth: "1px !important", // Keep border width constant on hover
-                  },
-                  "&.Mui-focused": {
-                    borderColor: showError ? errorStyle.color : palette.neutral['10'], // Match custom input focus
-                    borderWidth: "1px !important", // Keep border width constant on focus
-                    boxShadow: "none",
-                    outline: "none",
-                  },
-                  "& fieldset": {
-                    border: "none !important", // Remove default fieldset border
-                    borderWidth: "0 !important", // Ensure no border width
-                  },
-                },
-                "& .MuiPickersInputBase-root": {
-                  fontSize: "16px", // Override default 24px to match CustomInput
-                  height: "45px !important",
-                  borderRadius: "6px",
-                  padding: "0px 12px", // Match custom input padding
-                  backgroundColor: palette.solid.white, // White background
-                  border: showError ? `1px solid ${errorStyle.color}` : `1px solid ${palette.neutral['10'] as string}`, // Match custom input border
-                  borderWidth: "1px !important", // Keep border width constant
-                  boxShadow: "none",
-                  outline: "none",
-                  "&:hover": {
-                    borderColor: showError ? errorStyle.color : palette.neutral['10'], // Match custom input hover
-                    borderWidth: "1px !important", // Keep border width constant on hover
-                  },
-                  "&.Mui-focused": {
-                    borderColor: showError ? errorStyle.color : palette.neutral['10'], // Match custom input focus
-                    borderWidth: "1px !important", // Keep border width constant on focus
-                    boxShadow: "none",
-                    outline: "none",
-                  },
-                  "& fieldset": {
-                    border: "none !important", // Remove default fieldset border
-                    borderWidth: "0 !important", // Ensure no border width
-                  },
-                },
-                "& .MuiOutlinedInput-root.Mui-error": {
-                  "& fieldset": {
-                    border: "none !important", // Remove fieldset border even on error
-                    borderWidth: "0 !important",
-                  },
-                },
-                "& .MuiPickersInputBase-sectionContent": {
-                  fontSize: "16px", // Match custom input font size
-                  color: palette.neutral['80'],
-                },
-                "& .MuiPickersSectionList-sectionSeparator": {
-                  fontSize: "16px",
-                  color: palette.neutral['80'],
-                },
-                "& .MuiPickersInputBase-root.Mui-error": {
-                  "& fieldset": {
-                    border: "none !important", // Remove fieldset border even on error
-                    borderWidth: "0 !important",
-                  },
-                },
-              };
-            },
-            [hasError, validationError]
-          )}
-        />
-      </LocalizationProvider>
+    <div className={cn('flex w-full flex-col', className)}>
+      <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
+        <PopoverPrimitive.Trigger asChild>
+          <button
+            type="button"
+            disabled={disabled}
+            aria-invalid={showError || undefined}
+            className={cn(
+              'flex h-11 w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-left text-sm',
+              'border-input',
+              'focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/40',
+              'disabled:cursor-not-allowed disabled:opacity-60',
+              bgWhite ? 'bg-white' : 'bg-background',
+              showError && 'border-destructive focus:border-destructive focus:ring-destructive/30',
+            )}
+          >
+            <span className={cn('truncate', !displayValue && 'text-muted-foreground')}>
+              {displayValue || label || 'Select Date'}
+            </span>
+            <span className="flex shrink-0 items-center gap-1">
+              {showClearIcon && internalValue && !disabled && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Clear date"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelect(undefined);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleSelect(undefined);
+                    }
+                  }}
+                  className="rounded p-1 text-muted-foreground hover:bg-secondary"
+                >
+                  ×
+                </span>
+              )}
+              <CalendarIcon aria-hidden className="size-4 text-muted-foreground" />
+            </span>
+          </button>
+        </PopoverPrimitive.Trigger>
+        <PopoverPrimitive.Portal>
+          <PopoverPrimitive.Content
+            sideOffset={6}
+            className="z-50 rounded-md border border-border bg-background p-3 shadow-lg"
+          >
+            <DayPicker
+              mode="single"
+              selected={internalValue?.toDate() ?? undefined}
+              onSelect={handleSelect}
+              disabled={disabledMatchers}
+              showOutsideDays
+              className="text-sm"
+            />
+          </PopoverPrimitive.Content>
+        </PopoverPrimitive.Portal>
+      </PopoverPrimitive.Root>
+
       {(hasError || validationError) && (errorMessage || validationError) && (
-        <Typography
-          sx={{
-            ...errorStyle,
-            fontSize: "0.75rem",
-            lineHeight: 1.50,
-            letterSpacing: "0.03333em",
-          }}
-        >
+        <p role="alert" className="mt-1 text-xs leading-tight text-destructive">
           {validationError || errorMessage}
-        </Typography>
+        </p>
       )}
-    </>
+    </div>
   );
-}
+};
 
 export default memo(DatePickerField);
+export { DatePickerField };

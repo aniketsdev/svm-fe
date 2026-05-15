@@ -1,49 +1,41 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@/test/test-utils'
-import userEvent from '@testing-library/user-event'
-import CustomDrawer from './custom-drawer'
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { CustomDrawer } from './custom-drawer';
 
 describe('CustomDrawer', () => {
-  it('renders title and children when open', () => {
-    render(
-      <CustomDrawer anchor="right" open title="Test Drawer" onClose={vi.fn()}>
-        <p>Drawer content</p>
-      </CustomDrawer>,
-    )
-    expect(screen.getByText('Test Drawer')).toBeInTheDocument()
-    expect(screen.getByText('Drawer content')).toBeInTheDocument()
-  })
+  (['left', 'right', 'top', 'bottom'] as const).forEach((anchor) => {
+    it(`renders with anchor="${anchor}"`, () => {
+      render(
+        <CustomDrawer open anchor={anchor} title={`drawer-${anchor}`} onClose={() => {}}>
+          <p>body</p>
+        </CustomDrawer>,
+      );
+      expect(screen.getByText(`drawer-${anchor}`)).toBeInTheDocument();
+      expect(screen.getByText('body')).toBeInTheDocument();
+      const content = document.querySelector('[data-slot="content"]');
+      expect(content).toHaveAttribute('data-anchor', anchor);
+    });
+  });
 
-  it('does not show content when open is false', () => {
+  it('fires onClose when the close button is clicked', async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
     render(
-      <CustomDrawer anchor="right" open={false} title="Test Drawer" onClose={vi.fn()}>
-        <p>Hidden content</p>
+      <CustomDrawer open anchor="right" title="t" onClose={onClose}>
+        body
       </CustomDrawer>,
-    )
-    // MUI Drawer with keepMounted keeps DOM but hides it
-    expect(screen.queryByText('Hidden content')).not.toBeVisible()
-  })
+    );
+    await user.click(screen.getByRole('button', { name: /close drawer/i }));
+    expect(onClose).toHaveBeenCalled();
+  });
 
-  it('calls onClose when close button is clicked', async () => {
-    const handleClose = vi.fn()
-    const user = userEvent.setup()
+  it('does not render content when open is false', () => {
     render(
-      <CustomDrawer anchor="right" open title="Test Drawer" onClose={handleClose}>
-        <p>Content</p>
+      <CustomDrawer open={false} anchor="right" title="t" onClose={() => {}}>
+        body
       </CustomDrawer>,
-    )
-    // CloseOutlinedIcon is inside an IconButton; find it via role button near the title
-    const buttons = screen.getAllByRole('button')
-    await user.click(buttons[0])
-    expect(handleClose).toHaveBeenCalledOnce()
-  })
-
-  it('does not render close button when title is not provided', () => {
-    render(
-      <CustomDrawer anchor="right" open onClose={vi.fn()}>
-        <p>No title content</p>
-      </CustomDrawer>,
-    )
-    expect(screen.queryByRole('button')).not.toBeInTheDocument()
-  })
-})
+    );
+    expect(screen.queryByText('body')).not.toBeInTheDocument();
+  });
+});

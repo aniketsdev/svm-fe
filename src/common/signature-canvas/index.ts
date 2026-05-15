@@ -1,2 +1,2 @@
-export { default as SignatureCanvas } from './SignatureCanvas';
-export type { SignatureCanvasRef } from './SignatureCanvas';
+export { default as SignatureCanvas, SignatureCanvas as SignatureCanvasNamed } from './SignatureCanvas';
+export type { SignatureCanvasProps, SignatureCanvasRef } from './SignatureCanvas';

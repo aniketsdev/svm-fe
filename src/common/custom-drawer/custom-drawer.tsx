@@ -1,164 +1,135 @@
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
-import {
-  Drawer,
-  Grid,
-  IconButton,
-  Typography,
-  useMediaQuery,
-  useTheme,
-  Box,
-} from "@mui/material";
-import { drawerHeader, gridHeader } from "./custom-drawer.widgets";
-import { palette } from '../../../theme/palette';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { X } from 'lucide-react';
+import type { CSSProperties, PropsWithChildren } from 'react';
+import { cn } from '../../lib/cn';
 
-interface DrawerProps {
-  anchor: "left" | "top" | "right" | "bottom";
+type DrawerAnchor = 'left' | 'top' | 'right' | 'bottom';
+type DrawerWidth = string | Partial<Record<'xs' | 'sm' | 'md' | 'lg' | 'xl', string>>;
+
+export interface DrawerProps {
+  anchor: DrawerAnchor;
   open: boolean;
   title?: string;
-  drawerWidth?: string | Partial<Record<'xs' | 'sm' | 'md' | 'lg' | 'xl', string>>;
+  drawerWidth?: DrawerWidth;
   drawermargin?: string;
   drawerPadding?: string;
-  headerPadding?: string; // Separate padding for header
+  /** Padding for the header region only. */
+  headerPadding?: string;
   onClose?: () => void;
+  /** Legacy `mt` passthrough (margin-top) for the header. */
   headerStyle?: string;
-  titleStyle?: React.CSSProperties;
+  titleStyle?: CSSProperties;
+  className?: string;
 }
 
-const CustomDrawer = (props: React.PropsWithChildren<DrawerProps>) => {
-  const theme = useTheme();
-  const { drawerWidth, drawermargin, drawerPadding, headerPadding } = props;
-  const belowLg = useMediaQuery(theme.breakpoints.down("lg")) && !drawerWidth;
-  const below768 = useMediaQuery("(max-width:768px)");
-  const below480 = useMediaQuery("(max-width:480px)");
+function widthString(w?: DrawerWidth): string | undefined {
+  if (!w) return undefined;
+  if (typeof w === 'string') return w;
+  return w.md ?? w.lg ?? w.sm ?? w.xs ?? w.xl ?? Object.values(w)[0];
+}
 
-  // Calculate responsive width
-  const getDrawerWidth = () => {
-    if (props.drawerWidth) return props.drawerWidth;
-    if (props.anchor === 'right' || props.anchor === 'left') {
-      if (below480) return '100vw'; // Full width on very small screens
-      if (below768) return '90vw';  // 90% width on mobile
-      if (belowLg) return '50vw';   // 50% width on tablet
-      return '40vw';                // 40% width on desktop
-    }
-    return 'auto';
+const CustomDrawer = ({
+  anchor,
+  open,
+  title,
+  drawerWidth,
+  drawermargin,
+  drawerPadding,
+  headerPadding,
+  onClose,
+  headerStyle,
+  titleStyle,
+  className,
+  children,
+}: PropsWithChildren<DrawerProps>) => {
+  const slideClasses: Record<DrawerAnchor, string> = {
+    right: 'right-0 top-0 h-full max-h-screen translate-x-0 data-[state=closed]:translate-x-full data-[state=open]:translate-x-0',
+    left: 'left-0 top-0 h-full max-h-screen translate-x-0 data-[state=closed]:-translate-x-full data-[state=open]:translate-x-0',
+    top: 'left-0 top-0 w-full data-[state=closed]:-translate-y-full data-[state=open]:translate-y-0',
+    bottom: 'bottom-0 left-0 w-full data-[state=closed]:translate-y-full data-[state=open]:translate-y-0',
   };
 
+  // Responsive default sizing: full screen on phones, narrower on larger screens.
+  const sizeStyle: CSSProperties = (() => {
+    const w = widthString(drawerWidth);
+    if (anchor === 'right' || anchor === 'left') {
+      return { width: w ?? undefined, maxWidth: '100vw' };
+    }
+    return { height: w ?? 'auto' };
+  })();
+
+  const defaultPad = drawerPadding ?? '24px';
+
   return (
-    <Drawer
-      anchor={props.anchor}
-      open={props.open}
-      variant="temporary"
-      ModalProps={{
-        keepMounted: true, // Better open performance on mobile.
-        // Avoid "Blocked aria-hidden on focused element" a11y warning when focus is inside drawer content
-        disableEnforceFocus: true,
-      }}
-      slotProps={{
-        root: {
-          "aria-hidden": false,
-        },
-      }}
-      sx={{
-        zIndex: theme.zIndex.drawer + 200,
-        '& .MuiDrawer-paper': {
-          zIndex: theme.zIndex.drawer + 200,
-          position: 'fixed',
-          top: 0,
-          height: '100vh',
-          width: getDrawerWidth(),
-          maxWidth: '100vw', // Ensure it never exceeds viewport width
-          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)', // Smooth width transition
-          // Mobile-specific improvements
-          '@media (max-width: 768px)': {
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)', // Enhanced shadow for mobile
-          },
-          '@media (max-width: 480px)': {
-            boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)', // Even stronger shadow for very small screens
-          },
-        },
-        '& .MuiBackdrop-root': {
-          zIndex: theme.zIndex.drawer + 199,
-          // Enhanced backdrop for mobile
-          '@media (max-width: 768px)': {
-            backgroundColor: 'rgba(0, 0, 0, 0.6)', // Darker backdrop on mobile
-          },
-        }
+    <DialogPrimitive.Root
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onClose?.();
       }}
     >
-      <Grid
-        container
-        flexDirection={"column"}
-        height={"100%"}
-        flexWrap={"nowrap"}
-        sx={{ margin: drawermargin }}
-      >
-        {props.title && (
-          <Grid
-            container
-            sx={{
-              ...gridHeader,
-              alignItems: "center",
-              justifyContent: "space-between",
-              mt: props.headerStyle,
-              paddingLeft: below768 ? "15px" : (headerPadding || drawerPadding || "24px"),
-              paddingRight: below768 ? "15px" : (headerPadding || drawerPadding || "24px"),
-              paddingTop: "10px",
-              paddingBottom: "10px",
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay
+          data-slot="overlay"
+          className="fixed inset-0 z-50 bg-foreground/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out"
+        />
+        <DialogPrimitive.Content
+          data-slot="content"
+          data-anchor={anchor}
+          style={sizeStyle}
+          className={cn(
+            'fixed z-50 flex flex-col overflow-hidden bg-background shadow-xl transition-transform',
+            // Default sensible widths per breakpoint when consumer didn't set one.
+            !drawerWidth && (anchor === 'left' || anchor === 'right') && 'w-full sm:w-[90vw] md:w-[50vw] lg:w-[40vw]',
+            slideClasses[anchor],
+            className,
+          )}
+        >
+          {title && (
+            <header
+              data-slot="header"
+              className="flex items-center justify-between border-b border-border"
+              style={{
+                marginTop: headerStyle,
+                paddingLeft: headerPadding ?? defaultPad,
+                paddingRight: headerPadding ?? defaultPad,
+                paddingTop: 10,
+                paddingBottom: 10,
+              }}
+            >
+              <DialogPrimitive.Title
+                data-slot="title"
+                className="text-base font-semibold leading-tight sm:text-lg md:text-xl"
+                style={titleStyle}
+              >
+                {title}
+              </DialogPrimitive.Title>
+              <DialogPrimitive.Close asChild>
+                <button
+                  type="button"
+                  aria-label="Close drawer"
+                  onClick={onClose}
+                  className="rounded p-1 text-muted-foreground hover:bg-secondary"
+                >
+                  <X aria-hidden className="size-4" />
+                </button>
+              </DialogPrimitive.Close>
+            </header>
+          )}
+          <div
+            data-slot="body"
+            className="flex-1 overflow-auto"
+            style={{
+              padding: defaultPad,
+              margin: drawermargin,
             }}
           >
-            <Grid>
-              <Typography
-                sx={{
-                  ...drawerHeader,
-                  fontSize: { xs: '17px !important', sm: '18px !important', md: '20px !important' },
-                  lineHeight: '1.3 !important',
-                  letterSpacing: '0.0075em',
-                  fontWeight: 600,
-                  color: palette.text.primary,
-                  ...props.titleStyle,
-                }}
-              >
-                {props.title}
-              </Typography>
-            </Grid>
-            <Grid>
-              <IconButton 
-                onClick={props.onClose}
-                sx={{
-                  padding: "4px",
-                  color: palette.text.secondary,
-                  "&:hover": {
-                    backgroundColor: "rgba(0, 0, 0, 0.04)",
-                  },
-                }}
-              >
-                <CloseOutlinedIcon />
-              </IconButton>
-            </Grid>
-          </Grid>
-        )}
-        <Box
-          sx={{
-            mt: 2,
-            flex: 1,
-            width: "100%", // Use full width of the drawer
-            paddingX: below768
-              ? "15px"
-              : drawerPadding
-                ? drawerPadding
-                : "50px",
-            overflowX: "hidden",
-            overflowY: "auto",
-            height: "calc(100vh - 120px)", // Account for header height
-            boxSizing: "border-box", // Include padding in width calculation
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', // Smooth transition for content
-          }}
-        >
-          {props.children}
-        </Box>
-      </Grid>
-    </Drawer>
+            {children}
+          </div>
+        </DialogPrimitive.Content>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 };
 
 export default CustomDrawer;
+export { CustomDrawer };

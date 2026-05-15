@@ -1,14 +1,7 @@
-export { default as CustomFileUpload } from './custom-fileupload';
+export { default as CustomFileUpload, CustomFileUpload as CustomFileUploadNamed } from './custom-fileupload';
 export type {
+  CustomFileUploadProps,
   FileItem,
-  CustomFileUploadProps
-} from './custom-fileupload';
-export type {
   FileUploadType,
   FileUploadSize,
-  FileUploadState,
-} from './custom-fileupload-styles';
-export {
-  getFileUploadStyles,
-  customFileUploadStyles
-} from './custom-fileupload-styles';
+} from './custom-fileupload';

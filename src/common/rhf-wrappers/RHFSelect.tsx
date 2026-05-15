@@ -1,33 +1,38 @@
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
-import { type SelectChangeEvent } from '@mui/material';
-import CustomSelect from '../custom-select/custom-select';
+import { CustomSelect, type CustomSelectProps } from '../custom-select';
+import { CustomLabel } from '../custom-label';
 
-type CustomSelectProps = React.ComponentProps<typeof CustomSelect>;
-
-interface RHFSelectProps<T extends FieldValues>
-  extends Omit<CustomSelectProps, 'value' | 'onChange' | 'hasError' | 'errorMessage' | 'name'> {
-  name: Path<T>;
-  control: Control<T>;
+export interface RHFSelectProps<TFieldValues extends FieldValues>
+  extends Omit<
+    CustomSelectProps,
+    'value' | 'onChange' | 'hasError' | 'errorMessage' | 'name'
+  > {
+  name: Path<TFieldValues>;
+  control?: Control<TFieldValues>;
+  label?: React.ReactNode;
+  required?: boolean;
 }
 
-export function RHFSelect<T extends FieldValues>({
-  name,
-  control,
-  ...rest
-}: RHFSelectProps<T>) {
+export function RHFSelect<TFieldValues extends FieldValues>(
+  props: RHFSelectProps<TFieldValues>,
+) {
+  const { name, control, label, required, ...rest } = props;
   return (
     <Controller
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <CustomSelect
-          {...rest}
-          name={name}
-          value={field.value ?? ''}
-          onChange={(e: SelectChangeEvent<string>) => field.onChange(e.target.value)}
-          hasError={!!fieldState.error}
-          errorMessage={fieldState.error?.message}
-        />
+        <div className="flex w-full flex-col">
+          {label && <CustomLabel label={label} htmlFor={name} isRequired={required} />}
+          <CustomSelect
+            {...rest}
+            name={field.name}
+            value={(field.value as string | undefined) ?? ''}
+            onChange={(e) => field.onChange(e.target.value)}
+            hasError={Boolean(fieldState.error)}
+            errorMessage={fieldState.error?.message}
+          />
+        </div>
       )}
     />
   );

@@ -1,73 +1,57 @@
-# React + TypeScript + Vite
+# svm-fe
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend for the SVM project. React 19 + TypeScript + Vite + Tailwind CSS 4.
 
-Currently, two official plugins are available:
+## Quick links
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Component library quickstart**:
+  [`specs/001-mui-to-tailwind-migration/quickstart.md`](../specs/001-mui-to-tailwind-migration/quickstart.md)
+  — how to use the components in `src/common/`, the canonical Zod + RHF form
+  pattern, TanStack Query wiring, toast usage, and the dev-only component
+  library page at `#__component-library`.
+- **Component contracts (Props APIs)**:
+  [`specs/001-mui-to-tailwind-migration/contracts/`](../specs/001-mui-to-tailwind-migration/contracts/)
+- **Project constitution**:
+  [`.specify/memory/constitution.md`](../.specify/memory/constitution.md)
+  — the five frontend principles (custom components, Tailwind-only, Zod+RHF
+  type-safe forms, project-structure discipline, mobile-first responsive).
 
-## React Compiler
+## Common scripts
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun dev          # start the Vite dev server
+bun run build    # type-check + production build
+bun run test     # run the Vitest suite once
+bun run test:watch  # watch mode
+bun run lint     # ESLint (bans @mui/* and @emotion/* imports)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Open the component library
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun dev
+# then visit:
+http://localhost:5173/#__component-library
 ```
+
+The route only exists when `import.meta.env.DEV` is true; production builds
+never expose it.
+
+## Project structure
+
+```text
+src/
+├── common/         # The migrated component library (25 components + 15 RHF wrappers).
+├── lib/            # Shared helpers (cn, query-client).
+├── pages/
+│   └── __component-library/   # Dev-only component library demo page.
+├── App.tsx
+├── main.tsx
+└── index.css       # @import "tailwindcss" + @theme design tokens.
+```
+
+---
+
+(Vite template documentation removed — see the Vite + Tailwind v4 docs for
+upstream details. The project is fully wired and ready to use; no extra
+configuration is required to add components.)

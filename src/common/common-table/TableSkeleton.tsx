@@ -1,135 +1,89 @@
-import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Skeleton,
-  Box,
-} from '@mui/material';
-import { 
-  heading, 
-  tableCellCss, 
-  tableContainerCss,
-  skeletonRowCss,
-  skeletonCellCss 
-} from './widgets/common-table-widgets';
+import { cn } from '../../lib/cn';
 
-interface TableHeader {
+export interface TableHeader {
   id: string;
   label: string;
   width: string;
 }
 
-interface TableSkeletonProps {
+export interface TableSkeletonProps {
   headers: TableHeader[];
   rowCount?: number;
   hasCheckbox?: boolean;
   hasAvatar?: boolean;
   hasActions?: boolean;
+  className?: string;
 }
 
-const TableSkeleton: React.FC<TableSkeletonProps> = ({
+const Pulse = ({ className }: { className?: string }) => (
+  <span className={cn('inline-block animate-pulse rounded bg-secondary', className)} />
+);
+
+const TableSkeleton = ({
   headers,
   rowCount = 5,
   hasCheckbox = true,
   hasAvatar = true,
   hasActions = true,
-}) => {
-  const renderSkeletonCell = (header: TableHeader, index: number) => {
-    // Checkbox column
+  className,
+}: TableSkeletonProps) => {
+  const renderCell = (header: TableHeader, index: number) => {
     if (header.id === 'select' || (hasCheckbox && index === 0)) {
-      return (
-        <Skeleton
-          variant="rectangular"
-          width={16}
-          height={16}
-          sx={{ borderRadius: '4px' }}
-        />
-      );
+      return <Pulse className="size-4 rounded" />;
     }
-
-    // Avatar + text column (usually client name)
     if (hasAvatar && (header.id === 'clientName' || index === 2)) {
       return (
-        <Box display="flex" alignItems="center" gap="12px">
-          <Skeleton variant="circular" width={32} height={32} />
-          <Box display="flex" flexDirection="column" gap="4px" flex={1}>
-            <Skeleton variant="text" width="80%" height={16} />
-            <Skeleton variant="text" width="60%" height={12} />
-          </Box>
-        </Box>
+        <div className="flex items-center gap-3">
+          <Pulse className="size-8 rounded-full" />
+          <div className="flex flex-1 flex-col gap-1">
+            <Pulse className="h-3 w-4/5" />
+            <Pulse className="h-2.5 w-3/5" />
+          </div>
+        </div>
       );
     }
-
-    // Actions column
     if (header.id === 'actions' || (hasActions && index === headers.length - 1)) {
       return (
-        <Box display="flex" gap="16px" alignItems="center">
-          <Skeleton variant="rectangular" width={70} height={32} sx={{ borderRadius: '6px' }} />
-          <Skeleton variant="rectangular" width={80} height={32} sx={{ borderRadius: '6px' }} />
-        </Box>
+        <div className="flex items-center gap-3">
+          <Pulse className="h-8 w-16 rounded-md" />
+          <Pulse className="h-8 w-20 rounded-md" />
+        </div>
       );
     }
-
-    // Regular text columns
-    const textWidth = header.id === 'treatmentDescription' ? '90%' : 
-                     header.id === 'clientId' ? '70%' : 
-                     header.id === 'code' ? '50%' : '75%';
-
-    return <Skeleton variant="text" width={textWidth} height={16} />;
+    return <Pulse className="h-3 w-3/4" />;
   };
 
   return (
-    <TableContainer sx={tableContainerCss}>
-      <Table stickyHeader aria-label="table skeleton" sx={{ ...tableCellCss, tableLayout: 'fixed', width: '100%' }}>
-        <colgroup>
-          {headers.map((header) => (
-            <col key={header.id} style={{ width: header.width }} />
-          ))}
-        </colgroup>
-        <TableHead>
-          <TableRow>
+    <div className={cn('overflow-x-auto', className)}>
+      <table className="w-full text-left text-sm" aria-label="loading table">
+        <thead className="bg-secondary/50">
+          <tr>
             {headers.map((header) => (
-              <TableCell
+              <th
                 key={header.id}
-                sx={{
-                  ...heading,
-                  width: header.width,
-                  minWidth: header.width,
-                }}
-                align="left"
+                style={{ width: header.width }}
+                className="border-b border-border px-4 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
               >
-                {header.id === 'select' ? (
-                  <Skeleton
-                    variant="rectangular"
-                    width={16}
-                    height={16}
-                    sx={{ borderRadius: '4px' }}
-                  />
-                ) : (
-                  <Skeleton variant="text" width="60%" height={14} />
-                )}
-              </TableCell>
+                {header.id === 'select' ? <Pulse className="size-4 rounded" /> : <Pulse className="h-3 w-3/5" />}
+              </th>
             ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
+          </tr>
+        </thead>
+        <tbody>
           {Array.from({ length: rowCount }).map((_, rowIndex) => (
-            <TableRow key={`skeleton-row-${rowIndex}`} sx={skeletonRowCss}>
+            <tr key={`skeleton-row-${rowIndex}`} className="border-b border-border/60 last:border-b-0">
               {headers.map((header, cellIndex) => (
-                <TableCell key={`skeleton-cell-${rowIndex}-${cellIndex}`} sx={skeletonCellCss}>
-                  {renderSkeletonCell(header, cellIndex)}
-                </TableCell>
+                <td key={`skeleton-cell-${rowIndex}-${cellIndex}`} className="px-4 py-3">
+                  {renderCell(header, cellIndex)}
+                </td>
               ))}
-            </TableRow>
+            </tr>
           ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+        </tbody>
+      </table>
+    </div>
   );
 };
 
 export default TableSkeleton;
+export { TableSkeleton };

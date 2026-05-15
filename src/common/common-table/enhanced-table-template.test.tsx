@@ -1,48 +1,63 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@/test/test-utils'
-import EnhancedTableTemplate from './enhanced-table-template'
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { CommonTable, type ColumnDef } from './enhanced-table-template';
 
-describe('EnhancedTableTemplate', () => {
-  it('renders all column headers', () => {
-    render(<EnhancedTableTemplate />)
-    expect(screen.getByText('Client ID')).toBeInTheDocument()
-    expect(screen.getByText('Client Name')).toBeInTheDocument()
-    expect(screen.getByText('Type')).toBeInTheDocument()
-    expect(screen.getByText('Code')).toBeInTheDocument()
-    expect(screen.getByText('Treatment Description')).toBeInTheDocument()
-    expect(screen.getByText('Reason')).toBeInTheDocument()
-    expect(screen.getByText('Actions')).toBeInTheDocument()
-  })
+interface Row {
+  id: string;
+  name: string;
+  age: number;
+}
 
-  it('renders row data from initialData prop', () => {
-    const testData = [
-      {
-        id: '1',
-        clientId: 'CLI001',
-        clientName: 'Alice Smith',
-        type: 'Individual',
-        code: '2001',
-        treatmentDescription: 'Initial Assessment',
-        reason: 'Probation',
-      },
-    ]
-    render(<EnhancedTableTemplate initialData={testData} />)
-    expect(screen.getByText('CLI001')).toBeInTheDocument()
-    expect(screen.getByText('Alice Smith')).toBeInTheDocument()
-    expect(screen.getByText('Individual')).toBeInTheDocument()
-    expect(screen.getByText('2001')).toBeInTheDocument()
-    expect(screen.getByText('Initial Assessment')).toBeInTheDocument()
-    expect(screen.getByText('Probation')).toBeInTheDocument()
-  })
+const data: Row[] = [
+  { id: '1', name: 'Alice', age: 30 },
+  { id: '2', name: 'Bob', age: 25 },
+  { id: '3', name: 'Carol', age: 41 },
+];
 
-  it('shows "No data available" when initialData is empty', () => {
-    render(<EnhancedTableTemplate initialData={[]} />)
-    expect(screen.getByText('No data available')).toBeInTheDocument()
-  })
+const columns: ColumnDef<Row, unknown>[] = [
+  { accessorKey: 'name', header: 'Name' },
+  { accessorKey: 'age', header: 'Age' },
+];
 
-  it('renders default mock data when no initialData is provided', () => {
-    render(<EnhancedTableTemplate />)
-    // Default mock data includes "Leon Kennedy"
-    expect(screen.getByText('Leon Kennedy')).toBeInTheDocument()
-  })
-})
+describe('CommonTable', () => {
+  it('renders headers + rows', () => {
+    render(<CommonTable columns={columns} data={data} />);
+    expect(screen.getByText('Name')).toBeInTheDocument();
+    expect(screen.getByText('Age')).toBeInTheDocument();
+    expect(screen.getByText('Alice')).toBeInTheDocument();
+    expect(screen.getByText('Bob')).toBeInTheDocument();
+    expect(screen.getByText('Carol')).toBeInTheDocument();
+  });
+
+  it('renders the empty state when data is empty', () => {
+    render(<CommonTable columns={columns} data={[]} emptyState="Nothing here." />);
+    expect(screen.getByText('Nothing here.')).toBeInTheDocument();
+  });
+
+  it('renders the skeleton when loading', () => {
+    render(<CommonTable columns={columns} data={data} loading />);
+    expect(screen.getByLabelText('loading table')).toBeInTheDocument();
+    expect(screen.queryByText('Alice')).not.toBeInTheDocument();
+  });
+
+  it('fires onRowClick with the original row', async () => {
+    const user = userEvent.setup();
+    const onRowClick = vi.fn();
+    render(<CommonTable columns={columns} data={data} onRowClick={onRowClick} />);
+    await user.click(screen.getByText('Alice'));
+    expect(onRowClick).toHaveBeenCalledWith(data[0]);
+  });
+
+  it('renders pagination when enablePagination is true and pages exist', () => {
+    render(
+      <CommonTable
+        columns={columns}
+        data={data}
+        enablePagination
+        pageSize={2}
+      />,
+    );
+    expect(screen.getByRole('navigation', { name: /pagination/i })).toBeInTheDocument();
+  });
+});

@@ -1,20 +1,17 @@
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
 import dayjs, { type Dayjs } from 'dayjs';
-import DatePickerField from '../date-picker-field/date-picker-field';
+import { DatePickerField, type DatePickerProps } from '../date-picker-field';
 
-type DatePickerProps = React.ComponentProps<typeof DatePickerField>;
-
-interface RHFDatePickerProps<T extends FieldValues>
-  extends Omit<DatePickerProps, 'value' | 'onChange' | 'hasError' | 'errorMessage'> {
-  name: Path<T>;
-  control: Control<T>;
+export interface RHFDatePickerProps<TFieldValues extends FieldValues>
+  extends Omit<DatePickerProps, 'value' | 'onChange' | 'hasError' | 'errorMessage' | 'name'> {
+  name: Path<TFieldValues>;
+  control?: Control<TFieldValues>;
 }
 
-export function RHFDatePicker<T extends FieldValues>({
-  name,
-  control,
-  ...rest
-}: RHFDatePickerProps<T>) {
+export function RHFDatePicker<TFieldValues extends FieldValues>(
+  props: RHFDatePickerProps<TFieldValues>,
+) {
+  const { name, control, ...rest } = props;
   return (
     <Controller
       name={name}
@@ -22,9 +19,10 @@ export function RHFDatePicker<T extends FieldValues>({
       render={({ field, fieldState }) => (
         <DatePickerField
           {...rest}
-          value={field.value ? dayjs(field.value) : null}
+          name={name}
+          value={field.value ? dayjs(field.value as string | Date) : null}
           onChange={(date: Dayjs | null) => field.onChange(date ? date.toISOString() : '')}
-          hasError={!!fieldState.error}
+          hasError={Boolean(fieldState.error)}
           errorMessage={fieldState.error?.message}
         />
       )}

@@ -1,33 +1,40 @@
-import { type ChangeEvent } from 'react';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
-import CustomInput from '../custom-input/custom-input';
+import { CustomInput, type CustomInputProps } from '../custom-input';
+import { CustomLabel } from '../custom-label';
 
-type CustomInputProps = React.ComponentProps<typeof CustomInput>;
-
-interface RHFInputProps<T extends FieldValues>
-  extends Omit<CustomInputProps, 'value' | 'onChange' | 'hasError' | 'errorMessage' | 'name'> {
-  name: Path<T>;
-  control: Control<T>;
+export interface RHFInputProps<TFieldValues extends FieldValues>
+  extends Omit<
+    CustomInputProps,
+    'value' | 'onChange' | 'hasError' | 'errorMessage' | 'name'
+  > {
+  name: Path<TFieldValues>;
+  control?: Control<TFieldValues>;
+  /** Optional label rendered above the input via `CustomLabel`. */
+  label?: React.ReactNode;
 }
 
-export function RHFInput<T extends FieldValues>({
-  name,
-  control,
-  ...rest
-}: RHFInputProps<T>) {
+export function RHFInput<TFieldValues extends FieldValues>(
+  props: RHFInputProps<TFieldValues>,
+) {
+  const { name, control, label, required, ...rest } = props;
   return (
     <Controller
       name={name}
       control={control}
       render={({ field, fieldState }) => (
-        <CustomInput
-          {...rest}
-          name={name}
-          value={field.value ?? ''}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => field.onChange(e.target.value)}
-          hasError={!!fieldState.error}
-          errorMessage={fieldState.error?.message}
-        />
+        <div className="flex w-full flex-col">
+          {label && <CustomLabel label={label} htmlFor={name} isRequired={required} />}
+          <CustomInput
+            {...rest}
+            required={required}
+            name={field.name}
+            id={name}
+            value={(field.value as string | number | undefined) ?? ''}
+            onChange={(e) => field.onChange(e.target.value)}
+            hasError={Boolean(fieldState.error)}
+            errorMessage={fieldState.error?.message}
+          />
+        </div>
       )}
     />
   );

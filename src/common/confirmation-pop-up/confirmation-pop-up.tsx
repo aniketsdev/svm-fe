@@ -1,106 +1,74 @@
-import { Button, Grid, Typography } from "@mui/material";
-import CustomDialog from "../custom-dialog/custom-dialog";
-import React from "react";
-import { palette } from '../../../theme/palette';
+import type { CSSProperties, ReactNode } from 'react';
+import { CustomDialog } from '../custom-dialog';
+import { CustomButton } from '../custom-buttons';
 
-type ConfirmationPopUpProps = {
+export interface ConfirmationPopUpProps {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  message: string | React.ReactNode;
-  sx?: object;
-  /** Disable the confirm button when true */
+  message: ReactNode;
+  sx?: CSSProperties;
+  /** Disable the confirm button when true. */
   confirmDisabled?: boolean;
-  /** Optional error/helper message shown under the main message */
+  /** Optional error/helper message shown under the main message. */
   errorMessage?: string | null;
-};
+  /** Optional override for the dialog title (default: "Confirm"). */
+  title?: ReactNode;
+  /** Optional override for the confirm button label. */
+  confirmLabel?: string;
+  /** Optional override for the cancel button label. */
+  cancelLabel?: string;
+  /** When true, renders the confirm button in the destructive variant. */
+  destructive?: boolean;
+}
 
-const ConfirmationPopUp = (props: ConfirmationPopUpProps) => {
-  const { open, onClose, onConfirm, message, sx } = props;
-  const { confirmDisabled, errorMessage } = props;
+const ConfirmationPopUp = ({
+  open,
+  onClose,
+  onConfirm,
+  message,
+  sx,
+  confirmDisabled,
+  errorMessage,
+  title = 'Confirm',
+  confirmLabel = 'Confirm',
+  cancelLabel = 'Cancel',
+  destructive = false,
+}: ConfirmationPopUpProps) => {
   return (
     <CustomDialog
-      width={{ xs: '90vw', sm: 480 }}
-      title={"Confirm"}
+      title={title}
       open={open}
       onClose={() => onClose()}
+      width={480}
       sx={sx}
     >
-      <Grid container flexDirection={"column"} rowGap={2}>
-        <Typography variant="subtitle1">
-          {message || "Do you really want to go ahead with this operation?"}
-        </Typography>
-        {errorMessage ? (
-          <Typography variant="body2" sx={{ color: "error.main" }}>
-            {errorMessage}
-          </Typography>
-        ) : null}
-        <Grid
-          container
-          width={"100%"}
-          justifyContent={"flex-end"}
-          columnGap={1}
-        >
-          <Button
-            variant="contained"
-            onClick={() => onConfirm()}
-            disabled={!!confirmDisabled}
-            sx={{
-              backgroundColor: palette.primary.main,
-              color: palette.solid.white,
-              border: "none",
-              borderRadius: "6px",
-              padding: "4px 14px",
-              minWidth: "auto",
-              textTransform: "none",
-              fontWeight: 500,
-              fontSize: "16px",
-              height: "38px",
-              "&:hover": {
-                backgroundColor: palette.primary.dark,
-              },
-              "&:focus-visible": {
-                outline: `2px solid ${palette.primary.main}`,
-                outlineOffset: "2px",
-              },
-              "&:disabled": {
-                backgroundColor: palette.neutral["20"],
-                color: palette.solid.white,
-              },
-            }}
-          >
-            Confirm
-          </Button>
-          <Button
-            variant="outlined"
+      <div className="flex flex-col gap-4">
+        <p className="text-sm leading-relaxed">
+          {message || 'Do you really want to go ahead with this operation?'}
+        </p>
+        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
+        <div className="flex flex-wrap justify-end gap-2">
+          <CustomButton
+            type="button"
+            variant="outline"
             onClick={() => onClose()}
-            sx={{
-              backgroundColor: palette.solid.white,
-              color: palette.neutral["60"],
-              border: `1px solid ${palette.neutral["20"]}`,
-              borderRadius: "6px",
-              padding: "4px 14px",
-              minWidth: "auto",
-              textTransform: "none",
-              fontWeight: 500,
-              fontSize: "16px",
-              height: "38px",
-              "&:hover": {
-                backgroundColor: palette.neutral["00"],
-                borderColor: palette.neutral["40"],
-              },
-              "&:focus-visible": {
-                outline: `2px solid ${palette.primary.main}`,
-                outlineOffset: "2px",
-              },
-            }}
           >
-            Cancel
-          </Button>
-        </Grid>
-      </Grid>
+            {cancelLabel}
+          </CustomButton>
+          <CustomButton
+            type="button"
+            variant={destructive ? 'destructive' : 'primary'}
+            disabled={Boolean(confirmDisabled)}
+            onClick={() => onConfirm()}
+          >
+            {confirmLabel}
+          </CustomButton>
+        </div>
+      </div>
     </CustomDialog>
   );
 };
 
 export default ConfirmationPopUp;
+export { ConfirmationPopUp };

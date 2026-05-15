@@ -1,83 +1,48 @@
-// Common Snackbar
-export { default as CommonSnackbar } from './common-snackbar/common-snackbar';
+/**
+ * Barrel export for the `svm-fe/src/common/` component library.
+ *
+ * Re-exports are added phase-by-phase as each user-story slice of the
+ * MUI → Tailwind migration lands. See:
+ *   - specs/001-mui-to-tailwind-migration/tasks.md
+ *   - specs/001-mui-to-tailwind-migration/contracts/
+ *
+ * Until a component is migrated, its line stays commented out so consumers
+ * importing from `@/common` don't pick up a half-broken legacy module.
+ */
 
-// User Avatar (image + initials + loading)
-export { UserAvatar } from './user-avatar/user-avatar';
-export type { UserAvatarProps } from './user-avatar/user-avatar';
+// Shared types
+export type { BaseFormInputProps } from './types';
 
-// Common Table
-export { default as EnhancedTableTemplate } from './common-table/enhanced-table-template';
-export { default as TableSkeleton } from './common-table/TableSkeleton';
-export * from './common-table/widgets/common-table-widgets';
+// ── Phase 3 / US1 — Core form fields (P1) ────────────────────────────────────
+export * from './custom-label';
+export * from './custom-input';
+export * from './custom-text-area';
+export * from './custom-select';
+export * from './custom-checkbox';
+export * from './custom-radio';
+export * from './custom-buttons';
+export * from './rhf-wrappers';
 
-// Confirmation Pop Up
-export { default as ConfirmationPopUp } from './confirmation-pop-up/confirmation-pop-up';
+// ── Phase 4 / US2 — Advanced inputs (P2) ─────────────────────────────────────
+export * from './custom-search';
+export * from './custom-multiselect';
+export * from './custom-auto-complete';
+export * from './custom-autocomplete-multiselect';
+export * from './country-code';
+export * from './date-picker-field';
+export * from './time-picker-field';
+export * from './custom-fileupload';
+export * from './multiple-files-upload';
+export * from './signature-canvas';
 
-// Country Code
-export { default as CountryCodeAutocomplete } from './country-code/CountryCodeAutocomplete';
+// ── Phase 5 / US3 — Overlays & feedback (P3) ─────────────────────────────────
+export * from './custom-dialog';
+export * from './custom-drawer';
+export * from './common-snackbar';
+export * from './confirmation-pop-up';
+export * from './action-menu';
 
-// Custom Auto Complete
-export { default as CustomAutoComplete } from './custom-auto-complete/custom-auto-complete';
-
-// Custom Autocomplete Multiselect
-export { default as CustomAutocompleteMultiselect } from './custom-autocomplete-multiselect/custom-autocomplete-multiselect';
-
-// Custom Buttons
-export { default as CustomButton } from './custom-buttons/custom-buttons';
-export { getButtonStyles, customButtonStyles } from './custom-buttons/custom-buttons-styles';
-
-// Custom Checkbox
-export { CustomCheckbox } from './custom-checkbox/custom-checkbox';
-export * from './custom-checkbox/custom-checkbox-styles';
-
-// Custom Dialog
-export { default as CustomDialog } from './custom-dialog/custom-dialog';
-
-// Custom Drawer
-export { default as CustomDrawer } from './custom-drawer/custom-drawer';
-
-// Custom File Upload
-export { default as CustomFileUpload } from './custom-fileupload/custom-fileupload';
-export { getFileUploadStyles, customFileUploadStyles } from './custom-fileupload/custom-fileupload-styles';
-
-// Custom Input
-export { default as CustomInput } from './custom-input/custom-input';
-
-// Custom Label
-export { default as CustomLabel } from './custom-label/custom-label';
-
-// Custom Multiselect
-export { default as CustomMultiSelect } from './custom-multiselect/custom-multiselect';
-
-// Custom Radio
-export { CustomRadio } from './custom-radio/custom-radio';
-export {
-  RadioContainer,
-  RadioDot,
-  RadioWithTextContainer,
-} from './custom-radio/custom-radio-styles';
-
-// Custom Search
-export { default as CustomSearchFilter } from './custom-search/custom-search-filter';
-
-// Custom Select
-export { default as CustomSelect } from './custom-select/custom-select';
-
-// Custom Text Area
-export { default as CustomTextArea } from './custom-text-area/custom-textarea';
-
-// Date Picker
-export { default as DatePickerField } from './date-picker-field/date-picker-field';
-
-// Multiple Files Upload
-export { default as CsvFileUpload } from './multiple-files-upload/csv-file-uploads';
-export { default as MultipleFilesUpload } from './multiple-files-upload/multiple-files-upload';
-
-// Pagination
-export { default as Paginator } from './pagination/pagination';
-
-// Signature Canvas
-export { default as SignatureCanvas } from './signature-canvas/SignatureCanvas';
-
-// Time Picker
-export { default as TimePickerField } from './time-picker-field/time-picker-field';
+// ── Phase 6 / US4 — Data display (P4) ────────────────────────────────────────
+export * from './pagination';
+export * from './user-avatar';
+export * from './common-table';

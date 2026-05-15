@@ -1,19 +1,16 @@
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
-import { CustomCheckbox } from '../custom-checkbox/custom-checkbox';
+import { CustomCheckbox, type CustomCheckboxProps } from '../custom-checkbox';
 
-type CustomCheckboxProps = React.ComponentProps<typeof CustomCheckbox>;
-
-interface RHFCheckboxProps<T extends FieldValues>
-  extends Omit<CustomCheckboxProps, 'checked' | 'onChange'> {
-  name: Path<T>;
-  control: Control<T>;
+export interface RHFCheckboxProps<TFieldValues extends FieldValues>
+  extends Omit<CustomCheckboxProps, 'checked' | 'onChange' | 'name'> {
+  name: Path<TFieldValues>;
+  control?: Control<TFieldValues>;
 }
 
-export function RHFCheckbox<T extends FieldValues>({
-  name,
-  control,
-  ...rest
-}: RHFCheckboxProps<T>) {
+export function RHFCheckbox<TFieldValues extends FieldValues>(
+  props: RHFCheckboxProps<TFieldValues>,
+) {
+  const { name, control, ...rest } = props;
   return (
     <Controller
       name={name}
@@ -21,8 +18,10 @@ export function RHFCheckbox<T extends FieldValues>({
       render={({ field }) => (
         <CustomCheckbox
           {...rest}
-          checked={!!field.value}
-          onChange={(checked: boolean) => field.onChange(checked)}
+          id={name}
+          name={field.name}
+          checked={Boolean(field.value)}
+          onChange={(next) => field.onChange(next)}
         />
       )}
     />

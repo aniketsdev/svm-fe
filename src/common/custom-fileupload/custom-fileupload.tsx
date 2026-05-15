@@ -1,17 +1,10 @@
-import React, { useState, useRef, useCallback, type DragEvent } from "react";
-import { Box, Typography, IconButton } from "@mui/material";
-import {
-  CloudUpload,
-  Delete,
-  FileUpload,
-  AttachFile,
-} from "@mui/icons-material";
-import {
-  getFileUploadStyles,
-  type FileUploadType,
-  type FileUploadSize,
-} from "./custom-fileupload-styles";
-import { palette } from '../../../theme/palette';
+import { Paperclip, CloudUpload, File as FileIcon, Trash2, Upload } from 'lucide-react';
+import { useCallback, type CSSProperties, type ReactNode } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { cn } from '../../lib/cn';
+
+export type FileUploadType = 'default' | 'drag-drop' | 'button' | 'icon';
+export type FileUploadSize = 'sm' | 'md' | 'lg';
 
 export interface FileItem {
   id: string;
@@ -34,18 +27,34 @@ export interface CustomFileUploadProps {
   multiple?: boolean;
   accept?: string;
   maxFiles?: number;
-  maxFileSize?: number; // in bytes
+  maxFileSize?: number; // bytes
   hasError?: boolean;
   errorMessage?: string;
   helperText?: string;
   placeholder?: string;
   buttonText?: string;
   className?: string;
-  sx?: React.CSSProperties;
+  sx?: CSSProperties;
   showFileList?: boolean;
   showProgress?: boolean;
   allowDragDrop?: boolean;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+}
+
+function matchesAccept(file: File, accept: string): boolean {
+  return accept.split(',').some((spec) => {
+    const t = spec.trim();
+    if (t.startsWith('.')) return file.name.toLowerCase().endsWith(t.toLowerCase());
+    return Boolean(file.type.match(t.replace('*', '.*')));
+  });
 }
 
 export default function CustomFileUpload({
@@ -53,382 +62,167 @@ export default function CustomFileUpload({
   onFilesChange,
   onFileAdd,
   onFileRemove,
-  type = "default",
-  size = "md",
+  type = 'default',
+  size = 'md',
   disabled = false,
   multiple = false,
   accept,
   maxFiles = 10,
-  maxFileSize = 10 * 1024 * 1024, // 10MB default
+  maxFileSize = 10 * 1024 * 1024,
   hasError = false,
   errorMessage,
   helperText,
-  placeholder = "Click to upload or drag and drop files here",
-  buttonText = "Choose Files",
+  placeholder = 'Click to upload or drag and drop files here',
+  buttonText = 'Choose Files',
   className,
   sx,
   showFileList = true,
-  showProgress: _showProgress = true,
   allowDragDrop = true,
   icon,
 }: CustomFileUploadProps) {
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const styles = getFileUploadStyles(type, size);
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
-  const validateFile = (file: File): string | undefined => {
-    if (file.size > maxFileSize) {
-      return `File size must be less than ${formatFileSize(maxFileSize)}`;
-    }
-    if (
-      accept &&
-      !accept.split(",").some((type) => {
-        const trimmedType = type.trim();
-        if (trimmedType.startsWith(".")) {
-          return file.name.toLowerCase().endsWith(trimmedType.toLowerCase());
-        }
-        return file.type.match(trimmedType.replace("*", ".*"));
-      })
-    ) {
-      return "File type not allowed";
-    }
-    return undefined;
-  };
-
-  const createFileItem = (file: File): FileItem => {
-    const error = validateFile(file);
-    return {
-      id: `${file.name}-${Date.now()}-${Math.random()}`,
-      file,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      progress: error ? undefined : 0,
-      error,
-    };
-  };
-
-  const handleFileSelect = useCallback(
-    (selectedFiles: FileList | null) => {
-      if (!selectedFiles || disabled) return;
-
-      const newFiles: FileItem[] = [];
-      const fileArray = Array.from(selectedFiles);
-
-      // Check max files limit
-      if (files.length + fileArray.length > maxFiles) {
-        // Maximum files limit reached
-        // You could show a toast notification here
-        return;
-      }
-
-      fileArray.forEach((file) => {
-        const fileItem = createFileItem(file);
-        newFiles.push(fileItem);
+  const onDrop = useCallback(
+    (accepted: File[]) => {
+      if (disabled) return;
+      if (files.length + accepted.length > maxFiles) return;
+      const next: FileItem[] = accepted.map((f) => {
+        let error: string | undefined;
+        if (f.size > maxFileSize) error = `File size must be less than ${formatFileSize(maxFileSize)}`;
+        else if (accept && !matchesAccept(f, accept)) error = 'File type not allowed';
+        return {
+          id: `${f.name}-${Date.now()}-${Math.random()}`,
+          file: f,
+          name: f.name,
+          size: f.size,
+          type: f.type,
+          progress: error ? undefined : 0,
+          error,
+        };
       });
-
-      const updatedFiles = [...files, ...newFiles];
-      onFilesChange?.(updatedFiles);
-
-      newFiles.forEach((fileItem) => {
-        if (!fileItem.error) {
-          onFileAdd?.(fileItem);
-        }
+      const updated = [...files, ...next];
+      onFilesChange?.(updated);
+      next.forEach((item) => {
+        if (!item.error) onFileAdd?.(item);
       });
     },
     [files, disabled, maxFiles, maxFileSize, accept, onFilesChange, onFileAdd],
   );
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileSelect(event.target.files);
-    // Reset input value to allow selecting the same file again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple,
+    disabled,
+    noDrag: !allowDragDrop,
+    accept: accept ? { 'application/octet-stream': accept.split(',').map((s) => s.trim()) } : undefined,
+  });
 
-  const handleDragOver = (event: DragEvent<HTMLElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (!disabled && allowDragDrop) {
-      setIsDragOver(true);
-    }
-  };
-
-  const handleDragLeave = (event: DragEvent<HTMLElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (event: DragEvent<HTMLElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setIsDragOver(false);
-
-    if (disabled || !allowDragDrop) return;
-
-    const droppedFiles = event.dataTransfer.files;
-    handleFileSelect(droppedFiles);
-  };
-
-  const handleRemoveFile = (fileId: string) => {
+  const remove = (id: string) => {
     if (disabled) return;
-
-    const updatedFiles = files.filter((file) => file.id !== fileId);
-    onFilesChange?.(updatedFiles);
-    onFileRemove?.(fileId);
+    onFilesChange?.(files.filter((f) => f.id !== id));
+    onFileRemove?.(id);
   };
 
-  const handleClick = (e: React.MouseEvent) => {
-    // Only stop propagation if we're actually going to open the file dialog
-    if (!disabled && fileInputRef.current) {
-      e.stopPropagation();
-      fileInputRef.current.click();
-    }
-  };
+  const dropzoneClasses = cn(
+    'group flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-input bg-background text-sm text-foreground transition-colors',
+    'hover:border-ring hover:bg-secondary/30',
+    isDragActive && 'border-ring bg-secondary/40',
+    hasError && 'border-destructive',
+    disabled && 'cursor-not-allowed opacity-60',
+    size === 'sm' && 'p-3',
+    size === 'md' && 'p-6',
+    size === 'lg' && 'p-10',
+  );
 
-  const handleFocus = () => {
-    if (!disabled) {
-      setIsFocused(true);
-    }
-  };
-
-  const handleBlur = () => {
-    setIsFocused(false);
-  };
-
-  const renderUploadArea = () => {
-    const currentStyles = {
-      ...styles.uploadArea,
-      ...(isDragOver && styles.uploadAreaHover),
-      ...(isFocused && styles.uploadAreaFocus),
-      ...(hasError && styles.uploadAreaError),
-      ...(disabled && styles.uploadAreaDisabled),
-    };
-
-    const labelStyles = {
-      ...styles.label,
-      ...(isDragOver && styles.labelHover),
-      ...(disabled && styles.labelDisabled),
-    };
-
-    const iconStyles = {
-      ...styles.icon,
-      ...(isDragOver && styles.iconHover),
-      ...(disabled && styles.iconDisabled),
-    };
-
-    if (size === "sm" && (type === "default" || type === "drag-drop")) {
-      return (
-        <Box
-          sx={currentStyles}
-          onClick={handleClick}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          }}
-        >
-          {icon || <CloudUpload sx={{ ...iconStyles, color: palette.secondary.main }} />}
-          <Typography sx={{ ...labelStyles, color: palette.secondary.main }}>
-            {placeholder || "Upload Signature"}
-          </Typography>
-        </Box>
-      );
-    }
-
-    if (type === "button") {
-      const buttonStyles = {
-        ...styles.button,
-        ...(isDragOver && styles.buttonHover),
-        ...(isFocused && styles.buttonFocus),
-        ...(disabled && styles.buttonDisabled),
-      };
-
+  const renderArea = () => {
+    if (type === 'button') {
       return (
         <button
-          style={buttonStyles}
-          onClick={handleClick}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
+          type="button"
           disabled={disabled}
+          {...getRootProps({ className: cn('inline-flex h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60', className) })}
         >
-          {icon || <FileUpload />}
-          <Typography sx={{ marginLeft: icon ? "8px" : 0, color: "inherit" }}>
-            {buttonText}
-          </Typography>
+          <input {...getInputProps()} />
+          {icon ?? <Upload aria-hidden className="size-4" />}
+          {buttonText}
         </button>
       );
     }
-
-    if (type === "icon") {
+    if (type === 'icon') {
       return (
-        <Box
-          sx={currentStyles}
-          onClick={handleClick}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          {icon || <AttachFile sx={iconStyles} />}
-        </Box>
+        <div {...getRootProps({ className: cn('inline-flex size-11 cursor-pointer items-center justify-center rounded-md border border-input bg-background hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-60', className) })}>
+          <input {...getInputProps()} />
+          {icon ?? <Paperclip aria-hidden className="size-5" />}
+        </div>
       );
     }
-
-    // Default and drag-drop types - Updated to match the image design
+    if (size === 'sm' && (type === 'default' || type === 'drag-drop')) {
+      return (
+        <div {...getRootProps({ className: cn(dropzoneClasses, 'flex-row gap-2 text-primary'), style: sx })}>
+          <input {...getInputProps()} />
+          {icon ?? <CloudUpload aria-hidden className="size-4" />}
+          <span className="font-medium">{placeholder || 'Upload'}</span>
+        </div>
+      );
+    }
     return (
-      <Box
-        sx={currentStyles}
-        onClick={handleClick}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onMouseDown={(e) => {
-          // Prevent the drawer from closing when clicking on the upload area
-          e.stopPropagation();
-        }}
-      >
-        {/* Upload Icon with circular background */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "64px",
-            height: "64px",
-            borderRadius: "50%",
-            backgroundColor: palette.secondary['05'],
-            marginBottom: "16px",
-          }}
-        >
-          {icon || (
-            <CloudUpload
-              sx={{ ...iconStyles, fontSize: "28px", color: palette.primary.main }}
-            />
-          )}
-        </Box>
-
-        {/* Main text with color-coded parts */}
-        <Box sx={{ textAlign: "center", marginBottom: "8px" }}>
-          <Typography sx={labelStyles}>
-            <span style={{ color: palette.primary.main }}>Click to upload</span>
-            <span style={{ color: palette.neutral['40'] }}> or drag and drop</span>
-          </Typography>
-        </Box>
-
-        {/* File type specifications - only show if helperText is not provided */}
-        {!helperText && accept && (
-          <Typography sx={styles.helperText}>
-            {accept.replace(/\./g, "").toUpperCase()}, PNG, JPG or GIF (max.
-            800x400px)
-          </Typography>
+      <div {...getRootProps({ className: cn(dropzoneClasses, className), style: sx })}>
+        <input {...getInputProps()} />
+        <span className="mb-4 flex size-16 items-center justify-center rounded-full bg-secondary text-primary">
+          {icon ?? <CloudUpload aria-hidden className="size-7" />}
+        </span>
+        <p className="text-center">
+          <span className="font-medium text-primary">Click to upload</span>
+          <span className="text-muted-foreground"> or drag and drop</span>
+        </p>
+        {!helperText && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            {(accept ? accept.replace(/\./g, '').toUpperCase() : 'SVG, PNG, JPG or GIF')} (max {formatFileSize(maxFileSize)})
+          </p>
         )}
-        {!helperText && !accept && (
-          <Typography sx={styles.helperText}>
-            SVG, PNG, JPG or GIF (max. 800x400px)
-          </Typography>
-        )}
-        {helperText && (
-          <Typography sx={styles.helperText}>{helperText}</Typography>
-        )}
-      </Box>
-    );
-  };
-
-  const renderFileList = () => {
-    if (!showFileList || files.length === 0) return null;
-
-    return (
-      <Box sx={styles.fileList}>
-        {files.map((fileItem) => (
-          <Box key={fileItem.id} sx={styles.fileItem}>
-            <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
-              <Typography sx={styles.fileName}>{fileItem.name}</Typography>
-              <Typography sx={styles.fileSize}>
-                {formatFileSize(fileItem.size)}
-              </Typography>
-            </Box>
-
-            {/* {showProgress && fileItem.progress !== undefined && (
-              <Box sx={styles.progressBar}>
-                <Box 
-                  sx={{
-                    ...styles.progressFill,
-                    width: `${fileItem.progress}%`
-                  }}
-                />
-              </Box>
-            )} */}
-
-            {fileItem.error && (
-              <Typography sx={styles.errorMessage}>{fileItem.error}</Typography>
-            )}
-
-            <IconButton
-              sx={styles.removeButton}
-              onClick={() => handleRemoveFile(fileItem.id)}
-              disabled={disabled}
-              size="small"
-            >
-              <Delete fontSize="small" />
-            </IconButton>
-          </Box>
-        ))}
-      </Box>
+        {helperText && <p className="mt-1 text-xs text-muted-foreground">{helperText}</p>}
+      </div>
     );
   };
 
   return (
-    <Box sx={{ ...styles.container, ...sx }} className={className}>
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple={multiple}
-        accept={accept}
-        onChange={handleInputChange}
-        style={styles.input}
-        disabled={disabled}
-      />
+    <div className="flex w-full flex-col gap-3">
+      {renderArea()}
 
-      {renderUploadArea()}
-
-      {renderFileList()}
+      {showFileList && files.length > 0 && (
+        <ul className="flex flex-col gap-2" data-slot="file-list">
+          {files.map((f) => (
+            <li
+              key={f.id}
+              className={cn(
+                'flex items-center gap-3 rounded-md border border-border bg-background p-2 text-sm',
+                f.error && 'border-destructive',
+              )}
+            >
+              <FileIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+              <span className="flex-1 truncate" title={f.name}>{f.name}</span>
+              <span className="text-xs text-muted-foreground">{formatFileSize(f.size)}</span>
+              {f.error && <span className="text-xs text-destructive">{f.error}</span>}
+              <button
+                type="button"
+                onClick={() => remove(f.id)}
+                disabled={disabled}
+                aria-label={`Remove ${f.name}`}
+                className="rounded p-1 text-muted-foreground hover:bg-secondary disabled:opacity-50"
+              >
+                <Trash2 aria-hidden className="size-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {hasError && errorMessage && (
-        <Typography sx={styles.errorMessage}>{errorMessage}</Typography>
+        <p role="alert" className="text-xs leading-tight text-destructive">{errorMessage}</p>
       )}
-
-      {!hasError && helperText && (
-        <Typography sx={styles.helperText}>{helperText}</Typography>
+      {!hasError && helperText && type !== 'default' && type !== 'drag-drop' && (
+        <p className="text-xs text-muted-foreground">{helperText}</p>
       )}
-    </Box>
+    </div>
   );
 }
+
+export { CustomFileUpload };

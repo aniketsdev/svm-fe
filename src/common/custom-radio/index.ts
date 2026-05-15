@@ -1,3 +1,2 @@
-export { CustomRadio } from './custom-radio';
-export type { CustomRadioProps } from './custom-radio';
-export * from './custom-radio-styles';
+export { CustomRadio, CustomRadioGroup, default } from './custom-radio';
+export type { CustomRadioProps, CustomRadioGroupProps, RadioOption } from './custom-radio';

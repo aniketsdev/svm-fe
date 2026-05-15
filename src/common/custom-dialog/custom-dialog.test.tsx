@@ -1,58 +1,51 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@/test/test-utils'
-import userEvent from '@testing-library/user-event'
-import CustomDialog from './custom-dialog'
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { CustomDialog } from './custom-dialog';
 
 describe('CustomDialog', () => {
-  it('renders content when open is true', () => {
+  it('renders the title and children when open', () => {
     render(
-      <CustomDialog title="Test Dialog" open onClose={vi.fn()}>
-        <p>Dialog content</p>
+      <CustomDialog title="Hello" open onClose={() => {}}>
+        <p>body</p>
       </CustomDialog>,
-    )
-    expect(screen.getByText('Test Dialog')).toBeInTheDocument()
-    expect(screen.getByText('Dialog content')).toBeInTheDocument()
-  })
+    );
+    expect(screen.getByText('Hello')).toBeInTheDocument();
+    expect(screen.getByText('body')).toBeInTheDocument();
+  });
 
-  it('does not render content when open is false', () => {
+  it('does not render content when closed', () => {
     render(
-      <CustomDialog title="Test Dialog" open={false} onClose={vi.fn()}>
-        <p>Hidden content</p>
+      <CustomDialog title="Hello" open={false} onClose={() => {}}>
+        <p>body</p>
       </CustomDialog>,
-    )
-    // MUI Dialog unmounts content when closed (no keepMounted)
-    expect(screen.queryByText('Hidden content')).not.toBeInTheDocument()
-  })
+    );
+    expect(screen.queryByText('body')).not.toBeInTheDocument();
+  });
 
-  it('calls onClose when close button is clicked', async () => {
-    const handleClose = vi.fn()
-    const user = userEvent.setup()
+  it('fires onClose when the close button is clicked', async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
     render(
-      <CustomDialog title="Test Dialog" open onClose={handleClose}>
-        <p>Content</p>
+      <CustomDialog title="Hello" open onClose={onClose}>
+        body
       </CustomDialog>,
-    )
-    await user.click(screen.getByLabelText('close'))
-    expect(handleClose).toHaveBeenCalledOnce()
-  })
+    );
+    await user.click(screen.getByRole('button', { name: /close/i }));
+    expect(onClose).toHaveBeenCalled();
+  });
 
-  it('calls onClose when backdrop is clicked', async () => {
-    const handleClose = vi.fn()
-    const user = userEvent.setup()
+  it('fires onClose with reason="escapeKeyDown" when Escape is pressed', async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
     render(
-      <CustomDialog title="Test Dialog" open onClose={handleClose}>
-        <p>Content</p>
+      <CustomDialog title="Hello" open onClose={onClose}>
+        body
       </CustomDialog>,
-    )
-    // Click the MUI backdrop to trigger onClose (simulates dismiss outside dialog)
-    const backdrop = document.querySelector('.MuiBackdrop-root') as HTMLElement
-    if (backdrop) {
-      await user.click(backdrop)
-      expect(handleClose).toHaveBeenCalled()
-    } else {
-      // Fallback: close button
-      await user.click(screen.getByLabelText('close'))
-      expect(handleClose).toHaveBeenCalled()
-    }
-  })
-})
+    );
+    await user.keyboard('{Escape}');
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    const args = onClose.mock.calls[0];
+    expect(args[1]).toBe('escapeKeyDown');
+  });
+});

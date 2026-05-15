@@ -1,66 +1,60 @@
-import { Grid } from "@mui/material";
-import * as React from "react";
-import { useState } from "react";
-// import { SEARCH } from "../../../../constant/constants";
-import CustomInput from "../custom-input/custom-input";
-import {
-  btnContainer,
-  // btnStyle,
-  filterSearchBox,
-} from "./widgets/custom-search-styles";
+import { useEffect, useState, type ChangeEvent } from 'react';
+import { CustomInput } from '../custom-input';
+import { cn } from '../../lib/cn';
 
-interface SearchFilterProps {
+export interface SearchFilterProps {
   textData: {
     placeholder: string;
+    /** Reserved for legacy compatibility. The migrated component does not render a separate search button. */
     btnTitle: string;
   };
+  /** Fires (debounced) with the current input value. */
   onSearch?: (value: string) => void;
+  /** Wrapper width passthrough (Tailwind-friendly e.g. `"24rem"` or `"100%"`). */
   width?: string;
+  /** Render a search icon on the left. */
   hasStartSearchIcon?: boolean;
+  /** Move the search icon to the right side. */
   startSearchIconOnRight?: boolean;
+  /** Debounce in ms before `onSearch` fires. */
+  debounceMs?: number;
+  /** Allow callers to clear the field; defaults to true. */
+  clearable?: boolean;
+  className?: string;
 }
 
-const SearchFilter: React.FC<SearchFilterProps> = (props) => {
-  const [inputValue, setInputValue] = useState("");
+const SearchFilter = ({
+  textData,
+  onSearch,
+  width,
+  hasStartSearchIcon,
+  startSearchIconOnRight,
+  debounceMs = 300,
+  className,
+}: SearchFilterProps) => {
+  const [inputValue, setInputValue] = useState('');
 
-  // const handleSearch = () => {
-  //   props.onSearch && props.onSearch(inputValue);
-  // };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e?.target?.value || "");
-  };
+  useEffect(() => {
+    if (!onSearch) return;
+    const t = setTimeout(() => onSearch(inputValue), debounceMs);
+    return () => clearTimeout(t);
+  }, [inputValue, onSearch, debounceMs]);
 
   return (
-    <>
-      <Grid>
-        <Grid container sx={btnContainer}>
-          <Grid sx={filterSearchBox}>
-            <Grid width={props.width ? props.width : "13rem"}>
-              <CustomInput
-                name="search"
-                placeholder={props.textData.placeholder}
-                onChange={handleInputChange}
-                value={inputValue}
-                bgWhite
-                hasStartSearchIcon={props.hasStartSearchIcon}
-                startSearchIconOnRight={props.startSearchIconOnRight}
-              />
-            </Grid>
-            {/* <Grid>
-              <Button
-                variant={"contained"}
-                onClick={handleSearch}
-                sx={{ ...btnStyle }}
-              >
-                {SEARCH}
-              </Button>
-            </Grid> */}
-          </Grid>
-        </Grid>
-      </Grid>
-    </>
+    <div className={cn('flex items-center', className)} style={width ? { width } : undefined}>
+      <CustomInput
+        name="search"
+        placeholder={textData.placeholder}
+        value={inputValue}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
+        bgWhite
+        hasStartSearchIcon={hasStartSearchIcon}
+        startSearchIconOnRight={startSearchIconOnRight}
+        className={width ? undefined : 'w-52'}
+      />
+    </div>
   );
 };
 
 export default SearchFilter;
+export { SearchFilter as CustomSearch };

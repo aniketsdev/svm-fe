@@ -1,66 +1,72 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@/test/test-utils'
-import userEvent from '@testing-library/user-event'
-import CustomInput from './custom-input'
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { CustomInput } from './custom-input';
 
 const baseProps = {
   name: 'test-input',
   placeholder: 'Enter value',
   value: '',
   onChange: vi.fn(),
-}
+};
 
 describe('CustomInput', () => {
-  it('renders placeholder text', () => {
-    render(<CustomInput {...baseProps} placeholder="Type here" />)
-    expect(screen.getByPlaceholderText('Type here')).toBeInTheDocument()
-  })
+  it('renders with placeholder and name', () => {
+    render(<CustomInput {...baseProps} />);
+    const input = screen.getByPlaceholderText('Enter value');
+    expect(input).toHaveAttribute('name', 'test-input');
+  });
 
-  it('displays current value', () => {
-    render(<CustomInput {...baseProps} value="hello" />)
-    const input = screen.getByPlaceholderText('Enter value') as HTMLInputElement
-    expect(input.value).toBe('hello')
-  })
+  it('fires onChange with the new value as the user types', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<CustomInput {...baseProps} onChange={onChange} />);
+    await user.type(screen.getByPlaceholderText('Enter value'), 'a');
+    expect(onChange).toHaveBeenCalled();
+    expect(onChange.mock.calls.at(-1)?.[0].target.value).toBe('a');
+  });
 
-  it('calls onChange when typed into', async () => {
-    const handleChange = vi.fn()
-    const user = userEvent.setup()
-    render(<CustomInput {...baseProps} onChange={handleChange} />)
-    const input = screen.getByPlaceholderText('Enter value')
-    await user.type(input, 'a')
-    expect(handleChange).toHaveBeenCalled()
-  })
-
-  it('shows error message when hasError is true', () => {
+  it('marks the field aria-invalid and renders the error message when hasError is true', () => {
     render(
       <CustomInput
         {...baseProps}
         hasError
         errorMessage="This field is required"
       />,
-    )
-    expect(screen.getByText('This field is required')).toBeInTheDocument()
-  })
+    );
+    const input = screen.getByPlaceholderText('Enter value');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input).toHaveAttribute('aria-describedby');
+    expect(screen.getByRole('alert')).toHaveTextContent('This field is required');
+  });
 
-  it('does not show error message when hasError is false', () => {
-    render(
-      <CustomInput
-        {...baseProps}
-        hasError={false}
-        errorMessage="This field is required"
-      />,
-    )
-    expect(screen.queryByText('This field is required')).not.toBeInTheDocument()
-  })
+  it('toggles password visibility when isPassword is true', async () => {
+    const user = userEvent.setup();
+    render(<CustomInput {...baseProps} isPassword />);
+    const input = screen.getByPlaceholderText('Enter value');
+    expect(input).toHaveAttribute('type', 'password');
 
-  it('renders as disabled when disableField is true', () => {
-    render(<CustomInput {...baseProps} disableField />)
-    const input = screen.getByPlaceholderText('Enter value') as HTMLInputElement
-    expect(input.disabled).toBe(true)
-  })
+    await user.click(screen.getByRole('button', { name: /show password/i }));
+    expect(input).toHaveAttribute('type', 'text');
 
-  it('renders placeholder when value is empty', () => {
-    render(<CustomInput {...baseProps} value="" placeholder="Placeholder text" />)
-    expect(screen.getByPlaceholderText('Placeholder text')).toBeInTheDocument()
-  })
-})
+    await user.click(screen.getByRole('button', { name: /hide password/i }));
+    expect(input).toHaveAttribute('type', 'password');
+  });
+
+  it('disables the input when disableField is true', () => {
+    render(<CustomInput {...baseProps} disableField />);
+    expect(screen.getByPlaceholderText('Enter value')).toBeDisabled();
+  });
+
+  it('formats a phone number for display while sending clean digits to onChange', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(<CustomInput {...baseProps} phone onChange={onChange} />);
+    const input = screen.getByPlaceholderText('Enter value');
+    await user.type(input, '5551234567');
+    // The display value reflects the formatted phone number…
+    expect((input as HTMLInputElement).value).toContain('(555)');
+    // …and the most recent onChange payload carries just the digits.
+    expect(onChange.mock.calls.at(-1)?.[0].target.value).toBe('5551234567');
+  });
+});

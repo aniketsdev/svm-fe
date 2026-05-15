@@ -1,42 +1,23 @@
-import { Grid, Typography, CircularProgress, Checkbox, Box, Avatar, InputAdornment } from "@mui/material";
-import Autocomplete from "@mui/material/Autocomplete";
-import TextField from "@mui/material/TextField";
-import { useEffect, useState, useCallback, useMemo, memo } from "react";
-import type { ChangeEvent, SyntheticEvent } from "react";
+import * as PopoverPrimitive from '@radix-ui/react-popover';
+import { Command as CommandPrimitive } from 'cmdk';
+import { Loader2, Search, X } from 'lucide-react';
+import { memo, useEffect, useMemo, useState } from 'react';
+import { cn } from '../../lib/cn';
 
-// Custom debounce hook
-const useDebounce = (value: string, delay: number): string => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
-};
-import SearchIcon from "@mui/icons-material/Search";
-import "./custom-autocomplete-multiselect.css";
-import { palette } from '../../../theme/palette';
-
-type OptionType = {
+export interface AutocompleteMultiselectOption {
   key: string;
   value: string;
   hide?: boolean;
-};
+}
 
-type CustomAutocompleteMultiselectProps = {
-  options: OptionType[];
+export interface CustomAutocompleteMultiselectProps {
+  options: AutocompleteMultiselectOption[];
+  /** Array of selected keys. */
   value: string[];
-  onChange: (selectedValue: string[]) => void;
+  onChange: (selectedKeys: string[]) => void;
   placeholder: string;
-  hasError?: boolean;
   limitTags: number;
+  hasError?: boolean;
   errorMessage?: string;
   onDebounceCall?: (selectedValue: string) => void;
   onInputEmpty?: () => void;
@@ -45,380 +26,197 @@ type CustomAutocompleteMultiselectProps = {
   loading?: boolean;
   isDisabled?: boolean;
   hideArrow?: boolean;
-  menuProps?: {
-    PaperProps?: {
-      style?: {
-        maxHeight: number;
-        width: number | string;
-        zIndex?: number;
-      };
-    };
-  };
-};
+  debounceMs?: number;
+  className?: string;
+}
 
-const CustomAutocompleteMultiselect = memo(({
+const COLORS = [
+  '#2196F3', '#4CAF50', '#F44336', '#FF9800',
+  '#9C27B0', '#00BCD4', '#E91E63', '#795548',
+];
+
+function initialOf(name: string): { letter: string; color: string } {
+  const trimmed = name.trim();
+  const letter = trimmed.charAt(0).toUpperCase() || '?';
+  const color = COLORS[name.charCodeAt(0) % COLORS.length];
+  return { letter, color };
+}
+
+const CustomAutocompleteMultiselect = memo(function CustomAutocompleteMultiselect({
   options,
   value,
-  limitTags,
-  placeholder,
   onChange,
-  onDebounceCall,
-  onInputEmpty,
-  hideArrow,
-  hasStartSearchIcon,
-  loading,
+  placeholder,
+  limitTags,
   hasError,
   errorMessage,
-  isDisabled,
+  onDebounceCall,
+  onInputEmpty,
   onClick,
-  menuProps,
-}: CustomAutocompleteMultiselectProps) => {
+  hasStartSearchIcon,
+  loading,
+  isDisabled,
+  hideArrow,
+  debounceMs = 1000,
+  className,
+}: CustomAutocompleteMultiselectProps) {
+  const [input, setInput] = useState('');
+  const [open, setOpen] = useState(false);
 
-  const [selectedOptionState, setSelectedOptionState] = useState("");
-  const selectedOptionDebounce = useDebounce(selectedOptionState, 1000);
+  // Selected options preserving order.
+  const selectedOptions = useMemo(
+    () => value.map((k) => options.find((o) => o.key === k)).filter((o): o is AutocompleteMultiselectOption => Boolean(o)),
+    [value, options],
+  );
 
-  const handleChange = useCallback((
-    _event: SyntheticEvent<Element, Event>,
-    newValue: string[],
-  ) => {
-    // newValue is an array of selected option values (strings)
-    // We need to find the corresponding keys from the options array
-    const selectedKeys: string[] = [];
-    
-    // Ensure we only process valid selections
-    if (!Array.isArray(newValue)) {
-      onChange([]);
-      return;
-    }
-    
-    newValue.forEach((selectedValue: string) => {
-      if (selectedValue && typeof selectedValue === 'string' && selectedValue.trim() !== '') {
-        const matchingOption = options.find((opt: OptionType) => opt.value === selectedValue && opt.value.trim() !== '');
-        if (matchingOption && matchingOption.key) {
-          // Avoid duplicate keys
-          if (!selectedKeys.includes(matchingOption.key)) {
-            selectedKeys.push(matchingOption.key);
-          }
-        }
-      }
-    });
-    
-    // Ensure we don't accidentally return all options
-    if (selectedKeys.length > options.length) {
-      onChange([]);
-      return;
-    }
-    
-    onChange(selectedKeys);
-  }, [options, onChange]);
+  // Visible (non-hidden, non-selected, filtered) options.
+  const visibleOptions = useMemo(() => {
+    const q = input.toLowerCase();
+    return options.filter((o) => !o.hide && !value.includes(o.key) && o.value.toLowerCase().includes(q));
+  }, [options, input, value]);
 
-  const [preSelectedValues, setPreSelectedValues] = useState<string[]>([]);
-
+  // Debounced search callback.
   useEffect(() => {
-    // Map the selected keys (IDs) back to their corresponding values (names)
-    const selectedValues = options
-      .filter((opt: OptionType) => opt.key && opt.value && value.includes(opt.key))
-      .map((opt: OptionType) => opt.value)
-      .filter((val: string) => val && val.trim() !== ''); // Remove any empty values
-    
-    setPreSelectedValues(selectedValues);
-  }, [value, options]);
+    if (!onDebounceCall) return;
+    const t = setTimeout(() => {
+      if (input.length > 3 || input === '') onDebounceCall(input);
+    }, debounceMs);
+    return () => clearTimeout(t);
+  }, [input, onDebounceCall, debounceMs]);
 
-  // Get display placeholder based on selected count
-  const displayPlaceholder = useMemo(() => {
-    return placeholder;
-  }, [placeholder]);
+  const remove = (key: string) => onChange(value.filter((k) => k !== key));
+  const add = (key: string) => onChange([...value, key]);
 
-  // Remove unused useEffect
-
-  const handleTextChange = useCallback((
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const newValue = event.target.value || "";
-    if (newValue === "") {
-      onInputEmpty?.();
-    }
-    setSelectedOptionState(newValue);
-  }, [onInputEmpty]);
-
-  useEffect(() => {
-    if (
-      selectedOptionDebounce &&
-      (selectedOptionDebounce.length > 3 || selectedOptionDebounce === "")
-    ) {
-      onDebounceCall?.(selectedOptionDebounce);
-    }
-  }, [selectedOptionDebounce, onDebounceCall]);
-
-  const inputStyles = useMemo(() => ({
-    background: "inherit",
-    border: "none",
-    borderRadius: "4px",
-    "& .MuiOutlinedInput-root": {
-      "& fieldset": {
-        border: "none",
-      },
-      "&:hover fieldset": {
-        border: "none",
-      },
-      "&.Mui-focused fieldset": {
-        border: "none",
-      },
-    },
-    "& .MuiAutocomplete-inputRoot": {
-      border: "none !important",
-      borderRadius: "4px !important",
-      "&:hover": {
-        border: "none !important",
-      },
-    },
-  }), []);
-
-  const sxStyles = useMemo(() => hasError
-    ? {
-        ...inputStyles,
-        ...errorBorder,
-      }
-    : {
-        ...inputStyles,
-      }, [hasError, inputStyles]);
-
-  // Check if we're inside a drawer by looking for drawer classes in the DOM
-  const isInsideDrawer = typeof window !== 'undefined' && 
-    document.querySelector('.MuiDrawer-root') !== null;
-
-  // Default componentsProps for popper with proper z-index and positioning
-  const maxHeight = menuProps?.PaperProps?.style?.maxHeight || 300;
-  const defaultComponentsProps = {
-    popper: {
-      sx: {
-        zIndex: isInsideDrawer ? 1500 : 1500, // Reasonable z-index
-        // Target the listbox inside the popper to control scrolling
-        '& .MuiAutocomplete-listbox': {
-          maxHeight: maxHeight,
-          overflowY: 'auto', // Only the listbox should scroll
-          '&::-webkit-scrollbar': {
-            width: '8px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: 'transparent',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: palette.neutral['20'],
-            borderRadius: '4px',
-            '&:hover': {
-              background: palette.neutral['40'],
-            },
-          },
-        },
-      },
-    },
-    paper: {
-      sx: {
-        maxHeight: maxHeight,
-        width: menuProps?.PaperProps?.style?.width || 'auto',
-        backgroundColor: 'white',
-        boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.15)',
-        overflow: 'hidden', // Prevent paper from scrolling - only listbox scrolls
-        ...(menuProps?.PaperProps?.style?.zIndex && { zIndex: menuProps.PaperProps.style.zIndex }),
-      },
-    },
-    listbox: {
-      sx: {
-        maxHeight: maxHeight,
-        overflowY: 'auto', // Only the listbox should scroll, not the paper
-        padding: 0,
-        '&::-webkit-scrollbar': {
-          width: '8px',
-        },
-        '&::-webkit-scrollbar-track': {
-          background: 'transparent',
-        },
-        '&::-webkit-scrollbar-thumb': {
-          background: palette.neutral['20'],
-          borderRadius: '4px',
-          '&:hover': {
-            background: palette.neutral['40'],
-          },
-        },
-      },
-    },
-  };
+  const visibleTags = selectedOptions.slice(0, limitTags);
+  const hiddenTagCount = selectedOptions.length - visibleTags.length;
 
   return (
-    <>
-      <Autocomplete
-        multiple
-        limitTags={limitTags}
-        className={hideArrow ? "custom-autocomplete" : ""}
-        loading={loading}
-        onChange={handleChange}
-        value={preSelectedValues}
-        id="multiple-limit-tags"
-        disablePortal={isInsideDrawer} // Disable portal when inside drawer to render within drawer context
-        componentsProps={defaultComponentsProps}
-        options={useMemo(() => {
-          const filtered = options.filter((option: OptionType) => !option.hide);
-          const mapped = filtered.map((option: OptionType) => option.value);
-          return mapped;
-        }, [options])}
-        getOptionLabel={(option) => option}
-        isOptionEqualToValue={(option, value) => option === value}
-        renderTags={() => null} // Hide chips in the input field
-        renderOption={(props, option, { selected }) => {
-          const { key, ...otherProps } = props;
-          
-          // Extract first letter of first name from the option (full name)
-          const getInitial = (fullName: string): string => {
-            if (!fullName || fullName.trim().length === 0) return '';
-            const trimmed = fullName.trim();
-            // Get first character and convert to uppercase
-            return trimmed.charAt(0).toUpperCase();
-          };
-          
-          const initial = getInitial(option);
-          
-          // Generate avatar color based on name
-          const colors = [
-            "#2196F3", // Blue
-            "#4CAF50", // Green
-            "#F44336", // Red
-            "#FF9800", // Orange
-            "#9C27B0", // Purple
-            "#00BCD4", // Cyan
-            "#E91E63", // Pink
-            "#795548", // Brown
-          ];
-          const colorIndex = option.charCodeAt(0) % colors.length;
-          const avatarColor = colors[colorIndex];
-          
-          return (
-            <Box
-              component="li"
-              {...otherProps}
-              key={key}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                cursor: "pointer",
-              }}
-            >
-              <Checkbox
-                checked={selected}
-                sx={{
-                  color: palette.secondary.main,
-                  "&.Mui-checked": {
-                    color: palette.secondary.main,
-                  },
-                  padding: "4px",
-                  pointerEvents: "none", // Prevent checkbox from intercepting clicks
-                }}
-              />
-              <Avatar
-                sx={{
-                  width: 20,
-                  height: 20,
-                  backgroundColor: avatarColor,
-                  color: "#FFFFFF",
-                  fontSize: "10px",
-                  fontWeight: 500,
-                  marginRight: "4px",
-                }}
-              >
-                {initial}
-              </Avatar>
-              <Typography sx={{ fontSize: "14px", color: palette.neutral['80'] }}>
-                {option}
-              </Typography>
-            </Box>
-          );
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            InputProps={{
-              ...params.InputProps,
-              startAdornment: hasStartSearchIcon ? (
-                <InputAdornment 
-                  position="start"
-                  sx={{
-                    marginLeft: '12px',
-                    marginRight: '8px'
-                  }}
-                >
-                  <SearchIcon
-                    sx={{
-                      width: 18,
-                      height: 18,
-                      color: palette.neutral['50'] // Neutral/50
-                    }}
-                  />
-                </InputAdornment>
-              ) : params.InputProps.startAdornment,
-              endAdornment: (
-                <Grid container width={"fit-content"}>
-                  {loading && (
-                    <CircularProgress size={"20px"} color="inherit" />
-                  )}
-                  {params.InputProps.endAdornment}
-                </Grid>
-              ),
-            }}
-            disabled={isDisabled}
+    <div className={cn('flex w-full flex-col', className)}>
+      <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
+        <PopoverPrimitive.Anchor asChild>
+          <div
             onClick={onClick}
-            placeholder={displayPlaceholder}
-            onChange={handleTextChange}
-          />
-        )}
-        sx={{
-          ...sxStyles,
-          maxWidth: "900px",
-          "& .MuiOutlinedInput-root": {
-            height: "42px", // Match other input fields height
-            padding: hideArrow ? "6px 10px !important" : "inherit",
-            "& fieldset": {
-              border: `1px solid ${palette.neutral['10'] as string}`, // Match custom input border
-              boxShadow: "none", // Remove shadow
-            },
-            "&:hover fieldset": {
-              border: `1px solid ${palette.neutral['10'] as string}`, // Match custom input hover border
-              boxShadow: "none", // Remove shadow
-            },
-            "&.Mui-focused fieldset": {
-              boxShadow: "none", // Remove shadow
-            },
-          },
-          "& .MuiInputBase-input": {
-            padding: "8px 12px", // Match other input fields padding
-            fontSize: "16px", // Match other input fields font size
-          },
-        }}
-      />
+            className={cn(
+              'flex min-h-11 w-full flex-wrap items-center gap-1.5 rounded-md border px-3 py-1.5',
+              'border-input',
+              'focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/40',
+              hasError && 'border-destructive focus-within:border-destructive focus-within:ring-destructive/30',
+              isDisabled && 'cursor-not-allowed opacity-60',
+            )}
+          >
+            {hasStartSearchIcon && (
+              <Search aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+            )}
+            {visibleTags.map((opt) => {
+              const { letter, color } = initialOf(opt.value);
+              return (
+                <span
+                  key={opt.key}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-secondary py-0.5 pl-1 pr-2 text-xs"
+                >
+                  <span
+                    aria-hidden
+                    className="inline-flex size-5 items-center justify-center rounded-full text-[10px] font-medium text-white"
+                    style={{ backgroundColor: color }}
+                  >
+                    {letter}
+                  </span>
+                  <span className="max-w-[12rem] truncate">{opt.value}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      remove(opt.key);
+                    }}
+                    aria-label={`Remove ${opt.value}`}
+                    className="rounded p-0.5 hover:bg-background"
+                  >
+                    <X aria-hidden className="size-3" />
+                  </button>
+                </span>
+              );
+            })}
+            {hiddenTagCount > 0 && (
+              <span className="text-xs text-muted-foreground">+{hiddenTagCount} more</span>
+            )}
+            <input
+              type="text"
+              placeholder={selectedOptions.length === 0 ? placeholder : ''}
+              value={input}
+              disabled={isDisabled}
+              onFocus={() => setOpen(true)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                setOpen(true);
+                if (e.target.value === '') onInputEmpty?.();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Backspace' && input === '' && selectedOptions.length > 0) {
+                  remove(selectedOptions[selectedOptions.length - 1].key);
+                }
+              }}
+              className="min-w-[6rem] flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed"
+            />
+            {loading && (
+              <Loader2 aria-hidden className="size-4 shrink-0 animate-spin text-muted-foreground" />
+            )}
+            {!hideArrow && !loading && (
+              <span className="text-muted-foreground">▾</span>
+            )}
+          </div>
+        </PopoverPrimitive.Anchor>
+        <PopoverPrimitive.Portal>
+          <PopoverPrimitive.Content
+            sideOffset={4}
+            align="start"
+            onOpenAutoFocus={(e) => e.preventDefault()}
+            className="z-50 w-[var(--radix-popover-trigger-width)] overflow-hidden rounded-md border border-border bg-background shadow-lg"
+          >
+            <CommandPrimitive shouldFilter={false}>
+              <CommandPrimitive.List className="max-h-60 overflow-y-auto p-1">
+                {visibleOptions.length === 0 ? (
+                  <div className="px-3 py-2 text-sm text-muted-foreground">
+                    {loading ? 'Loading…' : 'No results'}
+                  </div>
+                ) : (
+                  visibleOptions.map((opt) => {
+                    const { letter, color } = initialOf(opt.value);
+                    return (
+                      <CommandPrimitive.Item
+                        key={opt.key}
+                        value={opt.value}
+                        onSelect={() => {
+                          add(opt.key);
+                          setInput('');
+                        }}
+                        className="flex cursor-pointer items-center gap-2 rounded px-3 py-1.5 text-sm data-[selected=true]:bg-secondary data-[selected=true]:outline-none"
+                      >
+                        <span
+                          aria-hidden
+                          className="inline-flex size-5 items-center justify-center rounded-full text-[10px] font-medium text-white"
+                          style={{ backgroundColor: color }}
+                        >
+                          {letter}
+                        </span>
+                        <span className="truncate">{opt.value}</span>
+                      </CommandPrimitive.Item>
+                    );
+                  })
+                )}
+              </CommandPrimitive.List>
+            </CommandPrimitive>
+          </PopoverPrimitive.Content>
+        </PopoverPrimitive.Portal>
+      </PopoverPrimitive.Root>
+
       {hasError && errorMessage && (
-        <Typography
-          sx={{
-            color: palette.negative.main,
-            marginLeft: "5px",
-            fontSize: "0.75rem",
-            lineHeight: 1.66,
-            letterSpacing: "0.03333em",
-          }}
-        >
+        <p role="alert" className="mt-1 text-xs leading-tight text-destructive">
           {errorMessage}
-        </Typography>
+        </p>
       )}
-    </>
+    </div>
   );
 });
 
-CustomAutocompleteMultiselect.displayName = 'CustomAutocompleteMultiselect';
-
-const errorBorder = {
-  "&.MuiAutocomplete-root": {
-    border: `1px solid ${palette.negative.main as string}`,
-    borderRadius: "4px",
-  },
-};
-
 export default CustomAutocompleteMultiselect;
+export { CustomAutocompleteMultiselect };

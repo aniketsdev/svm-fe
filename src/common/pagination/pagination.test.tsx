@@ -1,61 +1,62 @@
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@/test/test-utils'
-import userEvent from '@testing-library/user-event'
-import Paginator from './pagination'
+import { describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { Paginator } from './pagination';
 
 const baseProps = {
   page: 0,
   totalPages: 5,
   totalRecord: 50,
   onPageChange: vi.fn(),
-}
+};
 
 describe('Paginator', () => {
-  it('renders page range info', () => {
-    render(<Paginator {...baseProps} page={0} totalRecord={50} />)
-    // The text "1-5 of 50 Rows" is split across spans; use regex on the container text
-    expect(screen.getByText('50')).toBeInTheDocument()
-    // Confirm the paragraph containing the range info is present
-    const rowsEl = screen.getByText((_, element) => {
-      return element?.textContent?.includes('Rows') === true &&
-        element?.tagName === 'P'
-    })
-    expect(rowsEl).toBeInTheDocument()
-  })
+  it('renders nothing when totalPages is 0', () => {
+    const { container } = render(<Paginator {...baseProps} totalPages={0} />);
+    expect(container.firstChild).toBeNull();
+  });
 
-  it('calls onPageChange when next page is clicked', async () => {
-    const handlePageChange = vi.fn()
-    const user = userEvent.setup()
+  it('renders the record-range summary on sm+ viewports', () => {
+    render(<Paginator {...baseProps} page={1} defaultSize={10} />);
+    expect(screen.getByText('11-20')).toBeInTheDocument();
+    expect(screen.getByText('50')).toBeInTheDocument();
+  });
+
+  it('marks the current page with aria-current="page"', () => {
+    render(<Paginator {...baseProps} page={2} />);
+    const current = screen.getByRole('button', { name: 'Page 3' });
+    expect(current).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('fires onPageChange with the 0-based page index when a page button is clicked', async () => {
+    const user = userEvent.setup();
+    const onPageChange = vi.fn();
+    render(<Paginator {...baseProps} onPageChange={onPageChange} />);
+    await user.click(screen.getByRole('button', { name: 'Page 3' }));
+    expect(onPageChange).toHaveBeenCalledWith(expect.anything(), 2);
+  });
+
+  it('disables Previous on first page and Next on last page', () => {
+    const { rerender } = render(<Paginator {...baseProps} page={0} />);
+    expect(screen.getByRole('button', { name: /previous page/i })).toBeDisabled();
+    rerender(<Paginator {...baseProps} page={4} />);
+    expect(screen.getByRole('button', { name: /next page/i })).toBeDisabled();
+  });
+
+  it('fires onRecordsPerPageChange and resets to page 0 when the page size changes', async () => {
+    const user = userEvent.setup();
+    const onRecordsPerPageChange = vi.fn();
+    const onPageChange = vi.fn();
     render(
       <Paginator
         {...baseProps}
-        page={0}
-        totalPages={3}
-        onPageChange={handlePageChange}
+        page={2}
+        onPageChange={onPageChange}
+        onRecordsPerPageChange={onRecordsPerPageChange}
       />,
-    )
-    const nextButton = screen.getByRole('button', { name: /go to next page/i })
-    await user.click(nextButton)
-    expect(handlePageChange).toHaveBeenCalled()
-  })
-
-  it('disables prev button on first page', () => {
-    render(<Paginator {...baseProps} page={0} totalPages={3} />)
-    const prevButton = screen.getByRole('button', { name: /go to previous page/i })
-    expect(prevButton).toBeDisabled()
-  })
-
-  it('disables next button on last page', () => {
-    render(<Paginator {...baseProps} page={2} totalPages={3} />)
-    const nextButton = screen.getByRole('button', { name: /go to next page/i })
-    expect(nextButton).toBeDisabled()
-  })
-
-  it('renders nothing when totalPages is 0', () => {
-    const { container } = render(
-      <Paginator {...baseProps} totalPages={0} totalRecord={0} />,
-    )
-    // The outer fragment renders nothing visible
-    expect(container.firstChild).toBeNull()
-  })
-})
+    );
+    await user.selectOptions(screen.getByLabelText('Rows per page'), '20');
+    expect(onRecordsPerPageChange).toHaveBeenCalledWith(20);
+    expect(onPageChange).toHaveBeenCalledWith(null, 0);
+  });
+});

@@ -1,128 +1,103 @@
-import React from "react";
-import { Autocomplete, TextField, Grid, Box } from "@mui/material";
-import { countryCodes } from "../../../constants/countryCodes";
-import { palette } from '../../../theme/palette';
+import * as PopoverPrimitive from '@radix-ui/react-popover';
+import { Command as CommandPrimitive } from 'cmdk';
+import { ChevronDown } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { cn } from '../../lib/cn';
+import { countryCodes as defaultCountryCodes, type CountryCode } from './countries';
 
-interface CountryCodeAutocompleteProps {
+export interface CountryCodeAutocompleteProps {
+  /** Selected dial code (e.g. "+1"). */
   value: string;
   onChange: (value: string) => void;
+  /** Override the country dataset (defaults to the bundled minimal list). */
+  countries?: CountryCode[];
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
 }
 
-const CountryCodeAutocomplete: React.FC<CountryCodeAutocompleteProps> = ({
+const CountryCodeAutocomplete = ({
   value,
   onChange,
-}) => {
-  const uniqueCountryCodes = Array.from(
-    new Map(countryCodes.map((country) => [country.code, country])).values()
+  countries = defaultCountryCodes,
+  placeholder = 'Select',
+  disabled,
+  className,
+}: CountryCodeAutocompleteProps) => {
+  const [open, setOpen] = useState(false);
+
+  // Deduplicate by dial code to match legacy behavior.
+  const unique = useMemo(
+    () => Array.from(new Map(countries.map((c) => [c.code, c])).values()),
+    [countries],
   );
-  const selectedValue =
-    uniqueCountryCodes.find((country) => country.code === value) || undefined;
+  const selected = unique.find((c) => c.code === value);
 
   return (
-    <Autocomplete
-      disablePortal
-      disableClearable
-      options={uniqueCountryCodes}
-      getOptionLabel={(option) =>
-        typeof option === "string" ? option : `${option.code}`
-      }
-      value={selectedValue}
-      onChange={(_e, newValue) => {
-        onChange(newValue?.code || "");
-      }}
-      isOptionEqualToValue={(option, value) => option.code === value?.code}
-      renderOption={(props, option) => {
-        const { key, ...otherProps } = props;
-        return (
-          <Box component="li" key={option.code} {...otherProps}>
-            <Grid container alignItems="center">
-              <img
-                src={option.flag}
-                alt={`${option.code} flag`}
-                style={{ width: "20px", height: "15px", marginRight: "8px" }}
-              />
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <span>{option.code}</span>
-              </Box>
-            </Grid>
-          </Box>
-        );
-      }}
-      /* ---------- HIDE SCROLLBAR (still scrollable) ---------- */
-      componentsProps={{
-        popper: {
-          sx: {
-            zIndex: 1300,
-            // target the listbox inside the popper (works with portal or inline)
-            "& .MuiAutocomplete-listbox": {
-              maxHeight: 280,
-              padding: 0,
-              overflow: "auto", // must be auto to allow scrolling
-              // hide scrollbar in WebKit (Chrome, Edge, Safari)
-              "&::-webkit-scrollbar": {
-                display: "none",
-                width: 0,
-                height: 0,
-              },
-              // Firefox
-              scrollbarWidth: "none",
-              // IE 10+
-              msOverflowStyle: "none",
-              // optionally add a tiny right padding so content doesn't touch edge
-              paddingRight: "8px",
-            },
-            "& .MuiPaper-root": {
-              padding: 0,
-              borderRadius: "6px",
-            },
-          },
-        },
-        paper: {
-          sx: {
-            padding: 0,
-          },
-        },
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          placeholder="Select"
-          variant="outlined"
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              height: "45px",
-              width: "125px",
-              overflow: "visible",
-              borderRadius: "5px",
-              backgroundColor: palette.solid.white,
-            },
-            "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-            "& .MuiInputBase-input": {
-              padding: "8px 14px",
-              display: "flex",
-              alignItems: "center",
-              whiteSpace: "nowrap",
-            },
-          }}
-          InputProps={{
-            ...params.InputProps,
-            startAdornment: selectedValue ? (
-              <Box
-                component="span"
-                sx={{ display: "flex", alignItems: "center" }}
-              >
-                <img
-                  src={selectedValue.flag}
-                  alt={`${selectedValue.code} flag`}
-                  style={{ width: "20px", height: "15px", marginRight: "8px" }}
+    <div className={cn('w-[125px]', className)}>
+      <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
+        <PopoverPrimitive.Trigger asChild>
+          <button
+            type="button"
+            disabled={disabled}
+            aria-label={selected ? `${selected.name} ${selected.code}` : placeholder}
+            className={cn(
+              'flex h-11 w-full items-center justify-between gap-2 rounded-md border border-input bg-white px-3 py-2 text-sm',
+              'focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/40',
+              'disabled:cursor-not-allowed disabled:opacity-60',
+            )}
+          >
+            {selected ? (
+              <span className="flex items-center gap-2">
+                <span aria-hidden className="text-base leading-none">{selected.flag}</span>
+                <span>{selected.code}</span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )}
+            <ChevronDown aria-hidden className="size-4 shrink-0 opacity-60" />
+          </button>
+        </PopoverPrimitive.Trigger>
+        <PopoverPrimitive.Portal>
+          <PopoverPrimitive.Content
+            sideOffset={4}
+            align="start"
+            className="z-50 w-64 overflow-hidden rounded-md border border-border bg-background shadow-lg"
+          >
+            <CommandPrimitive>
+              <div className="border-b border-border p-2">
+                <CommandPrimitive.Input
+                  placeholder="Search country…"
+                  className="w-full bg-transparent px-1 py-1 text-sm focus:outline-none"
                 />
-              </Box>
-            ) : null,
-          }}
-        />
-      )}
-    />
+              </div>
+              <CommandPrimitive.List className="max-h-60 overflow-y-auto p-1">
+                <CommandPrimitive.Empty className="px-3 py-2 text-sm text-muted-foreground">
+                  No country found
+                </CommandPrimitive.Empty>
+                {unique.map((c) => (
+                  <CommandPrimitive.Item
+                    key={c.iso2}
+                    value={`${c.name} ${c.code}`}
+                    onSelect={() => {
+                      onChange(c.code);
+                      setOpen(false);
+                    }}
+                    className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm data-[selected=true]:bg-secondary data-[selected=true]:outline-none"
+                  >
+                    <span aria-hidden className="text-base leading-none">{c.flag}</span>
+                    <span className="flex-1 truncate">{c.name}</span>
+                    <span className="text-muted-foreground">{c.code}</span>
+                  </CommandPrimitive.Item>
+                ))}
+              </CommandPrimitive.List>
+            </CommandPrimitive>
+          </PopoverPrimitive.Content>
+        </PopoverPrimitive.Portal>
+      </PopoverPrimitive.Root>
+    </div>
   );
 };
 
 export default CountryCodeAutocomplete;
+export { CountryCodeAutocomplete };
