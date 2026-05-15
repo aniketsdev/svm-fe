@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     clearAuthStorage();
     setUser(null);
-    window.location.href = '/clinician/login';
+    window.location.href = '/login';
   }, []);
 
   const login = useCallback((userData: AuthUser) => {

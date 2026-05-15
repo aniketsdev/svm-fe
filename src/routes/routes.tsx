@@ -7,7 +7,7 @@ import UnprotectedRoute from './UnprotectedRoute';
 import ProtectedLayout from './ProtectedLayout';
 import PlaceholderPage from './PlaceholderPage';
 
-// ── Lazy auth pages (the ones implemented in feature 002) ──────────────────
+// ── Lazy auth pages ─────────────────────────────────────────────────────────
 const SignInPage = lazyWithPreload(() =>
   import('../features/auth/pages/SignInPage').then((m) => ({ default: m.SignInPage })),
 );
@@ -25,8 +25,7 @@ const SetNewPasswordPage = lazyWithPreload(() =>
   })),
 );
 
-// ── Placeholder pages for routes whose features aren't built on this branch ─
-// Each gets a real lazy import + named feature when its own feature lands.
+// ── Placeholder pages for routes whose features aren't built yet ────────────
 const DashboardPlaceholder = () => <PlaceholderPage title="Dashboard" />;
 const ClientsPlaceholder = () => <PlaceholderPage title="Clients" />;
 const ClientDetailPlaceholder = () => <PlaceholderPage title="Client Detail" />;
@@ -47,12 +46,12 @@ function PageLoader() {
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Default → admin dashboard (ProtectedRoute bounces signed-out users to login). */}
-      <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+      {/* Default → dashboard (ProtectedRoute bounces signed-out users to /login). */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-      {/* Public auth routes — each wrapped in UnprotectedRoute + Suspense. */}
+      {/* Public auth routes — flat, no prefix. */}
       <Route
-        path="clinician/login"
+        path="login"
         element={
           <UnprotectedRoute>
             <Suspense fallback={<PageLoader />}>
@@ -62,7 +61,7 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="clinician/forgot-password"
+        path="forgot-password"
         element={
           <UnprotectedRoute>
             <Suspense fallback={<PageLoader />}>
@@ -72,7 +71,7 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="clinician/enter-otp"
+        path="enter-otp"
         element={
           <UnprotectedRoute>
             <Suspense fallback={<PageLoader />}>
@@ -82,7 +81,7 @@ export default function AppRoutes() {
         }
       />
       <Route
-        path="clinician/set-password"
+        path="set-password"
         element={
           <UnprotectedRoute>
             <Suspense fallback={<PageLoader />}>
@@ -92,16 +91,14 @@ export default function AppRoutes() {
         }
       />
 
-      {/* Protected app routes (placeholders until each feature is built). */}
+      {/* Protected app routes — flat, share the layout via a pathless parent. */}
       <Route
-        path="admin"
         element={
           <ProtectedRoute>
             <ProtectedLayout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPlaceholder />} />
         <Route path="scheduling" element={<SchedulingPlaceholder />} />
         <Route path="clients" element={<ClientsPlaceholder />} />
@@ -113,8 +110,8 @@ export default function AppRoutes() {
         <Route path="profile" element={<UserProfilePlaceholder />} />
       </Route>
 
-      {/* Catch-all — ProtectedRoute on /admin/dashboard handles signed-out users. */}
-      <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+      {/* Catch-all → dashboard (ProtectedRoute handles signed-out users). */}
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }

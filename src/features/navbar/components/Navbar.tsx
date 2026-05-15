@@ -8,10 +8,10 @@ import { NavItem } from './NavItem';
 import { UserMenu } from './UserMenu';
 
 const NAV_LINKS = [
-  { label: 'Dashboard', path: '/admin/dashboard', icon: <Home className="size-4" /> },
-  { label: 'All Clients', path: '/admin/clients', icon: <Users className="size-4" /> },
-  { label: 'Assessments', path: '/admin/assessments', icon: <ClipboardCheck className="size-4" /> },
-  { label: 'Settings', path: '/admin/settings', icon: <Settings className="size-4" /> },
+  { label: 'Dashboard', path: '/dashboard', icon: <Home className="size-4" /> },
+  { label: 'All Clients', path: '/clients', icon: <Users className="size-4" /> },
+  { label: 'Assessments', path: '/assessments', icon: <ClipboardCheck className="size-4" /> },
+  { label: 'Settings', path: '/settings', icon: <Settings className="size-4" /> },
 ];
 
 export function Navbar() {

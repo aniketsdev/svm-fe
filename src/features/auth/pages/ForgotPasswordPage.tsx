@@ -24,7 +24,7 @@ export function ForgotPasswordPage() {
       if (response.otp_expiry) storeOtpExpiry(response.otp_expiry);
       toast({ severity: 'success', message: response.message || 'OTP sent successfully!' });
       setTimeout(
-        () => navigate('/clinician/enter-otp', { state: { email: getValues('email') } }),
+        () => navigate('/enter-otp', { state: { email: getValues('email') } }),
         500,
       );
     },

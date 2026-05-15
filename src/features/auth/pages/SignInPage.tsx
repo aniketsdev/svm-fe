@@ -44,7 +44,7 @@ export function SignInPage() {
         localStorage.setItem('lastName', response.user.last_name);
       }
       toast({ severity: 'success', message: response.message || 'Login successful!' });
-      setTimeout(() => navigate('/admin/dashboard'), 500);
+      setTimeout(() => navigate('/dashboard'), 500);
     },
     onError: (error) => {
       const general = handleApiError(error);
@@ -98,7 +98,7 @@ export function SignInPage() {
           />
           <button
             type="button"
-            onClick={() => navigate('/clinician/forgot-password')}
+            onClick={() => navigate('/forgot-password')}
             className="text-sm font-medium text-primary hover:underline"
           >
             Forgot Password?

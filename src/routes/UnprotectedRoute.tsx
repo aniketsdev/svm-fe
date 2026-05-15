@@ -11,7 +11,7 @@ const UnprotectedRoute: React.FC<UnprotectedRouteProps> = ({ children }) => {
   const { isAuthenticated, user, checkUserIdMatch } = useAuth();
   const [searchParams] = useSearchParams();
   const location = useLocation();
-  
+
   // Special handling for set-password route
   if (location.pathname.includes('/set-password')) {
     // Allow access when arriving from forgot-password flow with a token in state
@@ -43,19 +43,19 @@ const UnprotectedRoute: React.FC<UnprotectedRouteProps> = ({ children }) => {
           return null;
         } else {
           // If userId matches, redirect to dashboard
-          return <Navigate to="/admin/dashboard" replace />;
+          return <Navigate to="/dashboard" replace />;
         }
       }
       // Not authenticated - allow access to set password page
       return <>{children}</>;
     }
     // No userId in URL and no token in state/URL - redirect to login
-    return <Navigate to="/clinician/login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // For other unprotected routes (login, forgot password)
   if (isAuthenticated) {
-    return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return <>{children}</>;

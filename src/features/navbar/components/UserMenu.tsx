@@ -73,7 +73,7 @@ export const UserMenu = memo(function UserMenu() {
             <div className="px-3 py-2 text-sm font-medium text-foreground/80">{displayName}</div>
             <div className="my-1 h-px bg-border" />
             <DropdownMenuPrimitive.Item
-              onSelect={() => navigate('/admin/profile')}
+              onSelect={() => navigate('/profile')}
               className="flex cursor-pointer items-center gap-2 rounded px-3 py-2 text-sm outline-none data-[highlighted]:bg-secondary"
             >
               <UserRound aria-hidden className="size-4 text-muted-foreground" />

@@ -57,13 +57,13 @@ export const GlobalSearch = memo(function GlobalSearch() {
 
   const handleResultClick = (uuid: string) => {
     collapse();
-    navigate(`/admin/clients/${uuid}`);
+    navigate(`/clients/${uuid}`);
   };
 
   const handleViewAll = () => {
     const term = searchTerm;
     collapse();
-    navigate(`/admin/clients?search=${encodeURIComponent(term)}`);
+    navigate(`/clients?search=${encodeURIComponent(term)}`);
   };
 
   return (

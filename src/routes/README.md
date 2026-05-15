@@ -1,76 +1,94 @@
-# Simple Routing System
+# Routing — protected & unprotected pattern
 
-This project has a basic routing system with protected and unprotected routes.
+The app uses a flat route table (no `/clinician/*` or `/admin/*` prefix). A
+single pathless parent route applies `<ProtectedRoute>` + `<ProtectedLayout>`
+to every protected child, so the navbar / suspense chrome renders once and
+the children mount inside its `<Outlet />`.
 
-## Files Created
+## Files
 
-### 1. ProtectedRoute (`src/components/ProtectedRoute.tsx`)
-- Simple component that checks if user is logged in
-- If not logged in → redirects to `/login`
-- If logged in → shows the protected content
+| File | Purpose |
+|------|---------|
+| [`ProtectedRoute.tsx`](./ProtectedRoute.tsx) | Wrapper that reads `useAuth()`. If signed out, `<Navigate to="/login" replace state={{ from: location }} />`. If still loading, renders a centered spinner. Otherwise renders children. |
+| [`UnprotectedRoute.tsx`](./UnprotectedRoute.tsx) | Wrapper for public pages. If signed in, redirects to `/dashboard`. Includes the `/set-password` special case that accepts a `token` / `userId` from URL params or `location.state`. |
+| [`ProtectedLayout.tsx`](./ProtectedLayout.tsx) | Shared shell for every protected route: `<Navbar />` + `<Suspense>` + `<Outlet />`, offset by `NAVBAR_HEIGHT`. |
+| [`PlaceholderPage.tsx`](./PlaceholderPage.tsx) | Default-export component used for protected routes whose feature isn't built yet (dashboard, clients, etc.). Renders the route's name + a "not yet implemented" hint. |
+| [`routes.tsx`](./routes.tsx) | `AppRoutes` — the actual `<Routes>` table. Auth pages are lazy-loaded via `lazyWithPreload`. |
 
-### 2. UnprotectedRoute (`src/components/UnprotectedRoute.tsx`)
-- For public pages like login
-- If user is logged in → redirects to `/dashboard`
-- If not logged in → shows the public content
+## Recipes
 
-### 3. ProtectedLayout (`src/components/ProtectedLayout.tsx`)
-- Wraps protected routes with a layout
-- Includes basic navigation
-- Uses `<Outlet />` to show child routes
+### Add a new protected page
 
-### 4. Routes (`src/routes/routes.tsx`)
-- Defines all the app routes
-- Public routes: `/login`
-- Protected routes: `/dashboard/*` and `/profile`
+In `routes.tsx`, drop a `<Route>` inside the pathless protected parent:
 
-## How to Use
-
-### Add a new protected page:
 ```tsx
-<Route 
-  path="/new-page" 
+<Route
   element={
     <ProtectedRoute>
-      <NewPage />
+      <ProtectedLayout />
     </ProtectedRoute>
-  } 
-/>
+  }
+>
+  <Route path="dashboard" element={<DashboardPlaceholder />} />
+  {/* … */}
+  <Route path="new-page" element={<NewPage />} />   {/* ← here */}
+</Route>
 ```
 
-### Add a new public page:
+`<NewPage />` is rendered inside `<ProtectedLayout />`'s `<Outlet />`, so the
+navbar appears automatically and signed-out users get bounced to `/login`.
+
+### Add a new public page (e.g. marketing)
+
 ```tsx
-<Route 
-  path="/about" 
+<Route
+  path="about"
   element={
     <UnprotectedRoute>
-      <AboutPage />
+      <Suspense fallback={<PageLoader />}>
+        <AboutPage />
+      </Suspense>
     </UnprotectedRoute>
-  } 
+  }
 />
 ```
 
-### Add a page with layout:
+`<UnprotectedRoute>` redirects already-signed-in users to `/dashboard`.
+
+### Add a route that bypasses both guards
+
+Just declare a top-level `<Route>` with no wrapper element. Useful for
+share links, embeddable views, or public marketing pages.
+
 ```tsx
-<Route path="/admin/new-page" element={<div>New Page</div>} />
+<Route path="shared/:token" element={<SharedView />} />
 ```
 
-## Current Routes
+## Current route table
 
-- `/` → redirects to `/login`
-- `/login` → Login page (public)
-- `/admin/dashboard` → Dashboard (protected with navbar)
-- `/admin/scheduling` → Scheduling page (protected with navbar)
-- `/admin/clients` → Clients page (protected with navbar)
-- `/admin/groups` → Groups page (protected with navbar)
-- `/admin/treatments` → Treatments page (protected with navbar)
-- `/admin/billing` → Billing page (protected with navbar)
-- `/admin/referral` → Referral page (protected with navbar)
-- `/admin/reports` → Reports page (protected with navbar)
-- `/admin/forms` → Forms page (protected with navbar)
-- `/admin/enroll` → Enroll page (protected with navbar)
-- `/admin/intake` → Intake page (protected with navbar)
-- `/admin/payment` → Payment page (protected with navbar)
-- `/admin/settings` → Admin settings page (protected with navbar)
-- `/admin/profile` → Profile page (protected with navbar)
-- `/*` → redirects to `/login`
+**Default**:
+- `/` → `/dashboard`
+
+**Public (auth)** — wrapped in `<UnprotectedRoute>`:
+- `/login` → Sign In
+- `/forgot-password`
+- `/enter-otp`
+- `/set-password`
+
+**Protected** — wrapped in `<ProtectedRoute><ProtectedLayout />`:
+- `/dashboard`
+- `/scheduling`
+- `/clients`
+- `/clients/:clientUuid`
+- `/assessments`
+- `/diagnostic-generator`
+- `/settings`
+- `/settings/user/:uuid`
+- `/profile`
+
+**Catch-all**:
+- `*` → `/dashboard` (`<ProtectedRoute>` handles signed-out users from there)
+
+> All protected route stubs above currently render `<PlaceholderPage />` since
+> their owning features haven't been implemented yet. As each feature ships,
+> swap its placeholder for the real `lazyWithPreload(...)` page.

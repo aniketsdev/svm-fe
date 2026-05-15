@@ -38,7 +38,7 @@ export function SetNewPasswordPage() {
     onSuccess: (data) => {
       const response = data as { message?: string };
       toast({ severity: 'success', message: response.message || 'Password set successfully!' });
-      setTimeout(() => navigate('/clinician/login'), 1000);
+      setTimeout(() => navigate('/login'), 1000);
     },
     onError: (error) => {
       const general = handleApiError(error);

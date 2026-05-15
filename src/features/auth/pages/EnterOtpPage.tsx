@@ -62,7 +62,7 @@ export function EnterOtpPage() {
       clearOtpExpiry();
       toast({ severity: 'success', message: response.message || 'OTP verified successfully!' });
       setTimeout(
-        () => navigate('/clinician/set-password', { state: { email, token: response.token } }),
+        () => navigate('/set-password', { state: { email, token: response.token } }),
         500,
       );
     },
