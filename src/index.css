@@ -1,60 +1,139 @@
 @import "tailwindcss";
 
 /**
- * Design tokens for the migrated component library.
- * Consumed by Tailwind v4 via the @theme block.
- * Light theme is the default; .dark adds the overrides for future dark-mode support.
+ * Design tokens — single source of truth for the application's colors,
+ * typography, radii, and shadows. Derived from src/theme/palette.ts +
+ * src/theme/typography.ts (Mind Health Group brand). Consumed by
+ * Tailwind v4 via the @theme block: declaring a `--color-x` here
+ * auto-generates the matching `bg-x`, `text-x`, `border-x`, etc utilities.
+ *
+ * When the brand palette changes, this is the only file that changes.
  */
 @theme {
-  /* Base surfaces */
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(240 10% 4%);
+  /* ── Base surfaces ────────────────────────────────────────────────────── */
+  --color-background: #FFFFFF;            /* palette.background.default */
+  --color-foreground: #1A212B;            /* palette.text.primary */
 
-  /* Brand */
-  --color-primary: hsl(271 91% 62%);
-  --color-primary-foreground: hsl(0 0% 100%);
+  /* ── Primary (teal-dark) ───────────────────────────────────────────────── */
+  --color-primary: #1E5060;               /* palette.primary.main */
+  --color-primary-foreground: #FFFFFF;    /* palette.primary.contrastText */
+  --color-primary-00: #EAF1F3;
+  --color-primary-01: #BDD3DA;
+  --color-primary-02: #9DBEC8;
+  --color-primary-03: #70A0AF;
+  --color-primary-04: #558D9F;
+  --color-primary-05: #2A7187;
+  --color-primary-06: #26677B;
+  --color-primary-07: #1E5060;
+  --color-primary-08: #173E4A;
+  --color-primary-09: #122F39;
+  --color-primary-10: #122D36;
+  --color-primary-light: #9DBEC8;
+  --color-primary-dark: #122F39;
 
-  /* Neutral / secondary */
-  --color-secondary: hsl(240 5% 96%);
-  --color-secondary-foreground: hsl(240 10% 4%);
+  /* ── Secondary (shadcn-style subtle gray for surfaces / outline-button hover) ── */
+  --color-secondary: #ECEFF4;             /* palette.neutral['05'] */
+  --color-secondary-foreground: #1A212B;  /* palette.text.primary */
 
-  /* Muted (subtle backgrounds, helper text) */
-  --color-muted: hsl(240 5% 96%);
-  --color-muted-foreground: hsl(240 4% 46%);
+  /* ── Accent (the brand's green) ───────────────────────────────────────── */
+  --color-accent: #578729;                /* palette.secondary.main */
+  --color-accent-foreground: #FFFFFF;
+  --color-accent-01: #FFFFFF;
+  --color-accent-05: #E6F3D4;
+  --color-accent-10: #CEE8AE;
+  --color-accent-20: #AED77F;
+  --color-accent-30: #83BE42;
+  --color-accent-40: #72AA38;
+  --color-accent-50: #578729;
+  --color-accent-60: #436823;
+  --color-accent-70: #385321;
+  --color-accent-80: #314720;
+  --color-accent-90: #18260D;
 
-  /* Destructive (errors, delete) */
-  --color-destructive: hsl(0 84% 60%);
-  --color-destructive-foreground: hsl(0 0% 100%);
+  /* ── Muted (helper text + very subtle backgrounds) ────────────────────── */
+  --color-muted: #F6F8FB;                 /* palette.neutral['00'] */
+  --color-muted-foreground: #728197;      /* palette.text.secondary / neutral['50'] */
 
-  /* Borders, inputs, focus ring */
-  --color-border: hsl(240 6% 90%);
-  --color-input: hsl(240 6% 90%);
-  --color-ring: hsl(271 91% 62%);
+  /* ── Destructive (errors, delete) ─────────────────────────────────────── */
+  --color-destructive: #B1000F;           /* palette.negative.main */
+  --color-destructive-foreground: #FFFFFF;
+  --color-destructive-01: #FFF2F3;
+  --color-destructive-05: #FFD4D8;
+  --color-destructive-10: #FFB6BC;
+  --color-destructive-20: #FA7D87;
+  --color-destructive-30: #F14A58;
+  --color-destructive-40: #E42131;
+  --color-destructive-50: #CE0718;
+  --color-destructive-60: #B1000F;
+  --color-destructive-70: #8D000C;
 
-  /* Radius scale */
+  /* ── Status palettes ──────────────────────────────────────────────────── */
+  --color-positive: #049B22;              /* palette.positive.main */
+  --color-positive-foreground: #FFFFFF;
+  --color-positive-01: #F4FFF2;
+  --color-positive-05: #E1FCDE;
+  --color-positive-50: #17BF33;
+  --color-positive-60: #049B22;
+  --color-positive-70: #016A1C;
+
+  --color-warning: #D66F00;               /* palette.warning.main */
+  --color-warning-foreground: #FFFFFF;
+  --color-warning-01: #FFFBF2;
+  --color-warning-05: #FFF2D2;
+  --color-warning-50: #D66F00;
+  --color-warning-60: #BA5900;
+
+  --color-info: #105FCE;                  /* palette.informative.main */
+  --color-info-foreground: #FFFFFF;
+  --color-info-01: #F2F7FF;
+  --color-info-05: #E0EDFF;
+  --color-info-50: #105FCE;
+  --color-info-60: #004AB1;
+
+  /* ── Neutral scale (for borders, text levels, surfaces) ───────────────── */
+  --color-neutral-00: #F6F8FB;
+  --color-neutral-05: #ECEFF4;
+  --color-neutral-10: #DEE4ED;
+  --color-neutral-20: #CBD4E1;
+  --color-neutral-30: #B6C2D3;
+  --color-neutral-40: #9AA8BC;
+  --color-neutral-50: #728197;
+  --color-neutral-60: #525E6F;
+  --color-neutral-70: #3B4554;
+  --color-neutral-80: #27313F;
+  --color-neutral-90: #27313F;
+
+  /* ── Borders, inputs, focus ring ─────────────────────────────────────── */
+  --color-border: #DEE4ED;                /* palette.neutral['10'] */
+  --color-input: #DEE4ED;                 /* palette.neutral['10'] */
+  --color-ring: #1E5060;                  /* palette.primary.main */
+  --color-outline-decorative: #CBD4E1;
+
+  /* ── Radius scale ─────────────────────────────────────────────────────── */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
+
+  /* ── Typography ───────────────────────────────────────────────────────── */
+  --font-sans: 'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, Consolas, 'Liberation Mono', monospace;
+
+  --text-xs: 0.75rem;       --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;      --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;        --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;      --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;       --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;       --text-2xl--line-height: 2rem;
+  --text-3xl: 1.875rem;     --text-3xl--line-height: 2.25rem;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 }
 
 :root {
   color-scheme: light;
-}
-
-.dark {
-  --color-background: hsl(240 10% 4%);
-  --color-foreground: hsl(0 0% 98%);
-  --color-primary: hsl(271 91% 70%);
-  --color-primary-foreground: hsl(240 10% 4%);
-  --color-secondary: hsl(240 4% 16%);
-  --color-secondary-foreground: hsl(0 0% 98%);
-  --color-muted: hsl(240 4% 16%);
-  --color-muted-foreground: hsl(240 5% 65%);
-  --color-destructive: hsl(0 63% 45%);
-  --color-destructive-foreground: hsl(0 0% 98%);
-  --color-border: hsl(240 4% 16%);
-  --color-input: hsl(240 4% 16%);
-  --color-ring: hsl(271 91% 70%);
 }
 
 html,
@@ -67,7 +146,7 @@ body {
   margin: 0;
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
