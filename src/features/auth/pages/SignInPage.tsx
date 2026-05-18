@@ -1,4 +1,3 @@
-import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CustomLabel } from '../../../common/custom-label';
@@ -7,56 +6,51 @@ import { RHFInput, RHFCheckbox } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { AuthLayout } from '../components/AuthLayout';
-import { authLoginCreateMutation } from '../api/auth-stubs';
+import { useAuthLogin } from '../../../sdk/auth';
 import { useSignInForm, type SignInFormValues } from '../hooks/useSignInForm';
 import { useAuth } from '../hooks/useAuth';
+import { ApiError } from '../../../api/client';
 import signInImage from '../../../assets/auth-sign-in.svg';
 
 export function SignInPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signIn } = useAuth();
   const { toast } = useToast();
   const { control, handleSubmit, setError } = useSignInForm();
   const { handleApiError } = useFormApiErrors(setError);
   const [pending, setPending] = useState(false);
 
-  const loginMutation = useMutation({
-    ...authLoginCreateMutation(),
-    onSuccess: (data) => {
-      const response = data as {
-        message?: string;
-        user?: {
-          uuid: string;
-          first_name: string;
-          last_name: string;
-          email: string;
-          role_name?: string;
-        };
-      };
-      if (response.user) {
-        login(response.user);
-        // Storage back-compat (per contracts/auth-context.md): preserve the
-        // legacy per-field writes for one release so any downstream consumer
-        // that hasn't migrated to reading `userData` keeps working.
-        localStorage.setItem('userId', response.user.uuid);
-        localStorage.setItem('email', response.user.email);
-        localStorage.setItem('firstName', response.user.first_name);
-        localStorage.setItem('lastName', response.user.last_name);
-      }
-      toast({ severity: 'success', message: response.message || 'Login successful!' });
-      setTimeout(() => navigate('/dashboard'), 500);
+  const loginMutation = useAuthLogin({
+    mutation: {
+      onSuccess: (response) => {
+        // The generated mutator wraps responses as {data, status, headers}.
+        // For a 200 response, `response.data` is the LoginResponse body.
+        // Server has already set __Host-access / __Host-refresh / csrf_token
+        // cookies; we just prime the in-memory user.
+        const loginBody = (response as { data: { user: { id: number; email: string; role: 'admin' | 'staff' | 'user' } } }).data;
+        signIn({ ...loginBody.user, is_active: true });
+        toast({ severity: 'success', message: 'Welcome back!' });
+        setTimeout(() => navigate('/dashboard'), 300);
+      },
+      onError: (error) => {
+        // Backend returns a uniform 401 `{detail: "Invalid credentials"}` for
+        // unknown email + wrong password + deactivated. Map to a single message.
+        if (error instanceof ApiError && error.status === 401) {
+          toast({ severity: 'error', message: 'Invalid email or password.' });
+          setError('password', { type: 'manual', message: 'Incorrect email or password' });
+          return;
+        }
+        const general = handleApiError(error);
+        if (general) toast({ severity: 'error', message: general });
+      },
+      onSettled: () => setPending(false),
     },
-    onError: (error) => {
-      const general = handleApiError(error);
-      if (general) toast({ severity: 'error', message: general });
-    },
-    onSettled: () => setPending(false),
   });
 
   const onSubmit = (data: SignInFormValues) => {
     setPending(true);
     loginMutation.mutate({
-      body: { email: data.username, password: data.password, remember_me: data.rememberMe },
+      data: { username: data.username, password: data.password },
     });
   };
 

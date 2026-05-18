@@ -1,101 +1,149 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
-import type { ReactNode } from 'react'
-import { AuthProvider } from '../context/AuthContext'
-import { useAuth } from '../hooks/useAuth'
-import type { AuthUser } from '../context/AuthContext'
+/**
+ * Tests for the cookie-bootstrap AuthContext.
+ *
+ * Verifies:
+ *  - `/auth/me` is the bootstrap source of truth (no localStorage reads).
+ *  - 200 populates the user; 401 clears it.
+ *  - `signIn(user)` and `signOut()` are imperative cache updates.
+ *  - The provider does not read or write `localStorage`.
+ */
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from '../context/AuthContext';
+import { useAuth } from '../hooks/useAuth';
+import type { AuthUser } from '../context/AuthContext';
 
-// Mock window.location.href setter so logout doesn't throw
-const mockLocation = { href: '' }
-vi.stubGlobal('location', mockLocation)
-
-const testUser: AuthUser = {
-  id: 1,
-  uuid: 'test-uuid-1234',
-  first_name: 'Jane',
-  last_name: 'Doe',
+const TEST_USER: AuthUser = {
+  id: 7,
   email: 'jane@example.com',
-  role_name: 'clinician',
+  role: 'user',
+  is_active: true,
+};
+
+const ORIGINAL_FETCH = globalThis.fetch;
+
+function mockFetch(status: number, body: unknown) {
+  return vi.fn(async () => {
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: { 'content-type': 'application/json' },
+    });
+  });
 }
 
-function wrapper({ children }: { children: ReactNode }) {
-  return <AuthProvider>{children}</AuthProvider>
+function makeWrapper(): React.FC<{ children: ReactNode }> {
+  const qc = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return ({ children }) => (
+    <QueryClientProvider client={qc}>
+      <AuthProvider>{children}</AuthProvider>
+    </QueryClientProvider>
+  );
 }
 
-describe('AuthContext + useAuth', () => {
-  beforeEach(() => {
-    localStorage.clear()
-    mockLocation.href = ''
-  })
+// We assert in some tests that the provider doesn't touch localStorage.
+// Spies are reset between tests.
+let localStorageGetSpy: ReturnType<typeof vi.spyOn>;
+let localStorageSetSpy: ReturnType<typeof vi.spyOn>;
 
-  it('starts unauthenticated when localStorage is empty', () => {
-    const { result } = renderHook(() => useAuth(), { wrapper })
-    expect(result.current.user).toBeNull()
-    expect(result.current.isAuthenticated).toBe(false)
-  })
+beforeEach(() => {
+  localStorage.clear();
+  localStorageGetSpy = vi.spyOn(Storage.prototype, 'getItem');
+  localStorageSetSpy = vi.spyOn(Storage.prototype, 'setItem');
+});
 
-  it('isLoading is false', () => {
-    const { result } = renderHook(() => useAuth(), { wrapper })
-    expect(result.current.isLoading).toBe(false)
-  })
+afterEach(() => {
+  globalThis.fetch = ORIGINAL_FETCH;
+  vi.restoreAllMocks();
+});
 
-  it('restores user from localStorage on mount', () => {
-    localStorage.setItem('userData', JSON.stringify(testUser))
-    const { result } = renderHook(() => useAuth(), { wrapper })
-    expect(result.current.user).toEqual(testUser)
-    expect(result.current.isAuthenticated).toBe(true)
-  })
+describe('AuthProvider — /auth/me bootstrap', () => {
+  it('populates the user when /auth/me returns 200', async () => {
+    globalThis.fetch = mockFetch(200, TEST_USER) as unknown as typeof fetch;
+    const wrapper = makeWrapper();
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
-  it('login() sets user and saves to localStorage', () => {
-    const { result } = renderHook(() => useAuth(), { wrapper })
+    expect(result.current.isLoading).toBe(true);
 
-    act(() => {
-      result.current.login(testUser)
-    })
+    await waitFor(() => expect(result.current.isAuthenticated).toBe(true));
+    expect(result.current.user).toEqual(TEST_USER);
+    expect(result.current.isLoading).toBe(false);
+  });
 
-    expect(result.current.user).toEqual(testUser)
-    expect(result.current.isAuthenticated).toBe(true)
-    expect(JSON.parse(localStorage.getItem('userData') ?? 'null')).toEqual(testUser)
-  })
+  it('treats 401 as unauthenticated and clears loading', async () => {
+    globalThis.fetch = mockFetch(401, { detail: 'Invalid credentials' }) as unknown as typeof fetch;
+    const wrapper = makeWrapper();
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
-  it('checkUserIdMatch returns true when UUID matches', () => {
-    const { result } = renderHook(() => useAuth(), { wrapper })
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.user).toBeNull();
+    expect(result.current.isAuthenticated).toBe(false);
+  });
 
-    act(() => {
-      result.current.login(testUser)
-    })
+  it('never reads or writes localStorage', async () => {
+    globalThis.fetch = mockFetch(200, TEST_USER) as unknown as typeof fetch;
+    const wrapper = makeWrapper();
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
-    expect(result.current.checkUserIdMatch('test-uuid-1234')).toBe(true)
-  })
+    await waitFor(() => expect(result.current.isAuthenticated).toBe(true));
 
-  it('checkUserIdMatch returns false when UUID does not match', () => {
-    const { result } = renderHook(() => useAuth(), { wrapper })
+    // Only allow getItem reads from outside the provider (vitest's own internals).
+    // The provider itself must not have any reads keyed by an auth value.
+    const authKeys = ['userData', 'userId', 'email', 'firstName', 'lastName', 'authToken'];
+    for (const key of authKeys) {
+      expect(localStorageGetSpy).not.toHaveBeenCalledWith(key);
+      expect(localStorageSetSpy).not.toHaveBeenCalledWith(
+        key,
+        expect.anything(),
+      );
+    }
+  });
+});
 
-    act(() => {
-      result.current.login(testUser)
-    })
+describe('AuthProvider — imperative signIn / signOut', () => {
+  it('signIn primes the user without a /auth/me round-trip', async () => {
+    // Start with /auth/me 401
+    globalThis.fetch = mockFetch(401, { detail: 'Invalid credentials' }) as unknown as typeof fetch;
+    const wrapper = makeWrapper();
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
-    expect(result.current.checkUserIdMatch('wrong-uuid')).toBe(false)
-  })
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(result.current.isAuthenticated).toBe(false);
 
-  it('checkUserIdMatch returns false when not authenticated', () => {
-    const { result } = renderHook(() => useAuth(), { wrapper })
-    expect(result.current.checkUserIdMatch('test-uuid-1234')).toBe(false)
-  })
+    act(() => result.current.signIn(TEST_USER));
+    await waitFor(() => expect(result.current.user).toEqual(TEST_USER));
+    expect(result.current.isAuthenticated).toBe(true);
+  });
 
-  it('handles corrupted localStorage gracefully', () => {
-    localStorage.setItem('userData', 'not-valid-json{{{')
-    const { result } = renderHook(() => useAuth(), { wrapper })
-    expect(result.current.user).toBeNull()
-    expect(result.current.isAuthenticated).toBe(false)
-  })
+  it('signOut clears the in-memory user', async () => {
+    globalThis.fetch = mockFetch(200, TEST_USER) as unknown as typeof fetch;
+    const wrapper = makeWrapper();
+    const { result } = renderHook(() => useAuth(), { wrapper });
 
-  it('throws when useAuth is used outside AuthProvider', () => {
-    // Suppress console error for expected throw
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
-    expect(() => renderHook(() => useAuth())).toThrow(
+    await waitFor(() => expect(result.current.isAuthenticated).toBe(true));
+
+    // After signOut, useAuth.user should be cleared. We don't assert on the
+    // subsequent invalidate-driven refetch here — that's covered by integration.
+    globalThis.fetch = mockFetch(401, { detail: 'Invalid credentials' }) as unknown as typeof fetch;
+    act(() => result.current.signOut());
+
+    await waitFor(() => expect(result.current.user).toBeNull());
+  });
+});
+
+describe('useAuth hook safety', () => {
+  it('throws when used outside an AuthProvider', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const qc = new QueryClient();
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={qc}>{children}</QueryClientProvider>
+    );
+    expect(() => renderHook(() => useAuth(), { wrapper })).toThrow(
       'useAuth must be used within an AuthProvider',
-    )
-    consoleError.mockRestore()
-  })
-})
+    );
+    spy.mockRestore();
+  });
+});

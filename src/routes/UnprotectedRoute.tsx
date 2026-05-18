@@ -1,59 +1,31 @@
 import React from 'react';
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../features/auth/hooks/useAuth';
-import { clearAuthStorage } from '../features/auth/utils/clearAuthStorage';
 
 interface UnprotectedRouteProps {
   children: React.ReactNode;
 }
 
+/**
+ * Routes that should only show to anonymous users (login, forgot-password).
+ *
+ * Special handling for `/set-password`: that page is reachable either from
+ * the forgot-password flow (`location.state.token`) or from an admin
+ * invitation email (`?token=...` in the URL). Both paths are allowed even if
+ * the visitor is already signed in — the server still validates the token.
+ */
 const UnprotectedRoute: React.FC<UnprotectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, user, checkUserIdMatch } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
-  // Special handling for set-password route
   if (location.pathname.includes('/set-password')) {
-    // Allow access when arriving from forgot-password flow with a token in state
     const stateToken = (location.state as { token?: string })?.token;
-    if (stateToken) {
-      return <>{children}</>;
-    }
-
-    // Allow access when arriving from invitation link with ?token= in URL
     const urlToken = searchParams.get('token');
-    if (urlToken) {
-      return <>{children}</>;
-    }
-
-    const urlUserId = searchParams.get('userId');
-
-    // If we have a userId in URL, validate against current auth
-    if (urlUserId) {
-      // If authenticated, check user match
-      if (isAuthenticated && user) {
-        // Get current user ID from localStorage
-        const currentUserId = localStorage.getItem('userId');
-
-        // Double check: validate both through auth context and localStorage
-        if (!checkUserIdMatch(urlUserId) || (currentUserId && currentUserId !== urlUserId)) {
-          // Different user - clear ALL auth data and reload
-          clearAuthStorage();
-          window.location.reload();
-          return null;
-        } else {
-          // If userId matches, redirect to dashboard
-          return <Navigate to="/dashboard" replace />;
-        }
-      }
-      // Not authenticated - allow access to set password page
-      return <>{children}</>;
-    }
-    // No userId in URL and no token in state/URL - redirect to login
+    if (stateToken || urlToken) return <>{children}</>;
     return <Navigate to="/login" replace />;
   }
 
-  // For other unprotected routes (login, forgot password)
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }

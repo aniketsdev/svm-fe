@@ -6,7 +6,16 @@ import tseslint from 'typescript-eslint';
 import { defineConfig, globalIgnores } from 'eslint/config';
 
 export default defineConfig([
-  globalIgnores(['dist', 'node_modules', 'coverage']),
+  globalIgnores([
+    'dist',
+    'node_modules',
+    'coverage',
+    // Generated SDK (Orval) — only `src/sdk/mutator.ts` is hand-written and
+    // it's small enough to spot-review. Linting auto-generated output is more
+    // pain than signal; regenerating to satisfy a lint rule is the wrong gate.
+    'src/sdk/**/*.ts',
+    '!src/sdk/mutator.ts',
+  ]),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

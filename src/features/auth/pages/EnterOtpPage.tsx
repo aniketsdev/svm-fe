@@ -1,4 +1,3 @@
-import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '../../../lib/cn';
@@ -7,13 +6,12 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { AuthLayout } from '../components/AuthLayout';
 import { OtpInput } from '../components/OtpInput';
-import {
-  authForgotPasswordCreateMutation,
-  authVerifyOtpCreateMutation,
-} from '../api/auth-stubs';
+import { useAuthForgotPassword, useAuthVerifyOtp } from '../../../sdk/auth';
 import { useEnterOtpForm, type EnterOtpFormValues } from '../hooks/useEnterOtpForm';
 import { clearOtpExpiry, useOtpTimer } from '../hooks/useOtpTimer';
 import enterOtpImage from '../../../assets/auth-enter-otp.svg';
+
+const OTP_EXPIRY_SECONDS = 10 * 60;
 
 export function EnterOtpPage() {
   const navigate = useNavigate();
@@ -55,44 +53,63 @@ export function EnterOtpPage() {
     setValue('otp', digits.join(''), { shouldValidate: true });
   };
 
-  const verifyOtpMutation = useMutation({
-    ...authVerifyOtpCreateMutation(),
-    onSuccess: (data) => {
-      const response = data as { message?: string; token?: string };
-      clearOtpExpiry();
-      toast({ severity: 'success', message: response.message || 'OTP verified successfully!' });
-      setTimeout(
-        () => navigate('/set-password', { state: { email, token: response.token } }),
-        500,
-      );
-    },
-    onError: (error) => {
-      const general = handleApiError(error);
-      if (general) toast({ severity: 'error', message: general });
+  const verifyOtpMutation = useAuthVerifyOtp({
+    mutation: {
+      onSuccess: (response) => {
+        // The backend returns { reset_token } in the success body. The mutator
+        // wraps it as { data, status, headers }; we extract reset_token here
+        // and pass it through `location.state` so it's never stored in
+        // localStorage / sessionStorage (per the spec's threat model).
+        const resetToken = (response as { data: { reset_token: string } }).data
+          .reset_token;
+        clearOtpExpiry();
+        toast({ severity: 'success', message: 'OTP verified.' });
+        setTimeout(
+          () =>
+            navigate('/set-password', {
+              state: { email, token: resetToken },
+            }),
+          400,
+        );
+      },
+      onError: (error) => {
+        // FR-046: the backend returns a single uniform 400 for any failure
+        // branch (expired / locked / wrong / unknown email). Don't try to
+        // surface "wrong code" vs "expired" — they're indistinguishable to
+        // the client by design.
+        const general = handleApiError(error);
+        toast({
+          severity: 'error',
+          message: general || 'This code is no longer valid. Please request a new one.',
+        });
+      },
     },
   });
 
-  const resendOtpMutation = useMutation({
-    ...authForgotPasswordCreateMutation(),
-    onSuccess: (data) => {
-      const response = data as { message?: string; otp_expiry?: number };
-      if (response.otp_expiry) resetTimer(response.otp_expiry);
-      toast({ severity: 'success', message: response.message || 'OTP resent successfully!' });
-      startCooldown();
-    },
-    onError: (error) => {
-      const general = handleApiError(error);
-      if (general) toast({ severity: 'error', message: general });
+  const resendOtpMutation = useAuthForgotPassword({
+    mutation: {
+      onSuccess: () => {
+        resetTimer(OTP_EXPIRY_SECONDS);
+        toast({
+          severity: 'success',
+          message: 'If that account exists, a new code has been sent.',
+        });
+        startCooldown();
+      },
+      onError: (error) => {
+        const general = handleApiError(error);
+        if (general) toast({ severity: 'error', message: general });
+      },
     },
   });
 
   const onSubmit = (data: EnterOtpFormValues) => {
-    verifyOtpMutation.mutate({ body: { email, otp: data.otp } });
+    verifyOtpMutation.mutate({ data: { email, otp: data.otp } });
   };
 
   const handleResendOtp = () => {
     if (resendOtpMutation.isPending || !isExpired || resendCooldown > 0) return;
-    resendOtpMutation.mutate({ body: { email } });
+    resendOtpMutation.mutate({ data: { email } });
   };
 
   return (

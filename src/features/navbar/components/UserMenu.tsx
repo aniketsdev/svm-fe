@@ -1,43 +1,43 @@
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
-import { useMutation, useQuery } from '@tanstack/react-query';
 import { ChevronDown, LogOut, UserRound } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
 import { UserAvatar } from '../../../common/user-avatar';
 import { cn } from '../../../lib/cn';
-import {
-  authLogoutCreateMutation,
-  authProfileRetrieveOptions,
-} from '../../auth/api/auth-stubs';
+import { useAuthLogout } from '../../../sdk/auth';
 import { useAuth } from '../../auth/hooks/useAuth';
 
 export const UserMenu = memo(function UserMenu() {
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const navigate = useNavigate();
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, signOut } = useAuth();
 
-  const logoutMutation = useMutation({
-    ...authLogoutCreateMutation(),
-    onSuccess: () => logout(),
-    onError: () => logout(), // best-effort — still clears local state.
-  });
-
-  const { data: profile } = useQuery({
-    ...authProfileRetrieveOptions(),
-    enabled: isAuthenticated,
-    staleTime: 60 * 60 * 1000,
+  const logoutMutation = useAuthLogout({
+    mutation: {
+      onSuccess: () => {
+        signOut();
+        navigate('/login', { replace: true });
+      },
+      onError: () => {
+        // Best-effort: still clear local state even if the server call fails
+        // (token may already be expired; cookie cleanup happens on next round-trip).
+        signOut();
+        navigate('/login', { replace: true });
+      },
+    },
   });
 
   const handleLogoutConfirm = () => {
     setLogoutConfirmOpen(false);
-    logoutMutation.mutate({});
+    logoutMutation.mutate(undefined);
   };
 
-  const firstName = profile?.first_name ?? user?.first_name ?? '';
-  const lastName = profile?.last_name ?? user?.last_name ?? '';
-  const displayName = firstName || lastName ? `${firstName} ${lastName}`.trim() : 'User';
-  const avatarSrc = (profile as { avatar_thumb_url?: string })?.avatar_thumb_url;
+  // Display name: backend /auth/me returns only id/email/role; we use the
+  // local-part of the email as a friendly fallback until profile data lands.
+  const displayName = user?.email ? user.email.split('@', 1)[0] : 'User';
+  const initialsFirst = displayName.charAt(0).toUpperCase();
+  const initialsLast = displayName.charAt(1)?.toUpperCase() ?? '';
 
   return (
     <div className="flex items-center" data-slot="user-menu">
@@ -52,9 +52,8 @@ export const UserMenu = memo(function UserMenu() {
             )}
           >
             <UserAvatar
-              src={avatarSrc}
-              firstName={firstName}
-              lastName={lastName}
+              firstName={initialsFirst}
+              lastName={initialsLast}
               size={32}
               variant="soft"
             />

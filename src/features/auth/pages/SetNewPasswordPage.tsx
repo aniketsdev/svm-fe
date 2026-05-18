@@ -1,4 +1,3 @@
-import { useMutation } from '@tanstack/react-query';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { CustomLabel } from '../../../common/custom-label';
 import { CustomButton } from '../../../common/custom-buttons';
@@ -6,45 +5,70 @@ import { RHFInput } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { AuthLayout } from '../components/AuthLayout';
-import { authSetPasswordCreateMutation } from '../api/auth-stubs';
+import { useAuthResetPassword, useAuthAcceptInvitation } from '../../../sdk/auth';
 import {
   useSetNewPasswordForm,
   type SetNewPasswordFormValues,
 } from '../hooks/useSetNewPasswordForm';
+import { useAuth } from '../hooks/useAuth';
 import setPasswordImage from '../../../assets/auth-set-password.svg';
 
+// Mirrors backend FR-024 so users see the requirements client-side.
 const PASSWORD_REQUIREMENTS = [
-  'Must be at least 8 characters long',
-  'Must not exceed 128 characters',
-  'Must contain at least one lowercase letter (a-z)',
-  'Must contain at least one uppercase letter (A-Z)',
-  'Must contain at least one number, symbol, or whitespace',
+  'At least 10 characters long',
+  'At least three of: lowercase, uppercase, digit, symbol',
 ];
 
 export function SetNewPasswordPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  // Token from forgot-password flow (state) or invitation link (URL query).
-  const token =
-    (location.state as { token?: string })?.token || searchParams.get('token') || '';
+  const { refetchMe } = useAuth();
+
+  // Two flows land on this page; the token's *source* tells us which:
+  //   - `location.state.token`  → reset-password flow (came from OTP verify)
+  //   - `?token=…` query param  → invitation flow (came from email link)
+  // The two endpoints accept different request shapes and live on different
+  // routes; we pick the right mutation based on which source supplied it.
+  const stateToken = (location.state as { token?: string })?.token;
+  const urlToken = searchParams.get('token');
+  const token = stateToken || urlToken || '';
+  const flow: 'reset' | 'invitation' = stateToken ? 'reset' : 'invitation';
 
   const { toast } = useToast();
   const { control, handleSubmit, setError } = useSetNewPasswordForm();
   const { handleApiError } = useFormApiErrors(setError);
 
-  const setPasswordMutation = useMutation({
-    ...authSetPasswordCreateMutation(),
-    onSuccess: (data) => {
-      const response = data as { message?: string };
-      toast({ severity: 'success', message: response.message || 'Password set successfully!' });
-      setTimeout(() => navigate('/login'), 1000);
-    },
-    onError: (error) => {
-      const general = handleApiError(error);
-      if (general) toast({ severity: 'error', message: general });
+  const successHandler = async (welcomeMsg: string) => {
+    // Both endpoints set the same auth cookies as /auth/login. Re-fetch
+    // /auth/me so AuthContext picks up the signed-in user and the next
+    // navigation lands on a protected page seamlessly.
+    toast({ severity: 'success', message: welcomeMsg });
+    await refetchMe();
+    setTimeout(() => navigate('/dashboard'), 400);
+  };
+
+  const errorHandler = (error: unknown) => {
+    const general = handleApiError(error);
+    if (general) toast({ severity: 'error', message: general });
+  };
+
+  const resetPasswordMutation = useAuthResetPassword({
+    mutation: {
+      onSuccess: () => successHandler('Password updated. Welcome back!'),
+      onError: errorHandler,
     },
   });
+
+  const acceptInvitationMutation = useAuthAcceptInvitation({
+    mutation: {
+      onSuccess: () => successHandler('Welcome to SVAP!'),
+      onError: errorHandler,
+    },
+  });
+
+  const isPending =
+    resetPasswordMutation.isPending || acceptInvitationMutation.isPending;
 
   const onSubmit = (data: SetNewPasswordFormValues) => {
     if (!token) {
@@ -54,18 +78,26 @@ export function SetNewPasswordPage() {
       });
       return;
     }
-    setPasswordMutation.mutate({
-      body: { token, password: data.newPassword, confirm_password: data.confirmPassword },
-    });
+    if (flow === 'invitation') {
+      acceptInvitationMutation.mutate({
+        data: { invitation_token: token, new_password: data.newPassword },
+      });
+    } else {
+      resetPasswordMutation.mutate({
+        data: { reset_token: token, new_password: data.newPassword },
+      });
+    }
   };
 
   return (
     <AuthLayout imageSrc={setPasswordImage} imageAlt="Set-new-password illustration">
       <h1 className="mb-1 text-xl font-semibold text-foreground sm:text-2xl md:text-3xl">
-        Set Your New Password
+        {flow === 'invitation' ? 'Welcome — Set Your Password' : 'Set Your New Password'}
       </h1>
       <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
-        Create a strong password to secure your account.
+        {flow === 'invitation'
+          ? "You've been invited. Pick a strong password to activate your account."
+          : 'Create a strong password to secure your account.'}
       </p>
 
       <div className="mb-4">
@@ -93,7 +125,7 @@ export function SetNewPasswordPage() {
         variant="primary"
         size="lg"
         fullWidth
-        loading={setPasswordMutation.isPending}
+        loading={isPending}
         onClick={handleSubmit(onSubmit)}
       >
         Set Password

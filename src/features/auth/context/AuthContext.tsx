@@ -1,117 +1,105 @@
 /* eslint-disable react-refresh/only-export-components */
-// This module intentionally co-locates the `AuthContext` object with its
-// `AuthProvider` component. Splitting them across files for fast-refresh's
-// sake would create one-file-per-export churn for no runtime benefit.
-import { createContext, useState, useCallback, useMemo, useEffect, useRef, type ReactNode } from 'react';
-import { clearAuthStorage } from '../utils/clearAuthStorage';
+/**
+ * Cookie-based AuthProvider.
+ *
+ * Bootstrap is `GET /auth/me`:
+ *  - 200 → user populated, `isAuthenticated = true`.
+ *  - 401 → user is `null`, `isAuthenticated = false`.
+ *
+ * No localStorage r
+ * eads or writes. Cookies are managed by the backend; the
+ * browser attaches them automatically because `credentials: 'include'` is set
+ * on every API call. The CSRF cookie is read by the request interceptor in
+ * `src/api/client.ts` and echoed back as `X-CSRF-Token`.
+ *
+ * `signIn(user)` updates the in-memory user after a successful POST /auth/login
+ * (the actual cookies are set by the server response). `signOut()` clears
+ * client-side state and refetches /auth/me so any concurrent tab reflects the
+ * change.
+ */
+import { useCallback, useMemo, type ReactNode } from 'react';
+import { createContext } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ApiError } from '../../../api/client';
+import { getAuthMeQueryOptions, getAuthMeQueryKey } from '../../../sdk/auth';
+import type { MeResponse } from '../../../sdk/schemas';
 
-const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
-const IDLE_CHECK_INTERVAL_MS = 60 * 1000; // check every minute
-const ACTIVITY_EVENTS = ['mousemove', 'keydown', 'click', 'touchstart'] as const;
-const BROADCAST_CHANNEL_NAME = 'auth_logout';
-
-export interface AuthUser {
-  id?: number;
-  uuid: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  role_name?: string;
-}
+export type AuthUser = MeResponse;
 
 export interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (userData: AuthUser) => void;
-  logout: () => void;
-  checkUserIdMatch: (userId: string) => boolean;
+  signIn: (user: AuthUser) => void;
+  signOut: () => void;
+  refetchMe: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthState | null>(null);
 
+// Cache shape produced by the SDK's authMe queryFn: the mutator-wrapped
+// envelope { data: MeResponse, status, headers }. We unwrap for consumers.
+interface AuthMeEnvelope {
+  data: AuthUser;
+  status: number;
+}
+
+const QUERY_KEY = getAuthMeQueryKey();
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(() => {
-    // localStorage read is the canonical bootstrap pattern. Allowed by the
-    // current lint rules (useState initializer runs at mount, not render).
-    const data = localStorage.getItem('userData');
-    if (!data) return null;
-    try {
-      return JSON.parse(data);
-    } catch {
-      return null;
-    }
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    ...getAuthMeQueryOptions(),
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+    retry: (count, err) => {
+      // 401 is "not authenticated" — never retry.
+      if (err instanceof ApiError && err.status === 401) return false;
+      return count < 2;
+    },
   });
 
-  // eslint-disable-next-line react-hooks/purity -- timestamp is the semantic intent of useRef-as-mutable-clock
-  const lastActivityRef = useRef<number>(Date.now());
+  const signIn = useCallback(
+    (user: AuthUser) => {
+      // Prime the cache so consumers see the user immediately after login,
+      // without waiting for a /auth/me round-trip. The SDK stores the
+      // envelope shape — we mirror that here so subsequent reads of
+      // `query.data.data` work the same as a real fetch result.
+      queryClient.setQueryData(QUERY_KEY, {
+        data: user,
+        status: 200,
+        headers: new Headers(),
+      });
+    },
+    [queryClient],
+  );
 
-  const logout = useCallback(() => {
-    clearAuthStorage();
-    setUser(null);
-    window.location.href = '/login';
-  }, []);
+  const signOut = useCallback(() => {
+    queryClient.setQueryData(QUERY_KEY, null);
+    // Invalidate so the next mount/focus re-checks against the server.
+    queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+  }, [queryClient]);
 
-  const login = useCallback((userData: AuthUser) => {
-    localStorage.setItem('userData', JSON.stringify(userData));
-    lastActivityRef.current = Date.now();
-    setUser(userData);
-  }, []);
+  const refetchMe = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+  }, [queryClient]);
 
-  // Idle timeout: track activity + auto-logout + cross-tab sync
-  useEffect(() => {
-    if (!user) return;
-
-    const resetActivity = () => {
-      lastActivityRef.current = Date.now();
-    };
-
-    // Broadcast logout to other open tabs
-    let channel: BroadcastChannel | null = null;
-    try {
-      channel = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
-      channel.onmessage = (e) => {
-        if (e.data === 'logout') logout();
-      };
-    } catch {
-      // BroadcastChannel not supported in all environments
-    }
-
-    const broadcastLogout = () => {
-      try {
-        channel?.postMessage('logout');
-      } catch {
-        // ignore
-      }
-      logout();
-    };
-
-    ACTIVITY_EVENTS.forEach((event) => window.addEventListener(event, resetActivity, { passive: true }));
-
-    const intervalId = setInterval(() => {
-      if (Date.now() - lastActivityRef.current >= IDLE_TIMEOUT_MS) {
-        broadcastLogout();
-      }
-    }, IDLE_CHECK_INTERVAL_MS);
-
-    return () => {
-      ACTIVITY_EVENTS.forEach((event) => window.removeEventListener(event, resetActivity));
-      clearInterval(intervalId);
-      channel?.close();
-    };
-  }, [user, logout]);
-
-  const value = useMemo<AuthState>(
-    () => ({
+  const value = useMemo<AuthState>(() => {
+    const isAuthError = query.error instanceof ApiError && query.error.status === 401;
+    const envelope = query.data as AuthMeEnvelope | null | undefined;
+    const user = envelope?.data ?? null;
+    return {
       user,
       isAuthenticated: !!user,
-      isLoading: false,
-      login,
-      logout,
-      checkUserIdMatch: (userId: string) => user?.uuid === userId,
-    }),
-    [user, login, logout],
-  );
+      // Only "loading" on the very first round trip. Once we've resolved
+      // (success OR 401), don't keep ProtectedRoute spinning.
+      isLoading: query.isPending && !isAuthError,
+      signIn,
+      signOut,
+      refetchMe,
+    };
+  }, [query.data, query.error, query.isPending, signIn, signOut, refetchMe]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
