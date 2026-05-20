@@ -78,7 +78,8 @@
   --color-positive-70: #016A1C;
 
   --color-warning: #D66F00;               /* palette.warning.main */
-  --color-warning-foreground: #FFFFFF;
+  --color-warning-foreground: #FFFFFF; on `http://localhost:8000/admin` (admin-only;
+  non-admins receive `404` per FR-030)
   --color-warning-01: #FFFBF2;
   --color-warning-05: #FFF2D2;
   --color-warning-50: #D66F00;
