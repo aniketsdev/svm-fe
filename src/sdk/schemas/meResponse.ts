@@ -11,4 +11,7 @@ export interface MeResponse {
   email: string;
   role: string;
   is_active: boolean;
+  first_name?: string | null;
+  last_name?: string | null;
+  phone?: string | null;
 }

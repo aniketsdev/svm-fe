@@ -32,6 +32,7 @@ import type {
   MeResponse,
   RefreshResponse,
   ResetPasswordRequest,
+  UpdateProfileRequest,
   VerifyOtpRequest,
   VerifyOtpResponse
 } from './schemas';
@@ -439,7 +440,95 @@ export function useAuthMe<TData = Awaited<ReturnType<typeof authMe>>, TError = E
 
 
 
-export type authChangePasswordResponse204 = {
+export type authUpdateProfileResponse200 = {
+  data: MeResponse
+  status: 200
+}
+
+export type authUpdateProfileResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type authUpdateProfileResponseSuccess = (authUpdateProfileResponse200) & {
+  headers: Headers;
+};
+export type authUpdateProfileResponseError = (authUpdateProfileResponse422) & {
+  headers: Headers;
+};
+
+export type authUpdateProfileResponse = (authUpdateProfileResponseSuccess | authUpdateProfileResponseError)
+
+export const getAuthUpdateProfileUrl = () => {
+
+
+
+
+  return `/api/v1/auth/me`
+}
+
+/**
+ * @summary Update My Profile
+ */
+export const authUpdateProfile = async (updateProfileRequest: UpdateProfileRequest, options?: RequestInit): Promise<authUpdateProfileResponse> => {
+
+  return mutator<authUpdateProfileResponse>(getAuthUpdateProfileUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateProfileRequest)
+  }
+);}
+
+
+
+
+export const getAuthUpdateProfileMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authUpdateProfile>>, TError,{data: BodyType<UpdateProfileRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof authUpdateProfile>>, TError,{data: BodyType<UpdateProfileRequest>}, TContext> => {
+
+const mutationKey = ['authUpdateProfile'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authUpdateProfile>>, {data: BodyType<UpdateProfileRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  authUpdateProfile(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthUpdateProfileMutationResult = NonNullable<Awaited<ReturnType<typeof authUpdateProfile>>>
+    export type AuthUpdateProfileMutationBody = BodyType<UpdateProfileRequest>
+    export type AuthUpdateProfileMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update My Profile
+ */
+export const useAuthUpdateProfile = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authUpdateProfile>>, TError,{data: BodyType<UpdateProfileRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authUpdateProfile>>,
+        TError,
+        {data: BodyType<UpdateProfileRequest>},
+        TContext
+      > => {
+      return useMutation(getAuthUpdateProfileMutationOptions(options), queryClient);
+    }
+    export type authChangePasswordResponse204 = {
   data: void
   status: 204
 }

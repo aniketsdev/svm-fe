@@ -18,6 +18,7 @@ export * from './loginUserOut';
 export * from './meResponse';
 export * from './refreshResponse';
 export * from './resetPasswordRequest';
+export * from './updateProfileRequest';
 export * from './validationError';
 export * from './validationErrorCtx';
 export * from './verifyOtpRequest';
