@@ -34,6 +34,13 @@ import type {
   AdminListStoresParams,
   AdminListUsersParams,
   AdminListVendorsParams,
+  AdminResendOut,
+  AdminUserCreate,
+  AdminUserCreateOut,
+  AdminUserList,
+  AdminUserOut,
+  AdminUserStatusUpdate,
+  AdminUserUpdate,
   AuditLogListResponse,
   BomListItem,
   BomListResponse,
@@ -67,7 +74,6 @@ import type {
   RoleListResponse,
   StoreListItem,
   StoreListResponse,
-  UserListResponse,
   VendorListItem,
   VendorListResponse
 } from './schemas';
@@ -256,7 +262,7 @@ export const useAdminRevokeInvitation = <TError = ErrorType<HTTPValidationError>
       return useMutation(getAdminRevokeInvitationMutationOptions(options), queryClient);
     }
     export type adminListUsersResponse200 = {
-  data: UserListResponse
+  data: AdminUserList
   status: 200
 }
 
@@ -381,7 +387,656 @@ export function useAdminListUsers<TData = Awaited<ReturnType<typeof adminListUse
 
 
 
-export type adminListAuditLogResponse200 = {
+export type adminCreateUserResponse201 = {
+  data: AdminUserCreateOut
+  status: 201
+}
+
+export type adminCreateUserResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminCreateUserResponseSuccess = (adminCreateUserResponse201) & {
+  headers: Headers;
+};
+export type adminCreateUserResponseError = (adminCreateUserResponse422) & {
+  headers: Headers;
+};
+
+export type adminCreateUserResponse = (adminCreateUserResponseSuccess | adminCreateUserResponseError)
+
+export const getAdminCreateUserUrl = () => {
+
+
+
+
+  return `/api/v1/admin/users`
+}
+
+/**
+ * @summary Create User
+ */
+export const adminCreateUser = async (adminUserCreate: AdminUserCreate, options?: RequestInit): Promise<adminCreateUserResponse> => {
+
+  return mutator<adminCreateUserResponse>(getAdminCreateUserUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(adminUserCreate)
+  }
+);}
+
+
+
+
+export const getAdminCreateUserMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateUser>>, TError,{data: BodyType<AdminUserCreate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateUser>>, TError,{data: BodyType<AdminUserCreate>}, TContext> => {
+
+const mutationKey = ['adminCreateUser'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateUser>>, {data: BodyType<AdminUserCreate>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminCreateUser(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCreateUserMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateUser>>>
+    export type AdminCreateUserMutationBody = BodyType<AdminUserCreate>
+    export type AdminCreateUserMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Create User
+ */
+export const useAdminCreateUser = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateUser>>, TError,{data: BodyType<AdminUserCreate>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminCreateUser>>,
+        TError,
+        {data: BodyType<AdminUserCreate>},
+        TContext
+      > => {
+      return useMutation(getAdminCreateUserMutationOptions(options), queryClient);
+    }
+    export type adminGetUserResponse200 = {
+  data: AdminUserOut
+  status: 200
+}
+
+export type adminGetUserResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminGetUserResponseSuccess = (adminGetUserResponse200) & {
+  headers: Headers;
+};
+export type adminGetUserResponseError = (adminGetUserResponse422) & {
+  headers: Headers;
+};
+
+export type adminGetUserResponse = (adminGetUserResponseSuccess | adminGetUserResponseError)
+
+export const getAdminGetUserUrl = (userId: number,) => {
+
+
+
+
+  return `/api/v1/admin/users/${userId}`
+}
+
+/**
+ * @summary Get User
+ */
+export const adminGetUser = async (userId: number, options?: RequestInit): Promise<adminGetUserResponse> => {
+
+  return mutator<adminGetUserResponse>(getAdminGetUserUrl(userId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetUserQueryKey = (userId: number,) => {
+    return [
+    `/api/v1/admin/users/${userId}`
+    ] as const;
+    }
+
+
+export const getAdminGetUserQueryOptions = <TData = Awaited<ReturnType<typeof adminGetUser>>, TError = ErrorType<HTTPValidationError>>(userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetUser>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetUserQueryKey(userId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetUser>>> = ({ signal }) => adminGetUser(userId, { signal });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: userId !== null && userId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetUser>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminGetUserQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetUser>>>
+export type AdminGetUserQueryError = ErrorType<HTTPValidationError>
+
+
+export function useAdminGetUser<TData = Awaited<ReturnType<typeof adminGetUser>>, TError = ErrorType<HTTPValidationError>>(
+ userId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetUser>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetUser>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetUser>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetUser<TData = Awaited<ReturnType<typeof adminGetUser>>, TError = ErrorType<HTTPValidationError>>(
+ userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetUser>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetUser>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetUser>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetUser<TData = Awaited<ReturnType<typeof adminGetUser>>, TError = ErrorType<HTTPValidationError>>(
+ userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetUser>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get User
+ */
+
+export function useAdminGetUser<TData = Awaited<ReturnType<typeof adminGetUser>>, TError = ErrorType<HTTPValidationError>>(
+ userId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetUser>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminGetUserQueryOptions(userId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminUpdateUserResponse200 = {
+  data: AdminUserOut
+  status: 200
+}
+
+export type adminUpdateUserResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateUserResponseSuccess = (adminUpdateUserResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateUserResponseError = (adminUpdateUserResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateUserResponse = (adminUpdateUserResponseSuccess | adminUpdateUserResponseError)
+
+export const getAdminUpdateUserUrl = (userId: number,) => {
+
+
+
+
+  return `/api/v1/admin/users/${userId}`
+}
+
+/**
+ * @summary Update User
+ */
+export const adminUpdateUser = async (userId: number,
+    adminUserUpdate: AdminUserUpdate, options?: RequestInit): Promise<adminUpdateUserResponse> => {
+
+  return mutator<adminUpdateUserResponse>(getAdminUpdateUserUrl(userId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(adminUserUpdate)
+  }
+);}
+
+
+
+
+export const getAdminUpdateUserMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateUser>>, TError,{userId: number;data: BodyType<AdminUserUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateUser>>, TError,{userId: number;data: BodyType<AdminUserUpdate>}, TContext> => {
+
+const mutationKey = ['adminUpdateUser'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateUser>>, {userId: number;data: BodyType<AdminUserUpdate>}> = (props) => {
+          const {userId,data} = props ?? {};
+
+          return  adminUpdateUser(userId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateUserMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateUser>>>
+    export type AdminUpdateUserMutationBody = BodyType<AdminUserUpdate>
+    export type AdminUpdateUserMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update User
+ */
+export const useAdminUpdateUser = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateUser>>, TError,{userId: number;data: BodyType<AdminUserUpdate>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateUser>>,
+        TError,
+        {userId: number;data: BodyType<AdminUserUpdate>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateUserMutationOptions(options), queryClient);
+    }
+    export type adminSoftDeleteUserResponse204 = {
+  data: void
+  status: 204
+}
+
+export type adminSoftDeleteUserResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSoftDeleteUserResponseSuccess = (adminSoftDeleteUserResponse204) & {
+  headers: Headers;
+};
+export type adminSoftDeleteUserResponseError = (adminSoftDeleteUserResponse422) & {
+  headers: Headers;
+};
+
+export type adminSoftDeleteUserResponse = (adminSoftDeleteUserResponseSuccess | adminSoftDeleteUserResponseError)
+
+export const getAdminSoftDeleteUserUrl = (userId: number,) => {
+
+
+
+
+  return `/api/v1/admin/users/${userId}`
+}
+
+/**
+ * @summary Soft Delete User
+ */
+export const adminSoftDeleteUser = async (userId: number, options?: RequestInit): Promise<adminSoftDeleteUserResponse> => {
+
+  return mutator<adminSoftDeleteUserResponse>(getAdminSoftDeleteUserUrl(userId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getAdminSoftDeleteUserMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSoftDeleteUser>>, TError,{userId: number}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSoftDeleteUser>>, TError,{userId: number}, TContext> => {
+
+const mutationKey = ['adminSoftDeleteUser'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSoftDeleteUser>>, {userId: number}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  adminSoftDeleteUser(userId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSoftDeleteUserMutationResult = NonNullable<Awaited<ReturnType<typeof adminSoftDeleteUser>>>
+
+    export type AdminSoftDeleteUserMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Soft Delete User
+ */
+export const useAdminSoftDeleteUser = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSoftDeleteUser>>, TError,{userId: number}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSoftDeleteUser>>,
+        TError,
+        {userId: number},
+        TContext
+      > => {
+      return useMutation(getAdminSoftDeleteUserMutationOptions(options), queryClient);
+    }
+    export type adminSetUserStatusResponse200 = {
+  data: AdminUserOut
+  status: 200
+}
+
+export type adminSetUserStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetUserStatusResponseSuccess = (adminSetUserStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetUserStatusResponseError = (adminSetUserStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetUserStatusResponse = (adminSetUserStatusResponseSuccess | adminSetUserStatusResponseError)
+
+export const getAdminSetUserStatusUrl = (userId: number,) => {
+
+
+
+
+  return `/api/v1/admin/users/${userId}/status`
+}
+
+/**
+ * @summary Set User Status
+ */
+export const adminSetUserStatus = async (userId: number,
+    adminUserStatusUpdate: AdminUserStatusUpdate, options?: RequestInit): Promise<adminSetUserStatusResponse> => {
+
+  return mutator<adminSetUserStatusResponse>(getAdminSetUserStatusUrl(userId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(adminUserStatusUpdate)
+  }
+);}
+
+
+
+
+export const getAdminSetUserStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetUserStatus>>, TError,{userId: number;data: BodyType<AdminUserStatusUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetUserStatus>>, TError,{userId: number;data: BodyType<AdminUserStatusUpdate>}, TContext> => {
+
+const mutationKey = ['adminSetUserStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetUserStatus>>, {userId: number;data: BodyType<AdminUserStatusUpdate>}> = (props) => {
+          const {userId,data} = props ?? {};
+
+          return  adminSetUserStatus(userId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetUserStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetUserStatus>>>
+    export type AdminSetUserStatusMutationBody = BodyType<AdminUserStatusUpdate>
+    export type AdminSetUserStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set User Status
+ */
+export const useAdminSetUserStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetUserStatus>>, TError,{userId: number;data: BodyType<AdminUserStatusUpdate>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetUserStatus>>,
+        TError,
+        {userId: number;data: BodyType<AdminUserStatusUpdate>},
+        TContext
+      > => {
+      return useMutation(getAdminSetUserStatusMutationOptions(options), queryClient);
+    }
+    export type adminRestoreUserResponse200 = {
+  data: AdminUserOut
+  status: 200
+}
+
+export type adminRestoreUserResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminRestoreUserResponseSuccess = (adminRestoreUserResponse200) & {
+  headers: Headers;
+};
+export type adminRestoreUserResponseError = (adminRestoreUserResponse422) & {
+  headers: Headers;
+};
+
+export type adminRestoreUserResponse = (adminRestoreUserResponseSuccess | adminRestoreUserResponseError)
+
+export const getAdminRestoreUserUrl = (userId: number,) => {
+
+
+
+
+  return `/api/v1/admin/users/${userId}/restore`
+}
+
+/**
+ * @summary Restore User
+ */
+export const adminRestoreUser = async (userId: number, options?: RequestInit): Promise<adminRestoreUserResponse> => {
+
+  return mutator<adminRestoreUserResponse>(getAdminRestoreUserUrl(userId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getAdminRestoreUserMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRestoreUser>>, TError,{userId: number}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminRestoreUser>>, TError,{userId: number}, TContext> => {
+
+const mutationKey = ['adminRestoreUser'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRestoreUser>>, {userId: number}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  adminRestoreUser(userId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminRestoreUserMutationResult = NonNullable<Awaited<ReturnType<typeof adminRestoreUser>>>
+
+    export type AdminRestoreUserMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Restore User
+ */
+export const useAdminRestoreUser = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRestoreUser>>, TError,{userId: number}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminRestoreUser>>,
+        TError,
+        {userId: number},
+        TContext
+      > => {
+      return useMutation(getAdminRestoreUserMutationOptions(options), queryClient);
+    }
+    export type adminResendInvitationResponse200 = {
+  data: AdminResendOut
+  status: 200
+}
+
+export type adminResendInvitationResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminResendInvitationResponseSuccess = (adminResendInvitationResponse200) & {
+  headers: Headers;
+};
+export type adminResendInvitationResponseError = (adminResendInvitationResponse422) & {
+  headers: Headers;
+};
+
+export type adminResendInvitationResponse = (adminResendInvitationResponseSuccess | adminResendInvitationResponseError)
+
+export const getAdminResendInvitationUrl = (userId: number,) => {
+
+
+
+
+  return `/api/v1/admin/users/${userId}/resend-invitation`
+}
+
+/**
+ * @summary Resend Invitation
+ */
+export const adminResendInvitation = async (userId: number, options?: RequestInit): Promise<adminResendInvitationResponse> => {
+
+  return mutator<adminResendInvitationResponse>(getAdminResendInvitationUrl(userId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getAdminResendInvitationMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminResendInvitation>>, TError,{userId: number}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminResendInvitation>>, TError,{userId: number}, TContext> => {
+
+const mutationKey = ['adminResendInvitation'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminResendInvitation>>, {userId: number}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  adminResendInvitation(userId,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminResendInvitationMutationResult = NonNullable<Awaited<ReturnType<typeof adminResendInvitation>>>
+
+    export type AdminResendInvitationMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Resend Invitation
+ */
+export const useAdminResendInvitation = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminResendInvitation>>, TError,{userId: number}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminResendInvitation>>,
+        TError,
+        {userId: number},
+        TContext
+      > => {
+      return useMutation(getAdminResendInvitationMutationOptions(options), queryClient);
+    }
+    export type adminListAuditLogResponse200 = {
   data: AuditLogListResponse
   status: 200
 }
