@@ -25,6 +25,62 @@ const SetNewPasswordPage = lazyWithPreload(() =>
   })),
 );
 
+// ── Lazy feature pages ──────────────────────────────────────────────────────
+const UsersPage = lazyWithPreload(() =>
+  import('../features/users/pages/UsersPage').then((m) => ({ default: m.UsersPage })),
+);
+const ActivityLogPage = lazyWithPreload(() =>
+  import('../features/activity-log/pages/ActivityLogPage').then((m) => ({
+    default: m.ActivityLogPage,
+  })),
+);
+const RolesPermissionsPage = lazyWithPreload(() =>
+  import('../features/roles-permissions/pages/RolesPermissionsPage').then((m) => ({
+    default: m.RolesPermissionsPage,
+  })),
+);
+const MastersPage = lazyWithPreload(() =>
+  import('../features/masters/pages/MastersPage').then((m) => ({ default: m.MastersPage })),
+);
+const StoresPage = lazyWithPreload(() =>
+  import('../features/masters/pages/StoresPage').then((m) => ({ default: m.StoresPage })),
+);
+const VendorsPage = lazyWithPreload(() =>
+  import('../features/masters/pages/VendorsPage').then((m) => ({ default: m.VendorsPage })),
+);
+const CouriersPage = lazyWithPreload(() =>
+  import('../features/masters/pages/CouriersPage').then((m) => ({ default: m.CouriersPage })),
+);
+const RmCategoriesPage = lazyWithPreload(() =>
+  import('../features/masters/pages/RmCategoriesPage').then((m) => ({
+    default: m.RmCategoriesPage,
+  })),
+);
+const ProductsPage = lazyWithPreload(() =>
+  import('../features/masters/pages/ProductsPage').then((m) => ({ default: m.ProductsPage })),
+);
+const RawMaterialsPage = lazyWithPreload(() =>
+  import('../features/masters/pages/RawMaterialsPage').then((m) => ({
+    default: m.RawMaterialsPage,
+  })),
+);
+const DoctorsPage = lazyWithPreload(() =>
+  import('../features/masters/pages/DoctorsPage').then((m) => ({ default: m.DoctorsPage })),
+);
+const DoctorAliasesPage = lazyWithPreload(() =>
+  import('../features/masters/pages/DoctorAliasesPage').then((m) => ({
+    default: m.DoctorAliasesPage,
+  })),
+);
+const DoctorPricingPage = lazyWithPreload(() =>
+  import('../features/masters/pages/DoctorPricingPage').then((m) => ({
+    default: m.DoctorPricingPage,
+  })),
+);
+const BomsPage = lazyWithPreload(() =>
+  import('../features/masters/pages/BomsPage').then((m) => ({ default: m.BomsPage })),
+);
+
 // ── Placeholder pages for routes whose features aren't built yet ────────────
 const DashboardPlaceholder = () => <PlaceholderPage title="Dashboard" />;
 const ClientsPlaceholder = () => <PlaceholderPage title="Clients" />;
@@ -100,6 +156,20 @@ export default function AppRoutes() {
         }
       >
         <Route path="dashboard" element={<DashboardPlaceholder />} />
+        <Route path="users" element={<UsersPage />} />
+        <Route path="activity-log" element={<ActivityLogPage />} />
+        <Route path="roles-permissions" element={<RolesPermissionsPage />} />
+        <Route path="masters" element={<MastersPage />} />
+        <Route path="masters/stores" element={<StoresPage />} />
+        <Route path="masters/vendors" element={<VendorsPage />} />
+        <Route path="masters/courier-partners" element={<CouriersPage />} />
+        <Route path="masters/rm-categories" element={<RmCategoriesPage />} />
+        <Route path="masters/products" element={<ProductsPage />} />
+        <Route path="masters/raw-materials" element={<RawMaterialsPage />} />
+        <Route path="masters/doctors" element={<DoctorsPage />} />
+        <Route path="masters/doctor-aliases" element={<DoctorAliasesPage />} />
+        <Route path="masters/doctor-pricing" element={<DoctorPricingPage />} />
+        <Route path="masters/boms" element={<BomsPage />} />
         <Route path="scheduling" element={<SchedulingPlaceholder />} />
         <Route path="clients" element={<ClientsPlaceholder />} />
         <Route path="clients/:clientUuid" element={<ClientDetailPlaceholder />} />

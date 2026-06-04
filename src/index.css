@@ -11,49 +11,51 @@
  * When the brand palette changes, this is the only file that changes.
  */
 @theme {
-  /* ── Base surfaces ────────────────────────────────────────────────────── */
-  --color-background: #FFFFFF;            /* palette.background.default */
-  --color-foreground: #1A212B;            /* palette.text.primary */
+  /* ── Base surfaces (Ayurveda: warm ivory canvas, near-white cards) ─────── */
+  --color-background: #F7F4EB;            /* warm ivory canvas */
+  --color-foreground: #15271E;            /* deep neem-green ink */
+  --color-card: #FDFCF7;                  /* near-white card surface */
+  --color-card-foreground: #15271E;
 
-  /* ── Primary (teal-dark) ───────────────────────────────────────────────── */
-  --color-primary: #1E5060;               /* palette.primary.main */
-  --color-primary-foreground: #FFFFFF;    /* palette.primary.contrastText */
-  --color-primary-00: #EAF1F3;
-  --color-primary-01: #BDD3DA;
-  --color-primary-02: #9DBEC8;
-  --color-primary-03: #70A0AF;
-  --color-primary-04: #558D9F;
-  --color-primary-05: #2A7187;
-  --color-primary-06: #26677B;
-  --color-primary-07: #1E5060;
-  --color-primary-08: #173E4A;
-  --color-primary-09: #122F39;
-  --color-primary-10: #122D36;
-  --color-primary-light: #9DBEC8;
-  --color-primary-dark: #122F39;
+  /* ── Primary (neem green) ──────────────────────────────────────────────── */
+  --color-primary: #1A6A3E;               /* neem green */
+  --color-primary-foreground: #F6F2E6;    /* cream on green */
+  --color-primary-00: #EAF3EE;
+  --color-primary-01: #C9E2D3;
+  --color-primary-02: #A6CFB8;
+  --color-primary-03: #79B791;
+  --color-primary-04: #4E9D6E;
+  --color-primary-05: #2E8553;
+  --color-primary-06: #217044;
+  --color-primary-07: #1A6A3E;
+  --color-primary-08: #134E2F;
+  --color-primary-09: #0E3A23;
+  --color-primary-10: #0B2E1B;
+  --color-primary-light: #A6CFB8;
+  --color-primary-dark: #0E3A23;
 
-  /* ── Secondary (shadcn-style subtle gray for surfaces / outline-button hover) ── */
-  --color-secondary: #ECEFF4;             /* palette.neutral['05'] */
-  --color-secondary-foreground: #1A212B;  /* palette.text.primary */
+  /* ── Secondary (pale sage for surfaces / outline-button hover) ─────────── */
+  --color-secondary: #E2E8D9;             /* pale sage */
+  --color-secondary-foreground: #1C3829;
 
-  /* ── Accent (the brand's green) ───────────────────────────────────────── */
-  --color-accent: #578729;                /* palette.secondary.main */
-  --color-accent-foreground: #FFFFFF;
+  /* ── Accent (saffron / gold) ──────────────────────────────────────────── */
+  --color-accent: #E7AE32;                /* saffron */
+  --color-accent-foreground: #3A2611;
   --color-accent-01: #FFFFFF;
-  --color-accent-05: #E6F3D4;
-  --color-accent-10: #CEE8AE;
-  --color-accent-20: #AED77F;
-  --color-accent-30: #83BE42;
-  --color-accent-40: #72AA38;
-  --color-accent-50: #578729;
-  --color-accent-60: #436823;
-  --color-accent-70: #385321;
-  --color-accent-80: #314720;
-  --color-accent-90: #18260D;
+  --color-accent-05: #FBF1D9;
+  --color-accent-10: #F7E4B2;
+  --color-accent-20: #F1D184;
+  --color-accent-30: #ECC057;
+  --color-accent-40: #E7AE32;
+  --color-accent-50: #CE9621;
+  --color-accent-60: #A8781A;
+  --color-accent-70: #845E15;
+  --color-accent-80: #674910;
+  --color-accent-90: #3A2611;
 
   /* ── Muted (helper text + very subtle backgrounds) ────────────────────── */
-  --color-muted: #F6F8FB;                 /* palette.neutral['00'] */
-  --color-muted-foreground: #728197;      /* palette.text.secondary / neutral['50'] */
+  --color-muted: #EDF0E4;                 /* warm pale sage */
+  --color-muted-foreground: #5F7C70;      /* muted green-gray */
 
   /* ── Destructive (errors, delete) ─────────────────────────────────────── */
   --color-destructive: #B1000F;           /* palette.negative.main */
@@ -105,10 +107,10 @@
   --color-neutral-90: #27313F;
 
   /* ── Borders, inputs, focus ring ─────────────────────────────────────── */
-  --color-border: #DEE4ED;                /* palette.neutral['10'] */
-  --color-input: #DEE4ED;                 /* palette.neutral['10'] */
-  --color-ring: #1E5060;                  /* palette.primary.main */
-  --color-outline-decorative: #CBD4E1;
+  --color-border: #D8DECC;                /* sage */
+  --color-input: #D8DECC;                 /* sage */
+  --color-ring: #1E7A49;                  /* neem green */
+  --color-outline-decorative: #C7D2B8;
 
   /* ── Radius scale ─────────────────────────────────────────────────────── */
   --radius-sm: 0.25rem;
@@ -145,7 +147,12 @@ body,
 
 body {
   margin: 0;
-  background: var(--color-background);
+  /* Warm ivory canvas with a soft neem/mint glow, echoing the reference UI. */
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--color-primary) 8%, transparent), transparent 30rem),
+    linear-gradient(120deg, color-mix(in srgb, var(--color-primary) 4%, transparent), transparent 20rem),
+    var(--color-background);
+  background-attachment: fixed;
   color: var(--color-foreground);
   font-family: var(--font-sans);
   font-synthesis: none;

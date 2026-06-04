@@ -1,0 +1,11 @@
+export { MastersPage } from './pages/MastersPage';
+export { StoresPage } from './pages/StoresPage';
+export { VendorsPage } from './pages/VendorsPage';
+export { CouriersPage } from './pages/CouriersPage';
+export { RmCategoriesPage } from './pages/RmCategoriesPage';
+export { ProductsPage } from './pages/ProductsPage';
+export { RawMaterialsPage } from './pages/RawMaterialsPage';
+export { DoctorsPage } from './pages/DoctorsPage';
+export { DoctorAliasesPage } from './pages/DoctorAliasesPage';
+export { DoctorPricingPage } from './pages/DoctorPricingPage';
+export { BomsPage } from './pages/BomsPage';
