@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import dayjs from 'dayjs';
+import { Mail, Pencil, Power, Trash2 } from 'lucide-react';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
+import { ActionMenu, type ActionMenuItem } from '../../../common/action-menu';
 import type { UserRow } from '../api/users';
 import { RoleBadge } from './RoleBadge';
 import { StatusPill } from './StatusPill';
@@ -13,17 +15,26 @@ function fullName(u: UserRow): string {
 interface UsersTableProps {
   users: UserRow[];
   loading: boolean;
+  onEdit: (u: UserRow) => void;
+  onToggleStatus: (u: UserRow) => void;
+  onResend: (u: UserRow) => void;
+  onDelete: (u: UserRow) => void;
 }
 
-export function UsersTable({ users, loading }: UsersTableProps) {
+export function UsersTable({
+  users,
+  loading,
+  onEdit,
+  onToggleStatus,
+  onResend,
+  onDelete,
+}: UsersTableProps) {
   const columns = useMemo<ColumnDef<UserRow, unknown>[]>(
     () => [
       {
         accessorKey: 'email',
         header: 'Email',
-        cell: ({ row }) => (
-          <span className="font-medium text-foreground">{row.original.email}</span>
-        ),
+        cell: ({ row }) => <span className="font-medium text-foreground">{row.original.email}</span>,
       },
       {
         id: 'name',
@@ -41,13 +52,6 @@ export function UsersTable({ users, loading }: UsersTableProps) {
         cell: ({ row }) => <StatusPill active={row.original.is_active} />,
       },
       {
-        // 2FA is not implemented on the backend yet — placeholder until that
-        // feature lands (see Week-1 plan).
-        id: 'twofa',
-        header: '2FA',
-        cell: () => <StatusPill active={false} activeLabel="On" inactiveLabel="Off" />,
-      },
-      {
         id: 'last_login',
         header: 'Last login',
         cell: ({ row }) =>
@@ -59,8 +63,42 @@ export function UsersTable({ users, loading }: UsersTableProps) {
             <span className="text-muted-foreground">—</span>
           ),
       },
+      {
+        id: 'actions',
+        header: '',
+        enableSorting: false,
+        cell: ({ row }) => {
+          const u = row.original;
+          const items: ActionMenuItem[] = [
+            { label: 'Edit', icon: <Pencil className="size-4" />, onClick: () => onEdit(u) },
+            {
+              label: u.is_active ? 'Deactivate' : 'Activate',
+              icon: <Power className="size-4" />,
+              onClick: () => onToggleStatus(u),
+            },
+          ];
+          if (u.can_resend_set_password_link) {
+            items.push({
+              label: 'Resend set-password link',
+              icon: <Mail className="size-4" />,
+              onClick: () => onResend(u),
+            });
+          }
+          items.push({
+            label: 'Delete',
+            icon: <Trash2 className="size-4" />,
+            color: 'var(--color-destructive)',
+            onClick: () => onDelete(u),
+          });
+          return (
+            <div className="flex justify-end">
+              <ActionMenu items={items} ariaLabel={`Actions for ${u.email}`} />
+            </div>
+          );
+        },
+      },
     ],
-    [],
+    [onEdit, onToggleStatus, onResend, onDelete],
   );
 
   return (

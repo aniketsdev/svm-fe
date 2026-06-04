@@ -2,9 +2,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-// Mirrors the backend AdminUserCreate (feature 008): email + role required,
-// name/phone optional.
-const createUserSchema = z.object({
+// Mirrors the backend AdminUserUpdate (feature 008) — a partial update; the
+// form sends the current values for every field.
+const editUserSchema = z.object({
   email: z.string().trim().min(3, 'Email is required').email('Enter a valid email'),
   first_name: z.string().trim().max(100).optional(),
   last_name: z.string().trim().max(100).optional(),
@@ -12,11 +12,11 @@ const createUserSchema = z.object({
   role: z.enum(['admin', 'staff', 'user']),
 });
 
-export type CreateUserFormValues = z.infer<typeof createUserSchema>;
+export type EditUserFormValues = z.infer<typeof editUserSchema>;
 
-export function useCreateUserForm() {
-  return useForm<CreateUserFormValues>({
-    resolver: zodResolver(createUserSchema),
+export function useEditUserForm() {
+  return useForm<EditUserFormValues>({
+    resolver: zodResolver(editUserSchema),
     defaultValues: { email: '', first_name: '', last_name: '', phone: '', role: 'user' },
     mode: 'onSubmit',
   });
