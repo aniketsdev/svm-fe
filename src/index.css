@@ -11,11 +11,11 @@
  * When the brand palette changes, this is the only file that changes.
  */
 @theme {
-  /* ── Base surfaces (Ayurveda: warm ivory canvas, near-white cards) ─────── */
-  --color-background: #F7F4EB;            /* warm ivory canvas */
-  --color-foreground: #15271E;            /* deep neem-green ink */
-  --color-card: #FDFCF7;                  /* near-white card surface */
-  --color-card-foreground: #15271E;
+  /* ── Base surfaces (clean white content; green lives on the nav chrome) ── */
+  --color-background: #FFFFFF;            /* white surface — inputs, dialogs, drawers, popovers */
+  --color-foreground: #16201B;            /* near-black ink */
+  --color-card: #FFFFFF;                  /* white card surface */
+  --color-card-foreground: #16201B;
 
   /* ── Primary (neem green) ──────────────────────────────────────────────── */
   --color-primary: #1A6A3E;               /* neem green */
@@ -34,9 +34,9 @@
   --color-primary-light: #A6CFB8;
   --color-primary-dark: #0E3A23;
 
-  /* ── Secondary (pale sage for surfaces / outline-button hover) ─────────── */
-  --color-secondary: #E2E8D9;             /* pale sage */
-  --color-secondary-foreground: #1C3829;
+  /* ── Secondary (neutral light gray for surfaces / outline-button hover) ── */
+  --color-secondary: #EEF1F5;             /* neutral light gray */
+  --color-secondary-foreground: #2B3A33;
 
   /* ── Accent (saffron / gold) ──────────────────────────────────────────── */
   --color-accent: #E7AE32;                /* saffron */
@@ -54,8 +54,8 @@
   --color-accent-90: #3A2611;
 
   /* ── Muted (helper text + very subtle backgrounds) ────────────────────── */
-  --color-muted: #EDF0E4;                 /* warm pale sage */
-  --color-muted-foreground: #5F7C70;      /* muted green-gray */
+  --color-muted: #F2F4F7;                 /* neutral light gray */
+  --color-muted-foreground: #667085;      /* slate gray */
 
   /* ── Destructive (errors, delete) ─────────────────────────────────────── */
   --color-destructive: #B1000F;           /* palette.negative.main */
@@ -107,10 +107,10 @@
   --color-neutral-90: #27313F;
 
   /* ── Borders, inputs, focus ring ─────────────────────────────────────── */
-  --color-border: #D8DECC;                /* sage */
-  --color-input: #D8DECC;                 /* sage */
-  --color-ring: #1E7A49;                  /* neem green */
-  --color-outline-decorative: #C7D2B8;
+  --color-border: #E5E8EC;                /* neutral gray */
+  --color-input: #D7DCE3;                 /* neutral gray */
+  --color-ring: #1E7A49;                  /* neem green (brand focus ring) */
+  --color-outline-decorative: #E0E4EA;
 
   /* ── Radius scale ─────────────────────────────────────────────────────── */
   --radius-sm: 0.25rem;
@@ -147,12 +147,9 @@ body,
 
 body {
   margin: 0;
-  /* Warm ivory canvas with a soft neem/mint glow, echoing the reference UI. */
-  background:
-    radial-gradient(circle at top left, color-mix(in srgb, var(--color-primary) 8%, transparent), transparent 30rem),
-    linear-gradient(120deg, color-mix(in srgb, var(--color-primary) 4%, transparent), transparent 20rem),
-    var(--color-background);
-  background-attachment: fixed;
+  /* Clean, modern light-gray canvas so white cards/inputs read crisply.
+     Brand green is confined to the sidebar + top header chrome. */
+  background-color: #F4F6F8;
   color: var(--color-foreground);
   font-family: var(--font-sans);
   font-synthesis: none;
