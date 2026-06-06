@@ -1,10 +1,10 @@
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
-import { CustomLabel } from '../../../common/custom-label';
 import { RHFInput } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCreateVendor } from '../../../sdk/admin';
 import { useCreateVendorForm, type CreateVendorFormValues } from '../hooks/useCreateVendorForm';
 
@@ -21,19 +21,19 @@ export function CreateVendorDialog({ open, onClose, onCreated }: CreateVendorDia
 
   const createMutation = useAdminCreateVendor({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Vendor created.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Vendor created.') });
         reset();
         onCreated();
         onClose();
       },
       onError: (error) => {
         if (error instanceof ApiError && error.status === 409) {
-          setError('code', { type: 'manual', message: 'A vendor with this code already exists.' });
+          setError('code', { type: 'manual', message: errorMessage(error) });
           return;
         }
         const general = handleApiError(error);
-        if (general) toast({ severity: 'error', message: general });
+        toast({ severity: 'error', message: general ?? errorMessage(error) });
       },
     },
   });
@@ -56,31 +56,16 @@ export function CreateVendorDialog({ open, onClose, onCreated }: CreateVendorDia
   };
 
   return (
-    <CustomDialog title="Add vendor" open={open} onClose={handleClose} width="32rem">
+    <CustomDrawer anchor="right" title="Add vendor" open={open} onClose={handleClose} drawerWidth="32rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <div>
-          <CustomLabel htmlFor="name" isRequired label="Name" />
-          <RHFInput<CreateVendorFormValues> name="name" control={control} placeholder="Himalaya Herbs" />
+        <RHFInput<CreateVendorFormValues> name="name" control={control} label="Name" required placeholder="Enter name" />
+        <div className="grid grid-cols-2 gap-3">
+          <RHFInput<CreateVendorFormValues> name="code" control={control} label="Code" required placeholder="Enter code" />
+          <RHFInput<CreateVendorFormValues> name="gstin" control={control} label="GSTIN" placeholder="Enter GSTIN" />
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <CustomLabel htmlFor="code" isRequired label="Code" />
-            <RHFInput<CreateVendorFormValues> name="code" control={control} placeholder="VEN-001" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="gstin" label="GSTIN" />
-            <RHFInput<CreateVendorFormValues> name="gstin" control={control} placeholder="27ABCDE1234F1Z5" />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <CustomLabel htmlFor="state_code" label="State code" />
-            <RHFInput<CreateVendorFormValues> name="state_code" control={control} placeholder="27" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="city" label="City" />
-            <RHFInput<CreateVendorFormValues> name="city" control={control} placeholder="Mumbai" />
-          </div>
+          <RHFInput<CreateVendorFormValues> name="state_code" control={control} label="State code" placeholder="Enter state code" />
+          <RHFInput<CreateVendorFormValues> name="city" control={control} label="City" placeholder="Enter city" />
         </div>
         <div className="mt-2 flex justify-end gap-3">
           <CustomButton type="button" variant="outline" onClick={handleClose}>
@@ -91,6 +76,6 @@ export function CreateVendorDialog({ open, onClose, onCreated }: CreateVendorDia
           </CustomButton>
         </div>
       </form>
-    </CustomDialog>
+    </CustomDrawer>
   );
 }

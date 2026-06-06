@@ -1,11 +1,7 @@
 import { useMemo } from 'react';
-import dayjs from 'dayjs';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
+import { formatCurrency, formatDate } from '../../../utils/format';
 import type { DoctorPricingRow } from '../api/doctor-pricing';
-
-function fmtDate(v: string | null | undefined): string {
-  return v ? dayjs(v).format('DD MMM YYYY') : '—';
-}
 
 export function DoctorPricingTable({
   pricing,
@@ -30,18 +26,18 @@ export function DoctorPricingTable({
         accessorKey: 'price',
         header: 'Price',
         cell: ({ row }) => (
-          <span className="tabular-nums text-foreground">₹{row.original.price.toFixed(2)}</span>
+          <span className="tabular-nums text-foreground">{formatCurrency(row.original.price)}</span>
         ),
       },
       {
         accessorKey: 'valid_from',
         header: 'Valid from',
-        cell: ({ row }) => <span className="text-muted-foreground">{fmtDate(row.original.valid_from)}</span>,
+        cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.valid_from)}</span>,
       },
       {
         accessorKey: 'valid_to',
         header: 'Valid to',
-        cell: ({ row }) => <span className="text-muted-foreground">{fmtDate(row.original.valid_to)}</span>,
+        cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.valid_to)}</span>,
       },
     ],
     [],

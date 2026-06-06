@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import dayjs from 'dayjs';
+import { formatDateTime } from '../../../utils/format';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import type { AuditRow } from '../api/activity-log';
 import { ActionBadge } from './ActionBadge';
@@ -18,7 +18,7 @@ export function ActivityLogTable({ entries, loading, onRowClick }: ActivityLogTa
         header: 'When',
         cell: ({ row }) => (
           <span className="whitespace-nowrap text-muted-foreground">
-            {dayjs(row.original.created_at).format('DD MMM YYYY, h:mm A')}
+            {formatDateTime(row.original.created_at)}
           </span>
         ),
       },

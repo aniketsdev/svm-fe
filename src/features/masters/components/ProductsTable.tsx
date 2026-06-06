@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { formatCurrency } from '../../../utils/format';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import type { ProductRow } from '../api/products';
 import { ActivePill } from './ActivePill';
@@ -26,7 +27,7 @@ export function ProductsTable({ products, loading }: { products: ProductRow[]; l
         header: 'MRP',
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">
-            {row.original.mrp != null ? `₹${row.original.mrp.toFixed(2)}` : '—'}
+            {formatCurrency(row.original.mrp)}
           </span>
         ),
       },

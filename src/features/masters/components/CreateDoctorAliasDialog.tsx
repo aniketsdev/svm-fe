@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
-import { CustomLabel } from '../../../common/custom-label';
 import { RHFInput, RHFSelect } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCreateDoctorAlias } from '../../../sdk/admin';
 import { useDoctors } from '../hooks/useDoctors';
 import {
@@ -32,19 +32,19 @@ export function CreateDoctorAliasDialog({ open, onClose, onCreated }: Props) {
 
   const createMutation = useAdminCreateDoctorAlias({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Alias added.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Alias added.') });
         reset();
         onCreated();
         onClose();
       },
       onError: (error) => {
         if (error instanceof ApiError && error.status === 409) {
-          setError('alias', { type: 'manual', message: 'This alias already exists for the doctor.' });
+          setError('alias', { type: 'manual', message: errorMessage(error) });
           return;
         }
         const general = handleApiError(error);
-        if (general) toast({ severity: 'error', message: general });
+        toast({ severity: 'error', message: general ?? errorMessage(error) });
       },
     },
   });
@@ -59,20 +59,17 @@ export function CreateDoctorAliasDialog({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <CustomDialog title="Add doctor alias" open={open} onClose={handleClose} width="30rem">
+    <CustomDrawer anchor="right" title="Add doctor alias" open={open} onClose={handleClose} drawerWidth="30rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <RHFSelect<CreateDoctorAliasFormValues>
           name="doctor_id"
           control={control}
           label="Doctor"
           required
-          placeholder={doctorItems.length ? 'Select a doctor' : 'No doctors yet'}
+          placeholder={doctorItems.length ? 'Select doctor' : 'No doctors yet'}
           items={doctorItems}
         />
-        <div>
-          <CustomLabel htmlFor="alias" isRequired label="Alias" />
-          <RHFInput<CreateDoctorAliasFormValues> name="alias" control={control} placeholder="Dr A. Rao" />
-        </div>
+        <RHFInput<CreateDoctorAliasFormValues> name="alias" control={control} label="Alias" required placeholder="Enter alias" />
         <div className="mt-2 flex justify-end gap-3">
           <CustomButton type="button" variant="outline" onClick={handleClose}>
             Cancel
@@ -82,6 +79,6 @@ export function CreateDoctorAliasDialog({ open, onClose, onCreated }: Props) {
           </CustomButton>
         </div>
       </form>
-    </CustomDialog>
+    </CustomDrawer>
   );
 }
