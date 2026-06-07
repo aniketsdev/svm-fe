@@ -13,5 +13,5 @@ export interface AdminUserUpdate {
   first_name?: string | null;
   last_name?: string | null;
   phone?: string | null;
-  role?: 'admin' | 'staff' | 'user' | null;
+  role?: string | null;
 }
