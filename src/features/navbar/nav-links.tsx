@@ -3,6 +3,7 @@ import {
   Boxes,
   ClipboardCheck,
   Home,
+  PackageSearch,
   ScrollText,
   Settings,
   ShieldCheck,
@@ -30,6 +31,7 @@ export const NAV_GROUPS: NavGroup[] = [
     links: [
       { label: 'Dashboard', path: '/dashboard', icon: <Home className={ICON} /> },
       { label: 'All Clients', path: '/clients', icon: <Users className={ICON} /> },
+      { label: 'Inventory', path: '/inventory', icon: <PackageSearch className={ICON} /> },
       { label: 'Assessments', path: '/assessments', icon: <ClipboardCheck className={ICON} /> },
     ],
   },

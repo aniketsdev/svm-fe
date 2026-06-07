@@ -80,6 +80,11 @@ const DoctorPricingPage = lazyWithPreload(() =>
 const BomsPage = lazyWithPreload(() =>
   import('../features/masters/pages/BomsPage').then((m) => ({ default: m.BomsPage })),
 );
+const InventoryPage = lazyWithPreload(() =>
+  import('../features/inventory/pages/InventoryPage').then((m) => ({
+    default: m.InventoryPage,
+  })),
+);
 
 // ── Placeholder pages for routes whose features aren't built yet ────────────
 const DashboardPlaceholder = () => <PlaceholderPage title="Dashboard" />;
@@ -170,6 +175,7 @@ export default function AppRoutes() {
         <Route path="masters/doctor-aliases" element={<DoctorAliasesPage />} />
         <Route path="masters/doctor-pricing" element={<DoctorPricingPage />} />
         <Route path="masters/boms" element={<BomsPage />} />
+        <Route path="inventory" element={<InventoryPage />} />
         <Route path="scheduling" element={<SchedulingPlaceholder />} />
         <Route path="clients" element={<ClientsPlaceholder />} />
         <Route path="clients/:clientUuid" element={<ClientDetailPlaceholder />} />

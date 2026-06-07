@@ -1,10 +1,10 @@
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
-import { CustomLabel } from '../../../common/custom-label';
 import { RHFInput } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCreateCourierPartner } from '../../../sdk/admin';
 import { useCreateCourierForm, type CreateCourierFormValues } from '../hooks/useCreateCourierForm';
 
@@ -21,19 +21,19 @@ export function CreateCourierDialog({ open, onClose, onCreated }: CreateCourierD
 
   const createMutation = useAdminCreateCourierPartner({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Courier partner created.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Courier partner created.') });
         reset();
         onCreated();
         onClose();
       },
       onError: (error) => {
         if (error instanceof ApiError && error.status === 409) {
-          setError('code', { type: 'manual', message: 'A courier with this code already exists.' });
+          setError('code', { type: 'manual', message: errorMessage(error) });
           return;
         }
         const general = handleApiError(error);
-        if (general) toast({ severity: 'error', message: general });
+        toast({ severity: 'error', message: general ?? errorMessage(error) });
       },
     },
   });
@@ -55,26 +55,14 @@ export function CreateCourierDialog({ open, onClose, onCreated }: CreateCourierD
   };
 
   return (
-    <CustomDialog title="Add courier partner" open={open} onClose={handleClose} width="32rem">
+    <CustomDrawer anchor="right" title="Add courier partner" open={open} onClose={handleClose} drawerWidth="32rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <div>
-          <CustomLabel htmlFor="name" isRequired label="Name" />
-          <RHFInput<CreateCourierFormValues> name="name" control={control} placeholder="BlueDart" />
-        </div>
+        <RHFInput<CreateCourierFormValues> name="name" control={control} label="Name" required placeholder="Enter name" />
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <CustomLabel htmlFor="code" isRequired label="Code" />
-            <RHFInput<CreateCourierFormValues> name="code" control={control} placeholder="CUR-001" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="contact_phone" label="Phone" />
-            <RHFInput<CreateCourierFormValues> name="contact_phone" control={control} placeholder="+91 98765 43210" />
-          </div>
+          <RHFInput<CreateCourierFormValues> name="code" control={control} label="Code" required placeholder="Enter code" />
+          <RHFInput<CreateCourierFormValues> name="contact_phone" control={control} label="Phone" placeholder="Enter phone" />
         </div>
-        <div>
-          <CustomLabel htmlFor="tracking_url" label="Tracking URL" />
-          <RHFInput<CreateCourierFormValues> name="tracking_url" control={control} placeholder="https://track.example.com/{awb}" />
-        </div>
+        <RHFInput<CreateCourierFormValues> name="tracking_url" control={control} label="Tracking URL" placeholder="Enter tracking URL" />
         <div className="mt-2 flex justify-end gap-3">
           <CustomButton type="button" variant="outline" onClick={handleClose}>
             Cancel
@@ -84,6 +72,6 @@ export function CreateCourierDialog({ open, onClose, onCreated }: CreateCourierD
           </CustomButton>
         </div>
       </form>
-    </CustomDialog>
+    </CustomDrawer>
   );
 }
