@@ -3,9 +3,7 @@
  * Regenerate via: bun run sdk:gen
  */
 
-export interface InviteUserResponse {
-  id: number;
+export interface UserRef {
+  user_id: number;
   email: string;
-  role: string;
-  invitation_expires_at: string;
 }
