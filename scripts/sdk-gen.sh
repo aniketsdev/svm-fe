@@ -37,7 +37,15 @@ fi
 
 # Quick JSON sanity-check: openapi.json MUST start with `{` after optional whitespace.
 # Catches the case where the URL returns 200 with HTML (e.g., misconfigured proxy).
-FIRST_CHAR=$(curl -sf --max-time 10 "$URL" | head -c 64 | tr -d '[:space:]' | head -c 1)
+#
+# Read the body WITHOUT piping into `head`: `head -c N` closes the pipe as soon as
+# it has its bytes, which hands curl a broken-pipe write error (exit 23). Under
+# `set -o pipefail` that non-zero status propagates and `set -e` aborts the script
+# — even though the JSON is perfectly valid. Trimming leading whitespace in pure
+# bash keeps the check pipe-free and race-free.
+BODY=$(curl -sf --max-time 10 "$URL")
+TRIMMED="${BODY#"${BODY%%[![:space:]]*}"}"
+FIRST_CHAR="${TRIMMED:0:1}"
 if [ "$FIRST_CHAR" != "{" ]; then
   echo ""
   echo "[sdk:gen] ERROR: $URL returned 200 but the body does not look like JSON."
