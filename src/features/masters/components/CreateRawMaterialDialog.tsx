@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
-import { CustomLabel } from '../../../common/custom-label';
 import { RHFInput, RHFSelect } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCreateRawMaterial } from '../../../sdk/admin';
 import { useRmCategories } from '../hooks/useRmCategories';
 import {
@@ -32,19 +32,19 @@ export function CreateRawMaterialDialog({ open, onClose, onCreated }: CreateRawM
 
   const createMutation = useAdminCreateRawMaterial({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Raw material created.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Raw material created.') });
         reset();
         onCreated();
         onClose();
       },
       onError: (error) => {
         if (error instanceof ApiError && error.status === 409) {
-          setError('code', { type: 'manual', message: 'A raw material with this code already exists.' });
+          setError('code', { type: 'manual', message: errorMessage(error) });
           return;
         }
         const general = handleApiError(error);
-        if (general) toast({ severity: 'error', message: general });
+        toast({ severity: 'error', message: general ?? errorMessage(error) });
       },
     },
   });
@@ -66,27 +66,18 @@ export function CreateRawMaterialDialog({ open, onClose, onCreated }: CreateRawM
   };
 
   return (
-    <CustomDialog title="Add raw material" open={open} onClose={handleClose} width="32rem">
+    <CustomDrawer anchor="right" title="Add raw material" open={open} onClose={handleClose} drawerWidth="32rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <div>
-          <CustomLabel htmlFor="name" isRequired label="Name" />
-          <RHFInput<CreateRawMaterialFormValues> name="name" control={control} placeholder="Ashwagandha Root" />
-        </div>
+        <RHFInput<CreateRawMaterialFormValues> name="name" control={control} label="Name" required placeholder="Enter name" />
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <CustomLabel htmlFor="code" isRequired label="Code" />
-            <RHFInput<CreateRawMaterialFormValues> name="code" control={control} placeholder="RM-001" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="unit" label="Unit" />
-            <RHFInput<CreateRawMaterialFormValues> name="unit" control={control} placeholder="kg" />
-          </div>
+          <RHFInput<CreateRawMaterialFormValues> name="code" control={control} label="Code" required placeholder="Enter code" />
+          <RHFInput<CreateRawMaterialFormValues> name="unit" control={control} label="Unit" placeholder="Enter unit" />
         </div>
         <RHFSelect<CreateRawMaterialFormValues>
           name="rm_category_id"
           control={control}
           label="Category"
-          placeholder={categoryItems.length ? 'Select a category' : 'No categories yet'}
+          placeholder={categoryItems.length ? 'Select category' : 'No categories yet'}
           items={categoryItems}
           enableDeselect
         />
@@ -99,6 +90,6 @@ export function CreateRawMaterialDialog({ open, onClose, onCreated }: CreateRawM
           </CustomButton>
         </div>
       </form>
-    </CustomDialog>
+    </CustomDrawer>
   );
 }

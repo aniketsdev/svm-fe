@@ -5,7 +5,7 @@ import { CustomSearch } from '../../../common/custom-search';
 import { CustomSelect } from '../../../common/custom-select';
 import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
 import { useToast } from '../../../common/common-snackbar';
-import { ApiError } from '../../../api/client';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import {
   useAdminSetUserStatus,
   useAdminResendInvitation,
@@ -23,14 +23,6 @@ const STATUS_ITEMS = [
   { value: 'inactive', label: 'Inactive' },
 ];
 
-function actionError(error: unknown): string {
-  if (error instanceof ApiError) {
-    const detail = (error as unknown as { body?: { detail?: unknown } }).body?.detail;
-    if (typeof detail === 'string') return detail;
-  }
-  return 'Action failed.';
-}
-
 export function UsersPage() {
   const { toast } = useToast();
   const [search, setSearch] = useState('');
@@ -43,33 +35,36 @@ export function UsersPage() {
 
   const statusMutation = useAdminSetUserStatus({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'User status updated.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'User status updated.') });
         refetch();
       },
-      onError: (e) => toast({ severity: 'error', message: actionError(e) }),
+      onError: (e) => toast({ severity: 'error', message: errorMessage(e) }),
     },
   });
 
   const resendMutation = useAdminResendInvitation({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Set-password link regenerated (printed to backend console in dev).' });
+      onSuccess: (response) => {
+        toast({
+          severity: 'success',
+          message: successMessage(response, 'Set-password link regenerated.'),
+        });
         refetch();
       },
-      onError: (e) => toast({ severity: 'error', message: actionError(e) }),
+      onError: (e) => toast({ severity: 'error', message: errorMessage(e) }),
     },
   });
 
   const deleteMutation = useAdminSoftDeleteUser({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'User deleted.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'User deleted.') });
         setDeleteUser(null);
         refetch();
       },
       onError: (e) => {
-        toast({ severity: 'error', message: actionError(e) });
+        toast({ severity: 'error', message: errorMessage(e) });
         setDeleteUser(null);
       },
     },
@@ -95,15 +90,12 @@ export function UsersPage() {
         </CustomButton>
       </div>
 
-      {/* Toolbar */}
+      {/* Toolbar — count left, search + filters top-right */}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <CustomSearch
-            textData={{ placeholder: 'Search by email or name', btnTitle: 'Search' }}
-            onSearch={setSearch}
-            hasStartSearchIcon
-            width="20rem"
-          />
+        <span className="shrink-0 text-sm text-muted-foreground">
+          {count} {count === 1 ? 'record' : 'records'}
+        </span>
+        <div className="flex items-center gap-3 sm:justify-end">
           <div className="w-36">
             <CustomSelect
               name="status"
@@ -113,10 +105,13 @@ export function UsersPage() {
               onChange={(e) => setStatus(e.target.value as AdminListUsersStatus)}
             />
           </div>
+          <CustomSearch
+            textData={{ placeholder: 'Search by email or name', btnTitle: 'Search' }}
+            onSearch={setSearch}
+            hasStartSearchIcon
+            width="20rem"
+          />
         </div>
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {count} {count === 1 ? 'record' : 'records'}
-        </span>
       </div>
 
       {/* Table */}

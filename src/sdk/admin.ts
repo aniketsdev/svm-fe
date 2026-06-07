@@ -31,6 +31,8 @@ import type {
   AdminListProductsParams,
   AdminListRawMaterialsParams,
   AdminListRmCategoriesParams,
+  AdminListStockMovementsParams,
+  AdminListStockParams,
   AdminListStoresParams,
   AdminListUsersParams,
   AdminListVendorsParams,
@@ -51,10 +53,12 @@ import type {
   CreateDoctorAliasRequest,
   CreateDoctorPricingRequest,
   CreateDoctorRequest,
+  CreateMovementRequest,
   CreateProductRequest,
   CreateRawMaterialRequest,
   CreateRmCategoryRequest,
   CreateStoreRequest,
+  CreateTransferRequest,
   CreateVendorRequest,
   DoctorAliasListItem,
   DoctorAliasListResponse,
@@ -65,6 +69,8 @@ import type {
   HTTPValidationError,
   InviteUserRequest,
   InviteUserResponse,
+  MovementListItem,
+  MovementListResponse,
   ProductListItem,
   ProductListResponse,
   RawMaterialListItem,
@@ -72,8 +78,10 @@ import type {
   RmCategoryListItem,
   RmCategoryListResponse,
   RoleListResponse,
+  StockBalanceResponse,
   StoreListItem,
   StoreListResponse,
+  TransferResult,
   VendorListItem,
   VendorListResponse
 } from './schemas';
@@ -3420,4 +3428,432 @@ export const useAdminCreateBom = <TError = ErrorType<HTTPValidationError>,
         TContext
       > => {
       return useMutation(getAdminCreateBomMutationOptions(options), queryClient);
+    }
+    export type adminListStockResponse200 = {
+  data: StockBalanceResponse
+  status: 200
+}
+
+export type adminListStockResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminListStockResponseSuccess = (adminListStockResponse200) & {
+  headers: Headers;
+};
+export type adminListStockResponseError = (adminListStockResponse422) & {
+  headers: Headers;
+};
+
+export type adminListStockResponse = (adminListStockResponseSuccess | adminListStockResponseError)
+
+export const getAdminListStockUrl = (params?: AdminListStockParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/admin/inventory/stock?${stringifiedParams}` : `/api/v1/admin/inventory/stock`
+}
+
+/**
+ * @summary List Stock
+ */
+export const adminListStock = async (params?: AdminListStockParams, options?: RequestInit): Promise<adminListStockResponse> => {
+
+  return mutator<adminListStockResponse>(getAdminListStockUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListStockQueryKey = (params?: AdminListStockParams,) => {
+    return [
+    `/api/v1/admin/inventory/stock`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdminListStockQueryOptions = <TData = Awaited<ReturnType<typeof adminListStock>>, TError = ErrorType<HTTPValidationError>>(params?: AdminListStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStock>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListStockQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListStock>>> = ({ signal }) => adminListStock(params, { signal });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListStock>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminListStockQueryResult = NonNullable<Awaited<ReturnType<typeof adminListStock>>>
+export type AdminListStockQueryError = ErrorType<HTTPValidationError>
+
+
+export function useAdminListStock<TData = Awaited<ReturnType<typeof adminListStock>>, TError = ErrorType<HTTPValidationError>>(
+ params: undefined |  AdminListStockParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStock>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListStock>>,
+          TError,
+          Awaited<ReturnType<typeof adminListStock>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListStock<TData = Awaited<ReturnType<typeof adminListStock>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStock>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListStock>>,
+          TError,
+          Awaited<ReturnType<typeof adminListStock>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListStock<TData = Awaited<ReturnType<typeof adminListStock>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStock>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List Stock
+ */
+
+export function useAdminListStock<TData = Awaited<ReturnType<typeof adminListStock>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStock>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminListStockQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminListStockMovementsResponse200 = {
+  data: MovementListResponse
+  status: 200
+}
+
+export type adminListStockMovementsResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminListStockMovementsResponseSuccess = (adminListStockMovementsResponse200) & {
+  headers: Headers;
+};
+export type adminListStockMovementsResponseError = (adminListStockMovementsResponse422) & {
+  headers: Headers;
+};
+
+export type adminListStockMovementsResponse = (adminListStockMovementsResponseSuccess | adminListStockMovementsResponseError)
+
+export const getAdminListStockMovementsUrl = (params?: AdminListStockMovementsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/admin/inventory/movements?${stringifiedParams}` : `/api/v1/admin/inventory/movements`
+}
+
+/**
+ * @summary List Movements
+ */
+export const adminListStockMovements = async (params?: AdminListStockMovementsParams, options?: RequestInit): Promise<adminListStockMovementsResponse> => {
+
+  return mutator<adminListStockMovementsResponse>(getAdminListStockMovementsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListStockMovementsQueryKey = (params?: AdminListStockMovementsParams,) => {
+    return [
+    `/api/v1/admin/inventory/movements`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdminListStockMovementsQueryOptions = <TData = Awaited<ReturnType<typeof adminListStockMovements>>, TError = ErrorType<HTTPValidationError>>(params?: AdminListStockMovementsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListStockMovementsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListStockMovements>>> = ({ signal }) => adminListStockMovements(params, { signal });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminListStockMovementsQueryResult = NonNullable<Awaited<ReturnType<typeof adminListStockMovements>>>
+export type AdminListStockMovementsQueryError = ErrorType<HTTPValidationError>
+
+
+export function useAdminListStockMovements<TData = Awaited<ReturnType<typeof adminListStockMovements>>, TError = ErrorType<HTTPValidationError>>(
+ params: undefined |  AdminListStockMovementsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListStockMovements>>,
+          TError,
+          Awaited<ReturnType<typeof adminListStockMovements>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListStockMovements<TData = Awaited<ReturnType<typeof adminListStockMovements>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockMovementsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListStockMovements>>,
+          TError,
+          Awaited<ReturnType<typeof adminListStockMovements>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListStockMovements<TData = Awaited<ReturnType<typeof adminListStockMovements>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockMovementsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List Movements
+ */
+
+export function useAdminListStockMovements<TData = Awaited<ReturnType<typeof adminListStockMovements>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockMovementsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminListStockMovementsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminCreateStockMovementResponse201 = {
+  data: MovementListItem
+  status: 201
+}
+
+export type adminCreateStockMovementResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminCreateStockMovementResponseSuccess = (adminCreateStockMovementResponse201) & {
+  headers: Headers;
+};
+export type adminCreateStockMovementResponseError = (adminCreateStockMovementResponse422) & {
+  headers: Headers;
+};
+
+export type adminCreateStockMovementResponse = (adminCreateStockMovementResponseSuccess | adminCreateStockMovementResponseError)
+
+export const getAdminCreateStockMovementUrl = () => {
+
+
+
+
+  return `/api/v1/admin/inventory/movements`
+}
+
+/**
+ * @summary Create Movement
+ */
+export const adminCreateStockMovement = async (createMovementRequest: CreateMovementRequest, options?: RequestInit): Promise<adminCreateStockMovementResponse> => {
+
+  return mutator<adminCreateStockMovementResponse>(getAdminCreateStockMovementUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createMovementRequest)
+  }
+);}
+
+
+
+
+export const getAdminCreateStockMovementMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateStockMovement>>, TError,{data: BodyType<CreateMovementRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateStockMovement>>, TError,{data: BodyType<CreateMovementRequest>}, TContext> => {
+
+const mutationKey = ['adminCreateStockMovement'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateStockMovement>>, {data: BodyType<CreateMovementRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminCreateStockMovement(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCreateStockMovementMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateStockMovement>>>
+    export type AdminCreateStockMovementMutationBody = BodyType<CreateMovementRequest>
+    export type AdminCreateStockMovementMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Create Movement
+ */
+export const useAdminCreateStockMovement = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateStockMovement>>, TError,{data: BodyType<CreateMovementRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminCreateStockMovement>>,
+        TError,
+        {data: BodyType<CreateMovementRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminCreateStockMovementMutationOptions(options), queryClient);
+    }
+    export type adminTransferStockResponse201 = {
+  data: TransferResult
+  status: 201
+}
+
+export type adminTransferStockResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminTransferStockResponseSuccess = (adminTransferStockResponse201) & {
+  headers: Headers;
+};
+export type adminTransferStockResponseError = (adminTransferStockResponse422) & {
+  headers: Headers;
+};
+
+export type adminTransferStockResponse = (adminTransferStockResponseSuccess | adminTransferStockResponseError)
+
+export const getAdminTransferStockUrl = () => {
+
+
+
+
+  return `/api/v1/admin/inventory/transfer`
+}
+
+/**
+ * @summary Transfer Stock
+ */
+export const adminTransferStock = async (createTransferRequest: CreateTransferRequest, options?: RequestInit): Promise<adminTransferStockResponse> => {
+
+  return mutator<adminTransferStockResponse>(getAdminTransferStockUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(createTransferRequest)
+  }
+);}
+
+
+
+
+export const getAdminTransferStockMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminTransferStock>>, TError,{data: BodyType<CreateTransferRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminTransferStock>>, TError,{data: BodyType<CreateTransferRequest>}, TContext> => {
+
+const mutationKey = ['adminTransferStock'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminTransferStock>>, {data: BodyType<CreateTransferRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminTransferStock(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminTransferStockMutationResult = NonNullable<Awaited<ReturnType<typeof adminTransferStock>>>
+    export type AdminTransferStockMutationBody = BodyType<CreateTransferRequest>
+    export type AdminTransferStockMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Transfer Stock
+ */
+export const useAdminTransferStock = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminTransferStock>>, TError,{data: BodyType<CreateTransferRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminTransferStock>>,
+        TError,
+        {data: BodyType<CreateTransferRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminTransferStockMutationOptions(options), queryClient);
     }

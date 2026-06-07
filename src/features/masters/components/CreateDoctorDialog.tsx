@@ -1,10 +1,10 @@
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
-import { CustomLabel } from '../../../common/custom-label';
 import { RHFInput } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCreateDoctor } from '../../../sdk/admin';
 import { useCreateDoctorForm, type CreateDoctorFormValues } from '../hooks/useCreateDoctorForm';
 
@@ -21,19 +21,19 @@ export function CreateDoctorDialog({ open, onClose, onCreated }: CreateDoctorDia
 
   const createMutation = useAdminCreateDoctor({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Doctor created.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Doctor created.') });
         reset();
         onCreated();
         onClose();
       },
       onError: (error) => {
         if (error instanceof ApiError && error.status === 409) {
-          setError('code', { type: 'manual', message: 'A doctor with this code already exists.' });
+          setError('code', { type: 'manual', message: errorMessage(error) });
           return;
         }
         const general = handleApiError(error);
-        if (general) toast({ severity: 'error', message: general });
+        toast({ severity: 'error', message: general ?? errorMessage(error) });
       },
     },
   });
@@ -57,35 +57,17 @@ export function CreateDoctorDialog({ open, onClose, onCreated }: CreateDoctorDia
   };
 
   return (
-    <CustomDialog title="Add doctor" open={open} onClose={handleClose} width="34rem">
+    <CustomDrawer anchor="right" title="Add doctor" open={open} onClose={handleClose} drawerWidth="34rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <CustomLabel htmlFor="name" isRequired label="Name" />
-            <RHFInput<CreateDoctorFormValues> name="name" control={control} placeholder="Dr. Anjali Rao" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="code" isRequired label="Code" />
-            <RHFInput<CreateDoctorFormValues> name="code" control={control} placeholder="DOC-001" />
-          </div>
+          <RHFInput<CreateDoctorFormValues> name="name" control={control} label="Name" required placeholder="Enter name" />
+          <RHFInput<CreateDoctorFormValues> name="code" control={control} label="Code" required placeholder="Enter code" />
         </div>
-        <div>
-          <CustomLabel htmlFor="clinic_name" label="Clinic" />
-          <RHFInput<CreateDoctorFormValues> name="clinic_name" control={control} placeholder="Rao Ayurveda Clinic" />
-        </div>
+        <RHFInput<CreateDoctorFormValues> name="clinic_name" control={control} label="Clinic" placeholder="Enter clinic name" />
         <div className="grid grid-cols-3 gap-3">
-          <div>
-            <CustomLabel htmlFor="phone" label="Phone" />
-            <RHFInput<CreateDoctorFormValues> name="phone" control={control} placeholder="+91 98765 43210" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="state_code" label="State code" />
-            <RHFInput<CreateDoctorFormValues> name="state_code" control={control} placeholder="27" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="city" label="City" />
-            <RHFInput<CreateDoctorFormValues> name="city" control={control} placeholder="Pune" />
-          </div>
+          <RHFInput<CreateDoctorFormValues> name="phone" control={control} label="Phone" placeholder="Enter phone" />
+          <RHFInput<CreateDoctorFormValues> name="state_code" control={control} label="State code" placeholder="Enter state code" />
+          <RHFInput<CreateDoctorFormValues> name="city" control={control} label="City" placeholder="Enter city" />
         </div>
         <div className="mt-2 flex justify-end gap-3">
           <CustomButton type="button" variant="outline" onClick={handleClose}>
@@ -96,6 +78,6 @@ export function CreateDoctorDialog({ open, onClose, onCreated }: CreateDoctorDia
           </CustomButton>
         </div>
       </form>
-    </CustomDialog>
+    </CustomDrawer>
   );
 }

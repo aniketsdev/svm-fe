@@ -7,9 +7,10 @@ interface SidebarItemProps {
   label: string;
   path: string;
   icon: ReactNode;
+  collapsed?: boolean;
 }
 
-export const SidebarItem = memo(function SidebarItem({ label, path, icon }: SidebarItemProps) {
+export const SidebarItem = memo(function SidebarItem({ label, path, icon, collapsed }: SidebarItemProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const isActive = location.pathname === path || location.pathname.startsWith(`${path}/`);
@@ -28,24 +29,26 @@ export const SidebarItem = memo(function SidebarItem({ label, path, icon }: Side
         startTransition(() => navigate(path));
       }}
       aria-current={isActive ? 'page' : undefined}
+      title={collapsed ? label : undefined}
       className={cn(
-        'group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        'group flex w-full items-center gap-3 rounded-lg py-2 text-sm font-medium transition-colors',
+        collapsed ? 'justify-center px-0' : 'px-3',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
         isActive
-          ? 'bg-primary text-primary-foreground shadow-sm'
-          : 'text-foreground/70 hover:bg-secondary hover:text-foreground',
+          ? 'bg-white/15 text-white shadow-sm'
+          : 'text-white/75 hover:bg-white/10 hover:text-white',
       )}
     >
       <span
         aria-hidden
         className={cn(
-          'inline-flex size-[18px] items-center justify-center',
-          isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground',
+          'inline-flex size-[18px] shrink-0 items-center justify-center',
+          isActive ? 'text-accent' : 'text-white/55 group-hover:text-white',
         )}
       >
         {icon}
       </span>
-      <span className="truncate">{label}</span>
+      {!collapsed && <span className="truncate">{label}</span>}
     </button>
   );
 });

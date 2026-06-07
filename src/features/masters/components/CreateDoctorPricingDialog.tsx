@@ -1,11 +1,10 @@
 import { useMemo } from 'react';
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
-import { CustomLabel } from '../../../common/custom-label';
 import { RHFInput, RHFSelect } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
-import { ApiError } from '../../../api/client';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCreateDoctorPricing } from '../../../sdk/admin';
 import { useDoctors } from '../hooks/useDoctors';
 import { useProducts } from '../hooks/useProducts';
@@ -38,17 +37,15 @@ export function CreateDoctorPricingDialog({ open, onClose, onCreated }: Props) {
 
   const createMutation = useAdminCreateDoctorPricing({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Pricing added.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Pricing added.') });
         reset();
         onCreated();
         onClose();
       },
       onError: (error) => {
         const general = handleApiError(error);
-        if (general) toast({ severity: 'error', message: general });
-        else if (error instanceof ApiError)
-          toast({ severity: 'error', message: 'Could not save pricing.' });
+        toast({ severity: 'error', message: general ?? errorMessage(error) });
       },
     },
   });
@@ -71,14 +68,14 @@ export function CreateDoctorPricingDialog({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <CustomDialog title="Add doctor pricing" open={open} onClose={handleClose} width="34rem">
+    <CustomDrawer anchor="right" title="Add doctor pricing" open={open} onClose={handleClose} drawerWidth="34rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <RHFSelect<CreateDoctorPricingFormValues>
           name="doctor_id"
           control={control}
           label="Doctor"
           required
-          placeholder={doctorItems.length ? 'Select a doctor' : 'No doctors yet'}
+          placeholder={doctorItems.length ? 'Select doctor' : 'No doctors yet'}
           items={doctorItems}
         />
         <RHFSelect<CreateDoctorPricingFormValues>
@@ -86,22 +83,13 @@ export function CreateDoctorPricingDialog({ open, onClose, onCreated }: Props) {
           control={control}
           label="Product"
           required
-          placeholder={productItems.length ? 'Select a product' : 'No products yet'}
+          placeholder={productItems.length ? 'Select product' : 'No products yet'}
           items={productItems}
         />
         <div className="grid grid-cols-3 gap-3">
-          <div>
-            <CustomLabel htmlFor="price" isRequired label="Price (₹)" />
-            <RHFInput<CreateDoctorPricingFormValues> name="price" control={control} placeholder="199.50" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="valid_from" label="Valid from" />
-            <RHFInput<CreateDoctorPricingFormValues> name="valid_from" control={control} placeholder="2026-06-01" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="valid_to" label="Valid to" />
-            <RHFInput<CreateDoctorPricingFormValues> name="valid_to" control={control} placeholder="2026-12-31" />
-          </div>
+          <RHFInput<CreateDoctorPricingFormValues> name="price" control={control} label="Price (₹)" required placeholder="Enter price" />
+          <RHFInput<CreateDoctorPricingFormValues> name="valid_from" control={control} label="Valid from" placeholder="YYYY-MM-DD" />
+          <RHFInput<CreateDoctorPricingFormValues> name="valid_to" control={control} label="Valid to" placeholder="YYYY-MM-DD" />
         </div>
         <div className="mt-2 flex justify-end gap-3">
           <CustomButton type="button" variant="outline" onClick={handleClose}>
@@ -112,6 +100,6 @@ export function CreateDoctorPricingDialog({ open, onClose, onCreated }: Props) {
           </CustomButton>
         </div>
       </form>
-    </CustomDialog>
+    </CustomDrawer>
   );
 }

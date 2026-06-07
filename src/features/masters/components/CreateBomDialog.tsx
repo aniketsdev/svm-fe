@@ -1,13 +1,14 @@
 import { useMemo } from 'react';
 import { useFieldArray } from 'react-hook-form';
 import { Plus, Trash2 } from 'lucide-react';
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
 import { CustomLabel } from '../../../common/custom-label';
 import { RHFInput, RHFSelect } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCreateBom } from '../../../sdk/admin';
 import { useProducts } from '../hooks/useProducts';
 import { useRawMaterials } from '../hooks/useRawMaterials';
@@ -38,19 +39,19 @@ export function CreateBomDialog({ open, onClose, onCreated }: Props) {
 
   const createMutation = useAdminCreateBom({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'BOM created.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'BOM created.') });
         reset();
         onCreated();
         onClose();
       },
       onError: (error) => {
         if (error instanceof ApiError && error.status === 409) {
-          setError('code', { type: 'manual', message: 'A BOM with this code already exists.' });
+          setError('code', { type: 'manual', message: errorMessage(error) });
           return;
         }
         const general = handleApiError(error);
-        if (general) toast({ severity: 'error', message: general });
+        toast({ severity: 'error', message: general ?? errorMessage(error) });
       },
     },
   });
@@ -77,31 +78,22 @@ export function CreateBomDialog({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <CustomDialog title="Add BOM" open={open} onClose={handleClose} width="48rem">
+    <CustomDrawer anchor="right" title="Add BOM" open={open} onClose={handleClose} drawerWidth="44rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <CustomLabel htmlFor="code" isRequired label="Code" />
-            <RHFInput<CreateBomFormValues> name="code" control={control} placeholder="BOM-001" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="name" isRequired label="Name" />
-            <RHFInput<CreateBomFormValues> name="name" control={control} placeholder="Ashwagandha Churna recipe" />
-          </div>
+          <RHFInput<CreateBomFormValues> name="code" control={control} label="Code" required placeholder="Enter code" />
+          <RHFInput<CreateBomFormValues> name="name" control={control} label="Name" required placeholder="Enter name" />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <RHFSelect<CreateBomFormValues>
             name="product_id"
             control={control}
             label="Output product"
-            placeholder={productItems.length ? 'Select a product' : 'No products yet'}
+            placeholder={productItems.length ? 'Select product' : 'No products yet'}
             items={productItems}
             enableDeselect
           />
-          <div>
-            <CustomLabel htmlFor="output_qty" label="Output qty" />
-            <RHFInput<CreateBomFormValues> name="output_qty" control={control} placeholder="100" />
-          </div>
+          <RHFInput<CreateBomFormValues> name="output_qty" control={control} label="Output qty" placeholder="Enter quantity" />
         </div>
 
         {/* Line items */}
@@ -123,7 +115,7 @@ export function CreateBomDialog({ open, onClose, onCreated }: Props) {
                   <RHFSelect<CreateBomFormValues>
                     name={`lines.${index}.raw_material_id`}
                     control={control}
-                    placeholder="Raw material"
+                    placeholder="Select material"
                     items={materialItems}
                     enableDeselect
                   />
@@ -139,7 +131,7 @@ export function CreateBomDialog({ open, onClose, onCreated }: Props) {
                   <RHFInput<CreateBomFormValues>
                     name={`lines.${index}.unit`}
                     control={control}
-                    placeholder="unit"
+                    placeholder="Unit"
                   />
                 </div>
                 <button
@@ -165,6 +157,6 @@ export function CreateBomDialog({ open, onClose, onCreated }: Props) {
           </CustomButton>
         </div>
       </form>
-    </CustomDialog>
+    </CustomDrawer>
   );
 }

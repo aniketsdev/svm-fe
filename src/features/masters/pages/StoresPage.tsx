@@ -39,15 +39,15 @@ export function StoresPage() {
 
       {/* Toolbar */}
       <div className="mt-6 flex items-center justify-between gap-3">
+        <span className="shrink-0 text-sm text-muted-foreground">
+          {count} {count === 1 ? 'record' : 'records'}
+        </span>
         <CustomSearch
           textData={{ placeholder: 'Search by name, code or city', btnTitle: 'Search' }}
           onSearch={setSearch}
           hasStartSearchIcon
           width="22rem"
         />
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {count} {count === 1 ? 'record' : 'records'}
-        </span>
       </div>
 
       {/* Table */}

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import dayjs from 'dayjs';
+import { formatDate } from '../../../utils/format';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import type { CourierRow } from '../api/couriers';
 import { ActivePill } from './ActivePill';
@@ -31,7 +31,7 @@ export function CouriersTable({ couriers, loading }: { couriers: CourierRow[]; l
         accessorKey: 'created_at',
         header: 'Created',
         cell: ({ row }) => (
-          <span className="text-muted-foreground">{dayjs(row.original.created_at).format('DD MMM YYYY')}</span>
+          <span className="text-muted-foreground">{formatDate(row.original.created_at)}</span>
         ),
       },
     ],

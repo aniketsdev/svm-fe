@@ -1,16 +1,11 @@
 import { useMemo } from 'react';
-import dayjs from 'dayjs';
 import { Mail, Pencil, Power, Trash2 } from 'lucide-react';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import { ActionMenu, type ActionMenuItem } from '../../../common/action-menu';
+import { fullName, formatDateTime } from '../../../utils/format';
 import type { UserRow } from '../api/users';
 import { RoleBadge } from './RoleBadge';
 import { StatusPill } from './StatusPill';
-
-function fullName(u: UserRow): string {
-  const name = [u.first_name, u.last_name].filter(Boolean).join(' ').trim();
-  return name || '—';
-}
 
 interface UsersTableProps {
   users: UserRow[];
@@ -39,7 +34,11 @@ export function UsersTable({
       {
         id: 'name',
         header: 'Name',
-        cell: ({ row }) => <span className="text-foreground">{fullName(row.original)}</span>,
+        cell: ({ row }) => (
+          <span className="text-foreground">
+            {fullName(row.original.first_name, row.original.last_name)}
+          </span>
+        ),
       },
       {
         accessorKey: 'role',
@@ -54,14 +53,9 @@ export function UsersTable({
       {
         id: 'last_login',
         header: 'Last login',
-        cell: ({ row }) =>
-          row.original.last_login_at ? (
-            <span className="text-muted-foreground">
-              {dayjs(row.original.last_login_at).format('DD MMM YYYY, h:mm A')}
-            </span>
-          ) : (
-            <span className="text-muted-foreground">—</span>
-          ),
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">{formatDateTime(row.original.last_login_at)}</span>
+        ),
       },
       {
         id: 'actions',

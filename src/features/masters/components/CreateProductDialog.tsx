@@ -1,10 +1,11 @@
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
-import { CustomLabel } from '../../../common/custom-label';
 import { RHFInput } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
+import { toNumberOrNull } from '../../../utils/format';
 import { useAdminCreateProduct } from '../../../sdk/admin';
 import { useCreateProductForm, type CreateProductFormValues } from '../hooks/useCreateProductForm';
 
@@ -14,12 +15,6 @@ interface CreateProductDialogProps {
   onCreated: () => void;
 }
 
-function toNumber(v?: string): number | null {
-  if (!v || !v.trim()) return null;
-  const n = Number(v);
-  return Number.isNaN(n) ? null : n;
-}
-
 export function CreateProductDialog({ open, onClose, onCreated }: CreateProductDialogProps) {
   const { toast } = useToast();
   const { control, handleSubmit, reset, setError } = useCreateProductForm();
@@ -27,19 +22,19 @@ export function CreateProductDialog({ open, onClose, onCreated }: CreateProductD
 
   const createMutation = useAdminCreateProduct({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Product created.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Product created.') });
         reset();
         onCreated();
         onClose();
       },
       onError: (error) => {
         if (error instanceof ApiError && error.status === 409) {
-          setError('code', { type: 'manual', message: 'A product with this code already exists.' });
+          setError('code', { type: 'manual', message: errorMessage(error) });
           return;
         }
         const general = handleApiError(error);
-        if (general) toast({ severity: 'error', message: general });
+        toast({ severity: 'error', message: general ?? errorMessage(error) });
       },
     },
   });
@@ -55,43 +50,25 @@ export function CreateProductDialog({ open, onClose, onCreated }: CreateProductD
         name: data.name,
         code: data.code,
         hsn: data.hsn || null,
-        mrp: toNumber(data.mrp),
-        gst_rate: toNumber(data.gst_rate),
+        mrp: toNumberOrNull(data.mrp),
+        gst_rate: toNumberOrNull(data.gst_rate),
         pack_size: data.pack_size || null,
       },
     });
   };
 
   return (
-    <CustomDialog title="Add product" open={open} onClose={handleClose} width="34rem">
+    <CustomDrawer anchor="right" title="Add product" open={open} onClose={handleClose} drawerWidth="34rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <div>
-          <CustomLabel htmlFor="name" isRequired label="Name" />
-          <RHFInput<CreateProductFormValues> name="name" control={control} placeholder="Ashwagandha Churna 100g" />
-        </div>
+        <RHFInput<CreateProductFormValues> name="name" control={control} label="Name" required placeholder="Enter name" />
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <CustomLabel htmlFor="code" isRequired label="Code" />
-            <RHFInput<CreateProductFormValues> name="code" control={control} placeholder="PRD-001" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="hsn" label="HSN" />
-            <RHFInput<CreateProductFormValues> name="hsn" control={control} placeholder="30049011" />
-          </div>
+          <RHFInput<CreateProductFormValues> name="code" control={control} label="Code" required placeholder="Enter code" />
+          <RHFInput<CreateProductFormValues> name="hsn" control={control} label="HSN" placeholder="Enter HSN" />
         </div>
         <div className="grid grid-cols-3 gap-3">
-          <div>
-            <CustomLabel htmlFor="mrp" label="MRP (₹)" />
-            <RHFInput<CreateProductFormValues> name="mrp" control={control} placeholder="250.00" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="gst_rate" label="GST %" />
-            <RHFInput<CreateProductFormValues> name="gst_rate" control={control} placeholder="12" />
-          </div>
-          <div>
-            <CustomLabel htmlFor="pack_size" label="Pack size" />
-            <RHFInput<CreateProductFormValues> name="pack_size" control={control} placeholder="100g" />
-          </div>
+          <RHFInput<CreateProductFormValues> name="mrp" control={control} label="MRP (₹)" placeholder="Enter MRP" />
+          <RHFInput<CreateProductFormValues> name="gst_rate" control={control} label="GST %" placeholder="Enter GST %" />
+          <RHFInput<CreateProductFormValues> name="pack_size" control={control} label="Pack size" placeholder="Enter pack size" />
         </div>
         <div className="mt-2 flex justify-end gap-3">
           <CustomButton type="button" variant="outline" onClick={handleClose}>
@@ -102,6 +79,6 @@ export function CreateProductDialog({ open, onClose, onCreated }: CreateProductD
           </CustomButton>
         </div>
       </form>
-    </CustomDialog>
+    </CustomDrawer>
   );
 }

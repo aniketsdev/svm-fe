@@ -1,10 +1,10 @@
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
-import { CustomLabel } from '../../../common/custom-label';
 import { RHFInput, RHFSelect } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCreateStore } from '../../../sdk/admin';
 import { useCreateStoreForm, type CreateStoreFormValues } from '../hooks/useCreateStoreForm';
 
@@ -28,19 +28,19 @@ export function CreateStoreDialog({ open, onClose, onCreated }: CreateStoreDialo
 
   const createMutation = useAdminCreateStore({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Store created.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Store created.') });
         reset();
         onCreated();
         onClose();
       },
       onError: (error) => {
         if (error instanceof ApiError && error.status === 409) {
-          setError('code', { type: 'manual', message: 'A store with this code already exists.' });
+          setError('code', { type: 'manual', message: errorMessage(error) });
           return;
         }
         const general = handleApiError(error);
-        if (general) toast({ severity: 'error', message: general });
+        toast({ severity: 'error', message: general ?? errorMessage(error) });
       },
     },
   });
@@ -57,37 +57,21 @@ export function CreateStoreDialog({ open, onClose, onCreated }: CreateStoreDialo
   };
 
   return (
-    <CustomDialog title="Add store" open={open} onClose={handleClose} width="30rem">
+    <CustomDrawer anchor="right" title="Add store" open={open} onClose={handleClose} drawerWidth="30rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <div>
-          <CustomLabel htmlFor="name" isRequired label="Name" />
-          <RHFInput<CreateStoreFormValues>
-            name="name"
-            control={control}
-            placeholder="Central Warehouse"
-          />
-        </div>
-
+        <RHFInput<CreateStoreFormValues> name="name" control={control} label="Name" required placeholder="Enter name" />
         <div className="grid grid-cols-2 gap-3">
-          <div>
-            <CustomLabel htmlFor="code" isRequired label="Code" />
-            <RHFInput<CreateStoreFormValues> name="code" control={control} placeholder="WH-001" />
-          </div>
+          <RHFInput<CreateStoreFormValues> name="code" control={control} label="Code" required placeholder="Enter code" />
           <RHFSelect<CreateStoreFormValues>
             name="kind"
             control={control}
             label="Type"
             required
-            placeholder="Select a type"
+            placeholder="Select type"
             items={KIND_ITEMS}
           />
         </div>
-
-        <div>
-          <CustomLabel htmlFor="city" label="City" />
-          <RHFInput<CreateStoreFormValues> name="city" control={control} placeholder="Pune" />
-        </div>
-
+        <RHFInput<CreateStoreFormValues> name="city" control={control} label="City" placeholder="Enter city" />
         <div className="mt-2 flex justify-end gap-3">
           <CustomButton type="button" variant="outline" onClick={handleClose}>
             Cancel
@@ -97,6 +81,6 @@ export function CreateStoreDialog({ open, onClose, onCreated }: CreateStoreDialo
           </CustomButton>
         </div>
       </form>
-    </CustomDialog>
+    </CustomDrawer>
   );
 }

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { Copy } from 'lucide-react';
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
-import { CustomLabel } from '../../../common/custom-label';
 import { RHFInput, RHFSelect } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
+import { errorMessage } from '../../../utils/api-messages';
 import { useAdminCreateUser } from '../../../sdk/admin';
 import { useCreateUserForm, type CreateUserFormValues } from '../hooks/useCreateUserForm';
 
@@ -42,11 +42,11 @@ export function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogP
       },
       onError: (error) => {
         if (error instanceof ApiError && error.status === 409) {
-          setError('email', { type: 'manual', message: 'A user with this email already exists.' });
+          setError('email', { type: 'manual', message: errorMessage(error) });
           return;
         }
         const general = handleApiError(error);
-        if (general) toast({ severity: 'error', message: general });
+        toast({ severity: 'error', message: general ?? errorMessage(error) });
       },
     },
   });
@@ -80,19 +80,16 @@ export function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogP
   };
 
   return (
-    <CustomDialog title="Create user" open={open} onClose={handleClose} width="30rem">
+    <CustomDrawer anchor="right" title="Create user" open={open} onClose={handleClose} drawerWidth="30rem">
       {createdUrl ? (
         <div className="flex flex-col gap-4">
           <p className="text-sm text-foreground">
             User created. Share this one-time link so they can set their password:
           </p>
           <div className="flex items-center gap-2">
-            <input
-              readOnly
-              value={createdUrl}
-              className="h-9 w-full rounded-md border border-border bg-background px-3 font-mono text-xs text-foreground"
-              onFocus={(e) => e.target.select()}
-            />
+            <code className="block w-full overflow-x-auto rounded-md border border-border bg-secondary px-3 py-2 font-mono text-xs text-foreground">
+              {createdUrl}
+            </code>
             <CustomButton type="button" variant="outline" icon={<Copy className="size-4" />} onClick={copyLink}>
               Copy
             </CustomButton>
@@ -106,31 +103,25 @@ export function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogP
         </div>
       ) : (
         <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <div>
-            <CustomLabel htmlFor="email" isRequired label="Email" />
-            <RHFInput<CreateUserFormValues> name="email" control={control} placeholder="name@company.com" />
+          <RHFInput<CreateUserFormValues>
+            name="email"
+            control={control}
+            label="Email"
+            required
+            placeholder="Enter email"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <RHFInput<CreateUserFormValues> name="first_name" control={control} label="First name" placeholder="Enter first name" />
+            <RHFInput<CreateUserFormValues> name="last_name" control={control} label="Last name" placeholder="Enter last name" />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <CustomLabel htmlFor="first_name" label="First name" />
-              <RHFInput<CreateUserFormValues> name="first_name" control={control} placeholder="Anjali" />
-            </div>
-            <div>
-              <CustomLabel htmlFor="last_name" label="Last name" />
-              <RHFInput<CreateUserFormValues> name="last_name" control={control} placeholder="Rao" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <CustomLabel htmlFor="phone" label="Phone" />
-              <RHFInput<CreateUserFormValues> name="phone" control={control} placeholder="+91 98765 43210" />
-            </div>
+            <RHFInput<CreateUserFormValues> name="phone" control={control} label="Phone" placeholder="Enter phone" />
             <RHFSelect<CreateUserFormValues>
               name="role"
               control={control}
               label="Role"
               required
-              placeholder="Select a role"
+              placeholder="Select role"
               items={ROLE_ITEMS}
             />
           </div>
@@ -144,6 +135,6 @@ export function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogP
           </div>
         </form>
       )}
-    </CustomDialog>
+    </CustomDrawer>
   );
 }

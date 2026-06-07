@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
-import { CustomLabel } from '../../../common/custom-label';
 import { RHFInput, RHFSelect } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminUpdateUser } from '../../../sdk/admin';
 import type { UserRow } from '../api/users';
 import { useEditUserForm, type EditUserFormValues } from '../hooks/useEditUserForm';
@@ -45,22 +45,18 @@ export function EditUserDialog({ user, onClose, onUpdated }: EditUserDialogProps
 
   const updateMutation = useAdminUpdateUser({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'User updated.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'User updated.') });
         onUpdated();
         onClose();
       },
       onError: (error) => {
         if (error instanceof ApiError && (error.status === 403 || error.status === 409)) {
-          const detail = (error as unknown as { body?: { detail?: unknown } }).body?.detail;
-          toast({
-            severity: 'error',
-            message: typeof detail === 'string' ? detail : 'Could not update user.',
-          });
+          toast({ severity: 'error', message: errorMessage(error, 'Could not update user.') });
           return;
         }
         const general = handleApiError(error);
-        if (general) toast({ severity: 'error', message: general });
+        toast({ severity: 'error', message: general ?? errorMessage(error) });
       },
     },
   });
@@ -80,34 +76,28 @@ export function EditUserDialog({ user, onClose, onUpdated }: EditUserDialogProps
   };
 
   return (
-    <CustomDialog title="Edit user" open={user !== null} onClose={onClose} width="30rem">
+    <CustomDrawer anchor="right" title="Edit user" open={user !== null} onClose={onClose} drawerWidth="30rem">
       {user && (
         <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <div>
-            <CustomLabel htmlFor="email" isRequired label="Email" />
-            <RHFInput<EditUserFormValues> name="email" control={control} placeholder="name@company.com" />
+          <RHFInput<EditUserFormValues>
+            name="email"
+            control={control}
+            label="Email"
+            required
+            placeholder="Enter email"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <RHFInput<EditUserFormValues> name="first_name" control={control} label="First name" placeholder="Enter first name" />
+            <RHFInput<EditUserFormValues> name="last_name" control={control} label="Last name" placeholder="Enter last name" />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <CustomLabel htmlFor="first_name" label="First name" />
-              <RHFInput<EditUserFormValues> name="first_name" control={control} placeholder="Anjali" />
-            </div>
-            <div>
-              <CustomLabel htmlFor="last_name" label="Last name" />
-              <RHFInput<EditUserFormValues> name="last_name" control={control} placeholder="Rao" />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <CustomLabel htmlFor="phone" label="Phone" />
-              <RHFInput<EditUserFormValues> name="phone" control={control} placeholder="+91 98765 43210" />
-            </div>
+            <RHFInput<EditUserFormValues> name="phone" control={control} label="Phone" placeholder="Enter phone" />
             <RHFSelect<EditUserFormValues>
               name="role"
               control={control}
               label="Role"
               required
-              placeholder="Select a role"
+              placeholder="Select role"
               items={ROLE_ITEMS}
             />
           </div>
@@ -121,6 +111,6 @@ export function EditUserDialog({ user, onClose, onUpdated }: EditUserDialogProps
           </div>
         </form>
       )}
-    </CustomDialog>
+    </CustomDrawer>
   );
 }

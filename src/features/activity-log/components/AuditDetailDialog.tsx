@@ -1,15 +1,6 @@
-import dayjs from 'dayjs';
 import { CustomDialog } from '../../../common/custom-dialog';
+import { formatDateTime, prettyJson } from '../../../utils/format';
 import type { AuditRow } from '../api/activity-log';
-
-function pretty(value: unknown): string | null {
-  if (value == null) return null;
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch {
-    return String(value);
-  }
-}
 
 interface AuditDetailDialogProps {
   entry: AuditRow | null;
@@ -18,8 +9,8 @@ interface AuditDetailDialogProps {
 
 /** Row-click detail: actor/action metadata + the before/after JSON snapshots. */
 export function AuditDetailDialog({ entry, onClose }: AuditDetailDialogProps) {
-  const before = pretty(entry?.before_state);
-  const after = pretty(entry?.after_state);
+  const before = prettyJson(entry?.before_state);
+  const after = prettyJson(entry?.after_state);
 
   return (
     <CustomDialog title="Activity detail" open={entry !== null} onClose={onClose} width="42rem">
@@ -29,7 +20,7 @@ export function AuditDetailDialog({ entry, onClose }: AuditDetailDialogProps) {
             <div>
               <dt className="text-xs text-muted-foreground">When</dt>
               <dd className="text-foreground">
-                {dayjs(entry.created_at).format('DD MMM YYYY, h:mm A')}
+                {formatDateTime(entry.created_at)}
               </dd>
             </div>
             <div>

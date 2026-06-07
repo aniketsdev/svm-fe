@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import dayjs from 'dayjs';
+import { formatDate } from '../../../utils/format';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import { cn } from '../../../lib/cn';
 import type { StoreRow } from '../api/stores';
@@ -65,9 +65,7 @@ export function StoresTable({ stores, loading }: StoresTableProps) {
         accessorKey: 'created_at',
         header: 'Created',
         cell: ({ row }) => (
-          <span className="text-muted-foreground">
-            {dayjs(row.original.created_at).format('DD MMM YYYY')}
-          </span>
+          <span className="text-muted-foreground">{formatDate(row.original.created_at)}</span>
         ),
       },
     ],
