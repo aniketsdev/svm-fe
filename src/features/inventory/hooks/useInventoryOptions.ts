@@ -3,7 +3,7 @@ import {
   getAdminListStoresQueryOptions,
   getAdminListProductsQueryOptions,
   getAdminListRawMaterialsQueryOptions,
-} from '../../../sdk/admin';
+} from '../../../sdk/inventory';
 import type { StoreListItem, ProductListItem, RawMaterialListItem } from '../../../sdk/schemas';
 
 function results<T>(data: unknown): T[] {

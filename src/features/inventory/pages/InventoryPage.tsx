@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeftRight, Plus, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { CustomButton } from '../../../common/custom-buttons';
 import { CustomSearch } from '../../../common/custom-search';
 import { CustomSelect } from '../../../common/custom-select';
@@ -15,8 +15,6 @@ import { InventorySummary } from '../components/InventorySummary';
 import { StockTable } from '../components/StockTable';
 import { MovementsTable } from '../components/MovementsTable';
 import { MovementDetailDrawer } from '../components/MovementDetailDrawer';
-import { RecordMovementDrawer } from '../components/RecordMovementDrawer';
-import { TransferStockDrawer } from '../components/TransferStockDrawer';
 import type { MovementRow } from '../api/inventory';
 
 const PAGE_LIMIT = 500;
@@ -58,8 +56,6 @@ type KindFilter =
 
 export function InventoryPage() {
   const [tab, setTab] = useState<Tab>('stock');
-  const [recordOpen, setRecordOpen] = useState(false);
-  const [transferOpen, setTransferOpen] = useState(false);
   const [selectedMovement, setSelectedMovement] = useState<MovementRow | null>(null);
   const [search, setSearch] = useState('');
   const [storeId, setStoreId] = useState(ALL);
@@ -135,22 +131,9 @@ export function InventoryPage() {
             Track stock on hand, transfers and every in/out ledger movement across stores.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2 sm:justify-end">
-          <CustomButton
-            variant="outline"
-            icon={<ArrowLeftRight className="size-4" />}
-            onClick={() => setTransferOpen(true)}
-          >
-            Transfer
-          </CustomButton>
-          <CustomButton
-            variant="primary"
-            icon={<Plus className="size-4" />}
-            onClick={() => setRecordOpen(true)}
-          >
-            Record movement
-          </CustomButton>
-        </div>
+        {/* The "Transfer" and "Record movement" quick-actions were removed: they
+            called backend endpoints that never existed. Use the GRN (inbound) and
+            Stock Transfer document workflows instead. */}
       </div>
 
       <div className="mt-6">
@@ -260,8 +243,6 @@ export function InventoryPage() {
         )}
       </div>
 
-      <RecordMovementDrawer open={recordOpen} onClose={() => setRecordOpen(false)} onDone={refetchAll} />
-      <TransferStockDrawer open={transferOpen} onClose={() => setTransferOpen(false)} onDone={refetchAll} />
       <MovementDetailDrawer movement={selectedMovement} onClose={() => setSelectedMovement(null)} />
     </div>
   );

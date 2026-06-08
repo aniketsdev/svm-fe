@@ -5,7 +5,7 @@ import { RHFInput } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { AuthLayout } from '../components/AuthLayout';
-import { useAuthResetPassword, useAuthAcceptInvitation } from '../../../sdk/auth';
+import { useAuthResetPassword, useAuthAcceptInvitation } from '../../../sdk/authentication';
 import {
   useSetNewPasswordForm,
   type SetNewPasswordFormValues,

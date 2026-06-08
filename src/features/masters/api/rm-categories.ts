@@ -1,4 +1,4 @@
-import { getAdminListRmCategoriesQueryOptions } from '../../../sdk/admin';
+import { getAdminListRmCategoriesQueryOptions } from '../../../sdk/inventory';
 import type { RmCategoryListItem, RmCategoryListResponse } from '../../../sdk/schemas';
 
 export type RmCategoryRow = RmCategoryListItem;

@@ -1,4 +1,4 @@
-import { getAdminListBomsQueryOptions } from '../../../sdk/admin';
+import { getAdminListBomsQueryOptions } from '../../../sdk/inventory';
 import type { BomListItem, BomListResponse, BomLineItem } from '../../../sdk/schemas';
 
 export type BomRow = BomListItem;

@@ -1,4 +1,4 @@
-import { getAdminListDoctorsQueryOptions } from '../../../sdk/admin';
+import { getAdminListDoctorsQueryOptions } from '../../../sdk/inventory';
 import type { DoctorListItem, DoctorListResponse } from '../../../sdk/schemas';
 
 export type DoctorRow = DoctorListItem;

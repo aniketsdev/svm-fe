@@ -5,7 +5,7 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
-import { useAdminCreateStore } from '../../../sdk/admin';
+import { useAdminCreateStore } from '../../../sdk/inventory';
 import { useCreateStoreForm, type CreateStoreFormValues } from '../hooks/useCreateStoreForm';
 
 const KIND_ITEMS = [

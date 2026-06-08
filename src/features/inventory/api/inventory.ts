@@ -3,7 +3,7 @@
 import {
   getAdminListStockQueryOptions,
   getAdminListStockMovementsQueryOptions,
-} from '../../../sdk/admin';
+} from '../../../sdk/inventory';
 import type {
   StockBalanceItem,
   StockBalanceResponse,

@@ -6,7 +6,7 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { AuthLayout } from '../components/AuthLayout';
 import { OtpInput } from '../components/OtpInput';
-import { useAuthForgotPassword, useAuthVerifyOtp } from '../../../sdk/auth';
+import { useAuthForgotPassword, useAuthVerifyOtp } from '../../../sdk/authentication';
 import { useEnterOtpForm, type EnterOtpFormValues } from '../hooks/useEnterOtpForm';
 import { clearOtpExpiry, useOtpTimer } from '../hooks/useOtpTimer';
 import enterOtpImage from '../../../assets/auth-enter-otp.svg';

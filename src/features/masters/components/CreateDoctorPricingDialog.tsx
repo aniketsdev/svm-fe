@@ -5,7 +5,7 @@ import { RHFInput, RHFSelect } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
-import { useAdminCreateDoctorPricing } from '../../../sdk/admin';
+import { useAdminCreateDoctorPricing } from '../../../sdk/inventory';
 import { useDoctors } from '../hooks/useDoctors';
 import { useProducts } from '../hooks/useProducts';
 import {

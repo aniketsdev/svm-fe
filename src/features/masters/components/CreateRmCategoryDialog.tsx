@@ -5,7 +5,7 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
-import { useAdminCreateRmCategory } from '../../../sdk/admin';
+import { useAdminCreateRmCategory } from '../../../sdk/inventory';
 import {
   useCreateRmCategoryForm,
   type CreateRmCategoryFormValues,

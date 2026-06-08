@@ -5,7 +5,7 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
-import { useAdminCreateDoctor } from '../../../sdk/admin';
+import { useAdminCreateDoctor } from '../../../sdk/inventory';
 import { useCreateDoctorForm, type CreateDoctorFormValues } from '../hooks/useCreateDoctorForm';
 
 interface CreateDoctorDialogProps {

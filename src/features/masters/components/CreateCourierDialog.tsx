@@ -5,7 +5,7 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
-import { useAdminCreateCourierPartner } from '../../../sdk/admin';
+import { useAdminCreateCourierPartner } from '../../../sdk/inventory';
 import { useCreateCourierForm, type CreateCourierFormValues } from '../hooks/useCreateCourierForm';
 
 interface CreateCourierDialogProps {

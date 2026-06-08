@@ -7,7 +7,7 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
 import { errorMessage } from '../../../utils/api-messages';
-import { useAdminCreateUser } from '../../../sdk/admin';
+import { useAdminCreateUser } from '../../../sdk/user-management';
 import { useCreateUserForm, type CreateUserFormValues } from '../hooks/useCreateUserForm';
 
 const ROLE_ITEMS = [

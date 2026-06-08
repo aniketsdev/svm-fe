@@ -5,7 +5,7 @@ import { RHFInput } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { AuthLayout } from '../components/AuthLayout';
-import { useAuthForgotPassword } from '../../../sdk/auth';
+import { useAuthForgotPassword } from '../../../sdk/authentication';
 import { useForgotPasswordForm, type ForgotPasswordFormValues } from '../hooks/useForgotPasswordForm';
 import { storeOtpExpiry } from '../hooks/useOtpTimer';
 import forgotPasswordImage from '../../../assets/auth-forgot-password.svg';

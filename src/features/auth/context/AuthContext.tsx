@@ -21,7 +21,7 @@ import { useCallback, useMemo, type ReactNode } from 'react';
 import { createContext } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError } from '../../../api/client';
-import { getAuthMeQueryOptions, getAuthMeQueryKey } from '../../../sdk/auth';
+import { getAuthMeQueryOptions, getAuthMeQueryKey } from '../../../sdk/authentication';
 import type { MeResponse } from '../../../sdk/schemas';
 
 export type AuthUser = MeResponse;

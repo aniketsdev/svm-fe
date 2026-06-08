@@ -10,7 +10,7 @@ import {
   useAdminSetUserStatus,
   useAdminResendInvitation,
   useAdminSoftDeleteUser,
-} from '../../../sdk/admin';
+} from '../../../sdk/user-management';
 import { useUsers } from '../hooks/useUsers';
 import { UsersTable } from '../components/UsersTable';
 import { CreateUserDialog } from '../components/CreateUserDialog';

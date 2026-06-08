@@ -1,7 +1,7 @@
 // Data access for the Users feature. Points at the canonical admin
 // user-management API (backend feature 008): GET /admin/users returns
 // { items, total, limit, offset } of AdminUserOut.
-import { getAdminListUsersQueryOptions } from '../../../sdk/admin';
+import { getAdminListUsersQueryOptions } from '../../../sdk/user-management';
 import type { AdminUserOut, AdminUserList, AdminListUsersStatus } from '../../../sdk/schemas';
 
 export type UserRow = AdminUserOut;

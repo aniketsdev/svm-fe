@@ -1,4 +1,4 @@
-import { getAdminListCourierPartnersQueryOptions } from '../../../sdk/admin';
+import { getAdminListCourierPartnersQueryOptions } from '../../../sdk/inventory';
 import type { CourierPartnerListItem, CourierPartnerListResponse } from '../../../sdk/schemas';
 
 export type CourierRow = CourierPartnerListItem;
