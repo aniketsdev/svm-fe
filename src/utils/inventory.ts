@@ -21,6 +21,8 @@ const KIND_LABEL: Record<string, string> = {
   return: 'Return',
   hold: 'Hold',
   release: 'Release',
+  processing_consume: 'Processing consume',
+  processing_output: 'Processing output',
 };
 
 export function inventoryTypeLabel(type: StockBalanceItemItemType | string): string {
