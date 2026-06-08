@@ -14,4 +14,8 @@ export const MovementListItemKind = {
   return: 'return',
   hold: 'hold',
   release: 'release',
+  processing_consume: 'processing_consume',
+  processing_output: 'processing_output',
+  manufacturing: 'manufacturing',
+  manufacturing_consume: 'manufacturing_consume',
 } as const;
