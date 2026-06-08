@@ -8,7 +8,7 @@ search?: string | null;
 store_id?: number | null;
 item_type?: 'product' | 'raw_material' | null;
 direction?: 'in' | 'out' | null;
-kind?: 'grn_receipt' | 'dispatch' | 'transfer' | 'adjustment' | 'return' | 'hold' | 'release' | null;
+kind?: 'grn_receipt' | 'dispatch' | 'transfer' | 'adjustment' | 'return' | 'hold' | 'release' | 'processing_consume' | 'processing_output' | 'manufacturing' | 'manufacturing_consume' | null;
 /**
  * @minimum 1
  * @maximum 100

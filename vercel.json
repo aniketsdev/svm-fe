@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    {
+      "comment": "Same-origin proxy: keeps auth cookies first-party so SameSite=Lax works. Replace the host with your real Render URL.",
+      "source": "/api/:path*",
+      "destination": "https://svm-be.onrender.com/api/:path*"
+    },
+    {
+      "comment": "SPA fallback: client-side routes that aren't real files resolve to index.html. Evaluated after the /api rule and only when no static file matches.",
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
