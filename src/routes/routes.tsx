@@ -42,9 +42,6 @@ const RolesPermissionsPage = lazyWithPreload(() =>
 const MastersPage = lazyWithPreload(() =>
   import('../features/masters/pages/MastersPage').then((m) => ({ default: m.MastersPage })),
 );
-const StoresPage = lazyWithPreload(() =>
-  import('../features/masters/pages/StoresPage').then((m) => ({ default: m.StoresPage })),
-);
 const VendorsPage = lazyWithPreload(() =>
   import('../features/masters/pages/VendorsPage').then((m) => ({ default: m.VendorsPage })),
 );
@@ -165,7 +162,6 @@ export default function AppRoutes() {
         <Route path="activity-log" element={<ActivityLogPage />} />
         <Route path="roles-permissions" element={<RolesPermissionsPage />} />
         <Route path="masters" element={<MastersPage />} />
-        <Route path="masters/stores" element={<StoresPage />} />
         <Route path="masters/vendors" element={<VendorsPage />} />
         <Route path="masters/courier-partners" element={<CouriersPage />} />
         <Route path="masters/rm-categories" element={<RmCategoriesPage />} />

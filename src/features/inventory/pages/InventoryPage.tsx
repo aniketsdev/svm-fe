@@ -7,7 +7,7 @@ import { cn } from '../../../lib/cn';
 import type {
   AdminListStockMovementsParams,
   AdminListStockParams,
-} from '../../../sdk/schemas';
+} from '../api/inventory';
 import { useStock } from '../hooks/useStock';
 import { useMovements } from '../hooks/useMovements';
 import { useInventoryOptions } from '../hooks/useInventoryOptions';
@@ -34,12 +34,13 @@ const DIRECTION_ITEMS = [
 
 const KIND_ITEMS = [
   { value: ALL, label: 'All reasons' },
-  { value: 'purchase', label: 'Purchase' },
-  { value: 'sale', label: 'Sale' },
-  { value: 'production', label: 'Production' },
+  { value: 'grn_receipt', label: 'GRN receipt' },
+  { value: 'dispatch', label: 'Dispatch' },
   { value: 'transfer', label: 'Transfer' },
   { value: 'adjustment', label: 'Adjustment' },
   { value: 'return', label: 'Return' },
+  { value: 'hold', label: 'Hold' },
+  { value: 'release', label: 'Release' },
 ];
 
 type Tab = 'stock' | 'movements';
@@ -47,12 +48,13 @@ type ItemTypeFilter = typeof ALL | 'product' | 'raw_material';
 type DirectionFilter = typeof ALL | 'in' | 'out';
 type KindFilter =
   | typeof ALL
-  | 'purchase'
-  | 'sale'
-  | 'production'
+  | 'grn_receipt'
+  | 'dispatch'
   | 'transfer'
   | 'adjustment'
-  | 'return';
+  | 'return'
+  | 'hold'
+  | 'release';
 
 export function InventoryPage() {
   const [tab, setTab] = useState<Tab>('stock');
@@ -67,7 +69,7 @@ export function InventoryPage() {
   const storeItems = useMemo(
     () => [
       { value: ALL, label: 'All stores' },
-      ...stores.map((s) => ({ value: String(s.id), label: s.name })),
+      ...stores.map((s) => ({ value: String(s.id), label: s.store_name })),
     ],
     [stores],
   );
@@ -92,18 +94,12 @@ export function InventoryPage() {
     [direction, kind, stockFilters],
   );
 
-  const { stock, count: stockCount, isLoading: stockLoading, refetch: refetchStock } = useStock(stockFilters);
+  const { stock, count: stockCount, isLoading: stockLoading } = useStock(stockFilters);
   const {
     movements,
     count: movementCount,
     isLoading: movementLoading,
-    refetch: refetchMovements,
   } = useMovements(movementFilters);
-
-  const refetchAll = () => {
-    refetchStock();
-    refetchMovements();
-  };
 
   const resetFilters = () => {
     setSearch('');

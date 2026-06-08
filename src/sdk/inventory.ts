@@ -39,6 +39,8 @@ import type {
   AdminListRawMaterialsParams,
   AdminListRmCategoriesParams,
   AdminListStockAdjustmentsParams,
+  AdminListStockBalanceParams,
+  AdminListStockMovementsParams,
   AdminListStockParams,
   AdminListStockTransfersParams,
   AdminListVendorsParams,
@@ -80,6 +82,7 @@ import type {
   MaterialList,
   MaterialOut,
   MaterialUpdate,
+  MovementListResponse,
   ProductListItem,
   ProductListResponse,
   RawMaterialListItem,
@@ -94,6 +97,7 @@ import type {
   StPreview,
   StStepRequest,
   StUpdate,
+  StockBalanceResponse,
   StockList,
   StoreCreate,
   StoreList,
@@ -641,6 +645,258 @@ export function useAdminListStock<TData = Awaited<ReturnType<typeof adminListSto
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getAdminListStockQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminListStockBalanceResponse200 = {
+  data: StockBalanceResponse
+  status: 200
+}
+
+export type adminListStockBalanceResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminListStockBalanceResponseSuccess = (adminListStockBalanceResponse200) & {
+  headers: Headers;
+};
+export type adminListStockBalanceResponseError = (adminListStockBalanceResponse422) & {
+  headers: Headers;
+};
+
+export type adminListStockBalanceResponse = (adminListStockBalanceResponseSuccess | adminListStockBalanceResponseError)
+
+export const getAdminListStockBalanceUrl = (params?: AdminListStockBalanceParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/admin/inventory/stock-balance?${stringifiedParams}` : `/api/v1/admin/inventory/stock-balance`
+}
+
+/**
+ * @summary List Stock Balance
+ */
+export const adminListStockBalance = async (params?: AdminListStockBalanceParams, options?: RequestInit): Promise<adminListStockBalanceResponse> => {
+
+  return mutator<adminListStockBalanceResponse>(getAdminListStockBalanceUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListStockBalanceQueryKey = (params?: AdminListStockBalanceParams,) => {
+    return [
+    `/api/v1/admin/inventory/stock-balance`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdminListStockBalanceQueryOptions = <TData = Awaited<ReturnType<typeof adminListStockBalance>>, TError = ErrorType<HTTPValidationError>>(params?: AdminListStockBalanceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockBalance>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListStockBalanceQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListStockBalance>>> = ({ signal }) => adminListStockBalance(params, { signal });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListStockBalance>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminListStockBalanceQueryResult = NonNullable<Awaited<ReturnType<typeof adminListStockBalance>>>
+export type AdminListStockBalanceQueryError = ErrorType<HTTPValidationError>
+
+
+export function useAdminListStockBalance<TData = Awaited<ReturnType<typeof adminListStockBalance>>, TError = ErrorType<HTTPValidationError>>(
+ params: undefined |  AdminListStockBalanceParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockBalance>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListStockBalance>>,
+          TError,
+          Awaited<ReturnType<typeof adminListStockBalance>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListStockBalance<TData = Awaited<ReturnType<typeof adminListStockBalance>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockBalanceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockBalance>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListStockBalance>>,
+          TError,
+          Awaited<ReturnType<typeof adminListStockBalance>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListStockBalance<TData = Awaited<ReturnType<typeof adminListStockBalance>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockBalanceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockBalance>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List Stock Balance
+ */
+
+export function useAdminListStockBalance<TData = Awaited<ReturnType<typeof adminListStockBalance>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockBalanceParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockBalance>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminListStockBalanceQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminListStockMovementsResponse200 = {
+  data: MovementListResponse
+  status: 200
+}
+
+export type adminListStockMovementsResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminListStockMovementsResponseSuccess = (adminListStockMovementsResponse200) & {
+  headers: Headers;
+};
+export type adminListStockMovementsResponseError = (adminListStockMovementsResponse422) & {
+  headers: Headers;
+};
+
+export type adminListStockMovementsResponse = (adminListStockMovementsResponseSuccess | adminListStockMovementsResponseError)
+
+export const getAdminListStockMovementsUrl = (params?: AdminListStockMovementsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/admin/inventory/movements?${stringifiedParams}` : `/api/v1/admin/inventory/movements`
+}
+
+/**
+ * @summary List Stock Movements
+ */
+export const adminListStockMovements = async (params?: AdminListStockMovementsParams, options?: RequestInit): Promise<adminListStockMovementsResponse> => {
+
+  return mutator<adminListStockMovementsResponse>(getAdminListStockMovementsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListStockMovementsQueryKey = (params?: AdminListStockMovementsParams,) => {
+    return [
+    `/api/v1/admin/inventory/movements`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdminListStockMovementsQueryOptions = <TData = Awaited<ReturnType<typeof adminListStockMovements>>, TError = ErrorType<HTTPValidationError>>(params?: AdminListStockMovementsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListStockMovementsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListStockMovements>>> = ({ signal }) => adminListStockMovements(params, { signal });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminListStockMovementsQueryResult = NonNullable<Awaited<ReturnType<typeof adminListStockMovements>>>
+export type AdminListStockMovementsQueryError = ErrorType<HTTPValidationError>
+
+
+export function useAdminListStockMovements<TData = Awaited<ReturnType<typeof adminListStockMovements>>, TError = ErrorType<HTTPValidationError>>(
+ params: undefined |  AdminListStockMovementsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListStockMovements>>,
+          TError,
+          Awaited<ReturnType<typeof adminListStockMovements>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListStockMovements<TData = Awaited<ReturnType<typeof adminListStockMovements>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockMovementsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListStockMovements>>,
+          TError,
+          Awaited<ReturnType<typeof adminListStockMovements>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListStockMovements<TData = Awaited<ReturnType<typeof adminListStockMovements>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockMovementsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List Stock Movements
+ */
+
+export function useAdminListStockMovements<TData = Awaited<ReturnType<typeof adminListStockMovements>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListStockMovementsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListStockMovements>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminListStockMovementsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

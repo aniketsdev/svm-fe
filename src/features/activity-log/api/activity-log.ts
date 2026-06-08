@@ -7,8 +7,12 @@ export type AuditRow = ActivityLogListItem;
 // Keep the feature's public type name stable for consumers (useActivityLog).
 export type AuditLogListResponse = ActivityLogList;
 
-/** TanStack Query options for `GET /api/v1/admin/activity-log`. */
-export function activityLogQueryOptions(search?: string) {
-  const trimmed = search?.trim();
-  return getAdminListActivityLogQueryOptions(trimmed ? { search: trimmed } : undefined);
+/**
+ * TanStack Query options for `GET /api/v1/admin/activity-log`.
+ *
+ * The endpoint has no free-text search param (it supports action/entity/actor/date
+ * filters); the page's search box is applied client-side in `useActivityLog`.
+ */
+export function activityLogQueryOptions() {
+  return getAdminListActivityLogQueryOptions();
 }

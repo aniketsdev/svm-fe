@@ -19,7 +19,9 @@ const SECTIONS: MasterSection[] = [
     description: 'Warehouses, factory & retail locations',
     icon: Warehouse,
     to: '/masters/stores',
-    ready: true,
+    // Deferred: the masters Stores schema conflicts with the inventory `stores`
+    // table, so this master has no backend yet (see inventory store endpoints).
+    ready: false,
   },
   {
     key: 'vendors',

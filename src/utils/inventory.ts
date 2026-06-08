@@ -14,12 +14,13 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 const KIND_LABEL: Record<string, string> = {
-  purchase: 'Purchase',
-  sale: 'Sale',
-  production: 'Production',
+  grn_receipt: 'GRN receipt',
+  dispatch: 'Dispatch',
   transfer: 'Transfer',
   adjustment: 'Adjustment',
   return: 'Return',
+  hold: 'Hold',
+  release: 'Release',
 };
 
 export function inventoryTypeLabel(type: StockBalanceItemItemType | string): string {
