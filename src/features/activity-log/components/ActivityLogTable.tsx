@@ -27,10 +27,10 @@ export function ActivityLogTable({ entries, loading, onRowClick }: ActivityLogTa
         header: 'Who',
         cell: ({ row }) => (
           <div className="flex flex-col">
-            <span className="text-foreground">{row.original.actor_email ?? 'System'}</span>
-            {row.original.actor_role && (
+            <span className="text-foreground">{row.original.actor?.email ?? 'System'}</span>
+            {row.original.actor?.role && (
               <span className="text-xs capitalize text-muted-foreground">
-                {row.original.actor_role}
+                {row.original.actor?.role}
               </span>
             )}
           </div>
@@ -45,14 +45,14 @@ export function ActivityLogTable({ entries, loading, onRowClick }: ActivityLogTa
         id: 'entity',
         header: 'Entity',
         cell: ({ row }) => (
-          <span className="text-foreground">{row.original.target_entity_type ?? '—'}</span>
+          <span className="text-foreground">{row.original.entity_type ?? '—'}</span>
         ),
       },
       {
         id: 'record',
         header: 'Record',
         cell: ({ row }) => (
-          <span className="text-muted-foreground">{row.original.target_entity_id ?? '—'}</span>
+          <span className="text-muted-foreground">{row.original.record_id ?? '—'}</span>
         ),
       },
       {

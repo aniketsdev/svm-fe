@@ -6,7 +6,7 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
-import { useAdminCreateDoctorAlias } from '../../../sdk/admin';
+import { useAdminCreateDoctorAlias } from '../../../sdk/inventory';
 import { useDoctors } from '../hooks/useDoctors';
 import {
   useCreateDoctorAliasForm,

@@ -1,4 +1,4 @@
-import { getAdminListVendorsQueryOptions } from '../../../sdk/admin';
+import { getAdminListVendorsQueryOptions } from '../../../sdk/inventory';
 import type { VendorListItem, VendorListResponse } from '../../../sdk/schemas';
 
 export type VendorRow = VendorListItem;

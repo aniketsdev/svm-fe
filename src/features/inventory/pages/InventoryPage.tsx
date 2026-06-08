@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeftRight, Plus, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { CustomButton } from '../../../common/custom-buttons';
 import { CustomSearch } from '../../../common/custom-search';
 import { CustomSelect } from '../../../common/custom-select';
@@ -7,7 +7,7 @@ import { cn } from '../../../lib/cn';
 import type {
   AdminListStockMovementsParams,
   AdminListStockParams,
-} from '../../../sdk/schemas';
+} from '../api/inventory';
 import { useStock } from '../hooks/useStock';
 import { useMovements } from '../hooks/useMovements';
 import { useInventoryOptions } from '../hooks/useInventoryOptions';
@@ -15,8 +15,6 @@ import { InventorySummary } from '../components/InventorySummary';
 import { StockTable } from '../components/StockTable';
 import { MovementsTable } from '../components/MovementsTable';
 import { MovementDetailDrawer } from '../components/MovementDetailDrawer';
-import { RecordMovementDrawer } from '../components/RecordMovementDrawer';
-import { TransferStockDrawer } from '../components/TransferStockDrawer';
 import type { MovementRow } from '../api/inventory';
 
 const PAGE_LIMIT = 500;
@@ -36,12 +34,13 @@ const DIRECTION_ITEMS = [
 
 const KIND_ITEMS = [
   { value: ALL, label: 'All reasons' },
-  { value: 'purchase', label: 'Purchase' },
-  { value: 'sale', label: 'Sale' },
-  { value: 'production', label: 'Production' },
+  { value: 'grn_receipt', label: 'GRN receipt' },
+  { value: 'dispatch', label: 'Dispatch' },
   { value: 'transfer', label: 'Transfer' },
   { value: 'adjustment', label: 'Adjustment' },
   { value: 'return', label: 'Return' },
+  { value: 'hold', label: 'Hold' },
+  { value: 'release', label: 'Release' },
 ];
 
 type Tab = 'stock' | 'movements';
@@ -49,17 +48,16 @@ type ItemTypeFilter = typeof ALL | 'product' | 'raw_material';
 type DirectionFilter = typeof ALL | 'in' | 'out';
 type KindFilter =
   | typeof ALL
-  | 'purchase'
-  | 'sale'
-  | 'production'
+  | 'grn_receipt'
+  | 'dispatch'
   | 'transfer'
   | 'adjustment'
-  | 'return';
+  | 'return'
+  | 'hold'
+  | 'release';
 
 export function InventoryPage() {
   const [tab, setTab] = useState<Tab>('stock');
-  const [recordOpen, setRecordOpen] = useState(false);
-  const [transferOpen, setTransferOpen] = useState(false);
   const [selectedMovement, setSelectedMovement] = useState<MovementRow | null>(null);
   const [search, setSearch] = useState('');
   const [storeId, setStoreId] = useState(ALL);
@@ -71,7 +69,7 @@ export function InventoryPage() {
   const storeItems = useMemo(
     () => [
       { value: ALL, label: 'All stores' },
-      ...stores.map((s) => ({ value: String(s.id), label: s.name })),
+      ...stores.map((s) => ({ value: String(s.id), label: s.store_name })),
     ],
     [stores],
   );
@@ -96,18 +94,12 @@ export function InventoryPage() {
     [direction, kind, stockFilters],
   );
 
-  const { stock, count: stockCount, isLoading: stockLoading, refetch: refetchStock } = useStock(stockFilters);
+  const { stock, count: stockCount, isLoading: stockLoading } = useStock(stockFilters);
   const {
     movements,
     count: movementCount,
     isLoading: movementLoading,
-    refetch: refetchMovements,
   } = useMovements(movementFilters);
-
-  const refetchAll = () => {
-    refetchStock();
-    refetchMovements();
-  };
 
   const resetFilters = () => {
     setSearch('');
@@ -135,22 +127,9 @@ export function InventoryPage() {
             Track stock on hand, transfers and every in/out ledger movement across stores.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2 sm:justify-end">
-          <CustomButton
-            variant="outline"
-            icon={<ArrowLeftRight className="size-4" />}
-            onClick={() => setTransferOpen(true)}
-          >
-            Transfer
-          </CustomButton>
-          <CustomButton
-            variant="primary"
-            icon={<Plus className="size-4" />}
-            onClick={() => setRecordOpen(true)}
-          >
-            Record movement
-          </CustomButton>
-        </div>
+        {/* The "Transfer" and "Record movement" quick-actions were removed: they
+            called backend endpoints that never existed. Use the GRN (inbound) and
+            Stock Transfer document workflows instead. */}
       </div>
 
       <div className="mt-6">
@@ -260,8 +239,6 @@ export function InventoryPage() {
         )}
       </div>
 
-      <RecordMovementDrawer open={recordOpen} onClose={() => setRecordOpen(false)} onDone={refetchAll} />
-      <TransferStockDrawer open={transferOpen} onClose={() => setTransferOpen(false)} onDone={refetchAll} />
       <MovementDetailDrawer movement={selectedMovement} onClose={() => setSelectedMovement(null)} />
     </div>
   );

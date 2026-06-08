@@ -1,5 +1,7 @@
 import { CustomDialog } from '../../../common/custom-dialog';
 import { formatDateTime, prettyJson } from '../../../utils/format';
+import { useAdminGetActivityLogEntry } from '../../../sdk/activity-log';
+import type { ActivityLogDetail } from '../../../sdk/schemas';
 import type { AuditRow } from '../api/activity-log';
 
 interface AuditDetailDialogProps {
@@ -7,10 +9,17 @@ interface AuditDetailDialogProps {
   onClose: () => void;
 }
 
-/** Row-click detail: actor/action metadata + the before/after JSON snapshots. */
+/** Row-click detail: actor/action metadata + the before/after JSON snapshots.
+ *  before/after live on the detail endpoint, so fetch the full entry on open. */
 export function AuditDetailDialog({ entry, onClose }: AuditDetailDialogProps) {
-  const before = prettyJson(entry?.before_state);
-  const after = prettyJson(entry?.after_state);
+  const query = useAdminGetActivityLogEntry(entry?.id ?? 0, {
+    query: { enabled: entry !== null },
+  });
+  const detail = (query.data as { data?: ActivityLogDetail } | undefined)?.data;
+  // The detail carries every field the list row has, plus before/after state.
+  const row = detail ?? entry;
+  const before = prettyJson(detail?.before_state);
+  const after = prettyJson(detail?.after_state);
 
   return (
     <CustomDialog title="Activity detail" open={entry !== null} onClose={onClose} width="42rem">
@@ -20,30 +29,30 @@ export function AuditDetailDialog({ entry, onClose }: AuditDetailDialogProps) {
             <div>
               <dt className="text-xs text-muted-foreground">When</dt>
               <dd className="text-foreground">
-                {formatDateTime(entry.created_at)}
+                {formatDateTime(row?.created_at ?? "")}
               </dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Who</dt>
               <dd className="text-foreground">
-                {entry.actor_email ?? 'System'}
-                {entry.actor_role ? ` (${entry.actor_role})` : ''}
+                {row?.actor?.email ?? 'System'}
+                {row?.actor?.role ? ` (${row?.actor?.role})` : ''}
               </dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Action</dt>
-              <dd className="text-foreground">{entry.action}</dd>
+              <dd className="text-foreground">{row?.action}</dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Entity</dt>
               <dd className="text-foreground">
-                {entry.target_entity_type ?? '—'}
-                {entry.target_entity_id ? ` #${entry.target_entity_id}` : ''}
+                {row?.entity_type ?? '—'}
+                {row?.record_id ? ` #${row?.record_id}` : ''}
               </dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">IP</dt>
-              <dd className="text-foreground">{entry.ip ?? '—'}</dd>
+              <dd className="text-foreground">{row?.ip ?? '—'}</dd>
             </div>
           </dl>
 

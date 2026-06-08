@@ -6,7 +6,7 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
-import { useAdminUpdateUser } from '../../../sdk/admin';
+import { useAdminUpdateUser } from '../../../sdk/user-management';
 import type { UserRow } from '../api/users';
 import { useEditUserForm, type EditUserFormValues } from '../hooks/useEditUserForm';
 

@@ -6,7 +6,7 @@ import { RHFInput, RHFCheckbox } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { AuthLayout } from '../components/AuthLayout';
-import { useAuthLogin } from '../../../sdk/auth';
+import { useAuthLogin } from '../../../sdk/authentication';
 import { useSignInForm, type SignInFormValues } from '../hooks/useSignInForm';
 import { useAuth } from '../hooks/useAuth';
 import { ApiError } from '../../../api/client';

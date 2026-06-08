@@ -1,5 +1,4 @@
 export { MastersPage } from './pages/MastersPage';
-export { StoresPage } from './pages/StoresPage';
 export { VendorsPage } from './pages/VendorsPage';
 export { CouriersPage } from './pages/CouriersPage';
 export { RmCategoriesPage } from './pages/RmCategoriesPage';

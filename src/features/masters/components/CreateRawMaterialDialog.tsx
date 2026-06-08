@@ -6,7 +6,7 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
-import { useAdminCreateRawMaterial } from '../../../sdk/admin';
+import { useAdminCreateRawMaterial } from '../../../sdk/inventory';
 import { useRmCategories } from '../hooks/useRmCategories';
 import {
   useCreateRawMaterialForm,

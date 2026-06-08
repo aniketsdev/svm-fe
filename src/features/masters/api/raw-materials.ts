@@ -1,4 +1,4 @@
-import { getAdminListRawMaterialsQueryOptions } from '../../../sdk/admin';
+import { getAdminListRawMaterialsQueryOptions } from '../../../sdk/inventory';
 import type { RawMaterialListItem, RawMaterialListResponse } from '../../../sdk/schemas';
 
 export type RawMaterialRow = RawMaterialListItem;

@@ -51,10 +51,6 @@ export function RolesPermissionsPage() {
       {role && (
         <p className="mt-3 max-w-3xl text-sm text-muted-foreground">
           {role.description}
-          <span className="text-muted-foreground/70">
-            {' '}
-            · {role.user_count} {role.user_count === 1 ? 'user' : 'users'}
-          </span>
         </p>
       )}
 

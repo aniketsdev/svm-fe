@@ -1,4 +1,4 @@
-import { getAdminListProductsQueryOptions } from '../../../sdk/admin';
+import { getAdminListProductsQueryOptions } from '../../../sdk/inventory';
 import type { ProductListItem, ProductListResponse } from '../../../sdk/schemas';
 
 export type ProductRow = ProductListItem;

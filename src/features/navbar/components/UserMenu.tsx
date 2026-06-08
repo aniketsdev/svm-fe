@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
 import { UserAvatar } from '../../../common/user-avatar';
 import { cn } from '../../../lib/cn';
-import { useAuthLogout } from '../../../sdk/auth';
+import { useAuthLogout } from '../../../sdk/authentication';
 import { useAuth } from '../../auth/hooks/useAuth';
 
 export const UserMenu = memo(function UserMenu() {

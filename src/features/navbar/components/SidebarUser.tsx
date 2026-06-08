@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '../../../lib/cn';
 import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
 import { UserAvatar } from '../../../common/user-avatar';
-import { useAuthLogout } from '../../../sdk/auth';
+import { useAuthLogout } from '../../../sdk/authentication';
 import { useAuth } from '../../auth/hooks/useAuth';
 
 /** Light-styled sidebar footer: avatar + name/role + logout (mirrors UserMenu's

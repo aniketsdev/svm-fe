@@ -6,7 +6,7 @@
  * Returns the same TanStack Query result, with friendly aliases.
  */
 import { useQuery } from '@tanstack/react-query';
-import { getAuthMeQueryOptions } from '../../../sdk/auth';
+import { getAuthMeQueryOptions } from '../../../sdk/authentication';
 import type { MeResponse } from '../../../sdk/schemas';
 import { ApiError } from '../../../api/client';
 

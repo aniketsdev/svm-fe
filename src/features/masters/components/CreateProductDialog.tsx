@@ -6,7 +6,7 @@ import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { toNumberOrNull } from '../../../utils/format';
-import { useAdminCreateProduct } from '../../../sdk/admin';
+import { useAdminCreateProduct } from '../../../sdk/inventory';
 import { useCreateProductForm, type CreateProductFormValues } from '../hooks/useCreateProductForm';
 
 interface CreateProductDialogProps {

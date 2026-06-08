@@ -1,29 +1,30 @@
 // Data access for Inventory. Single entry point onto the generated SDK
-// (adminListStock / adminListStockMovements).
+// (adminListStockBalance / adminListStockMovements).
 import {
-  getAdminListStockQueryOptions,
+  getAdminListStockBalanceQueryOptions,
   getAdminListStockMovementsQueryOptions,
-} from '../../../sdk/admin';
+} from '../../../sdk/inventory';
 import type {
   StockBalanceItem,
   StockBalanceResponse,
   MovementListItem,
   MovementListResponse,
-  AdminListStockParams,
+  AdminListStockBalanceParams,
   AdminListStockMovementsParams,
 } from '../../../sdk/schemas';
 
 export type StockRow = StockBalanceItem;
 export type MovementRow = MovementListItem;
+// Alias kept stable for callers (the balance endpoint replaced the old stock list).
+export type AdminListStockParams = AdminListStockBalanceParams;
 export type {
   StockBalanceResponse,
   MovementListResponse,
-  AdminListStockParams,
   AdminListStockMovementsParams,
 };
 
 export function stockQueryOptions(params: AdminListStockParams = {}) {
-  return getAdminListStockQueryOptions(params);
+  return getAdminListStockBalanceQueryOptions(params);
 }
 
 export function movementsQueryOptions(params: AdminListStockMovementsParams = {}) {

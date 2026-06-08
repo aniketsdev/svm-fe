@@ -9,7 +9,7 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
-import { useAdminCreateBom } from '../../../sdk/admin';
+import { useAdminCreateBom } from '../../../sdk/inventory';
 import { useProducts } from '../hooks/useProducts';
 import { useRawMaterials } from '../hooks/useRawMaterials';
 import { useCreateBomForm, type CreateBomFormValues } from '../hooks/useCreateBomForm';
