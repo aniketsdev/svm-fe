@@ -11,7 +11,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useState } from 'react';
-import logoLight from '../../../assets/logo-light-font.svg';
+import logoLight from '../../../assets/logo-light-font.png';
 import { NAVBAR_HEIGHT } from '../constants';
 import { GlobalSearch } from './GlobalSearch';
 import { MobileDrawer } from './MobileDrawer';

@@ -8,7 +8,7 @@ import { AuthLayout } from '../components/AuthLayout';
 import { useAuthForgotPassword } from '../../../sdk/authentication';
 import { useForgotPasswordForm, type ForgotPasswordFormValues } from '../hooks/useForgotPasswordForm';
 import { storeOtpExpiry } from '../hooks/useOtpTimer';
-import forgotPasswordImage from '../../../assets/auth-forgot-password.svg';
+import forgotPasswordImage from '../../../assets/home.jpg';
 
 // Backend OTPs are valid for 10 minutes (FR-017) — used by the inline timer on
 // the next page. Server doesn't echo this back; we just match the contract.

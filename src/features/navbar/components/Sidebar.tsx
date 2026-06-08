@@ -1,5 +1,5 @@
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import logoLight from '../../../assets/logo-light-font.svg';
+import logoLight from '../../../assets/logo-light-font.png';
 import { cn } from '../../../lib/cn';
 import { NAV_GROUPS } from '../nav-links';
 import { SidebarItem } from './SidebarItem';

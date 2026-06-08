@@ -1,5 +1,5 @@
 import { Menu } from 'lucide-react';
-import logoLight from '../../../assets/logo-light-font.svg';
+import logoLight from '../../../assets/logo-light-font.png';
 import { HeaderSearch } from './HeaderSearch';
 
 interface TopHeaderProps {
