@@ -88,6 +88,9 @@ const MaterialsPage = lazyWithPreload(() =>
 const StoresPage = lazyWithPreload(() =>
   import('../features/inventory/pages/StoresPage').then((m) => ({ default: m.StoresPage })),
 );
+const ProcessingPage = lazyWithPreload(() =>
+  import('../features/processing/pages/ProcessingPage').then((m) => ({ default: m.ProcessingPage })),
+);
 
 // ── Placeholder pages for routes whose features aren't built yet ────────────
 const DashboardPlaceholder = () => <PlaceholderPage title="Dashboard" />;
@@ -180,6 +183,7 @@ export default function AppRoutes() {
         <Route path="masters/materials" element={<MaterialsPage />} />
         <Route path="masters/stores" element={<StoresPage />} />
         <Route path="inventory" element={<InventoryPage />} />
+        <Route path="processing" element={<ProcessingPage />} />
         <Route path="scheduling" element={<SchedulingPlaceholder />} />
         <Route path="clients" element={<ClientsPlaceholder />} />
         <Route path="clients/:clientUuid" element={<ClientDetailPlaceholder />} />
