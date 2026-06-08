@@ -12,27 +12,35 @@ interface AuditEnvelope {
   status: number;
 }
 
-export function useActivityLog(search?: string) {
-  const query = useQuery(activityLogQueryOptions());
-  const envelope = query.data as AuditEnvelope | undefined;
-  const all: AuditRow[] = envelope?.data.items ?? [];
+export interface UseActivityLogArgs {
+  page: number;
+  pageSize: number;
+  /** Free-text search (server-side: actor / action / entity / record). */
+  q?: string;
+  /** Column id to sort by (when | who | action | entity | record | ip). */
+  sort?: string;
+  order?: 'asc' | 'desc';
+}
 
-  // The API has no free-text search; filter the loaded page client-side.
-  const term = search?.trim().toLowerCase();
-  const entries = term
-    ? all.filter(
-        (e) =>
-          (e.actor?.email ?? '').toLowerCase().includes(term) ||
-          e.action.toLowerCase().includes(term) ||
-          (e.entity_type ?? '').toLowerCase().includes(term) ||
-          String(e.record_id ?? '').toLowerCase().includes(term),
-      )
-    : all;
+export function useActivityLog({ page, pageSize, q, sort, order }: UseActivityLogArgs) {
+  // Search, sort AND pagination are all handled server-side.
+  const query = useQuery(
+    activityLogQueryOptions({
+      limit: pageSize,
+      offset: page * pageSize,
+      q: q?.trim() || undefined,
+      sort: sort || undefined,
+      order: sort ? order : undefined,
+    }),
+  );
+  const envelope = query.data as AuditEnvelope | undefined;
+  const entries: AuditRow[] = envelope?.data.items ?? [];
+  const total = envelope?.data.total ?? 0;
 
   return {
     entries,
-    count: term ? entries.length : envelope?.data.total ?? 0,
-    isLoading: query.isPending,
+    total,
+    isLoading: query.isPending || query.isFetching,
     isError: query.isError,
     refetch: query.refetch,
   };

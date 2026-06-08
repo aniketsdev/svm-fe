@@ -17,6 +17,7 @@ export interface ActivityLogDetail {
   action: string;
   entity_type?: string | null;
   record_id?: string | null;
+  record_name?: string | null;
   ip?: string | null;
   changed_fields?: string[] | null;
   before_state?: ActivityLogDetailBeforeState;

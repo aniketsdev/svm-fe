@@ -92,8 +92,8 @@ const CustomDrawer = ({
                 marginTop: headerStyle,
                 paddingLeft: headerPadding ?? defaultPad,
                 paddingRight: headerPadding ?? defaultPad,
-                paddingTop: 10,
-                paddingBottom: 10,
+                paddingTop: 15,
+                paddingBottom: 15,
               }}
             >
               <DialogPrimitive.Title
