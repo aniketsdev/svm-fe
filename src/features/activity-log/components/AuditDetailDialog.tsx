@@ -1,4 +1,4 @@
-import { CustomDialog } from '../../../common/custom-dialog';
+import { CustomDrawer } from '../../../common/custom-drawer';
 import { formatDateTime, prettyJson } from '../../../utils/format';
 import { useAdminGetActivityLogEntry } from '../../../sdk/activity-log';
 import type { ActivityLogDetail } from '../../../sdk/schemas';
@@ -22,7 +22,13 @@ export function AuditDetailDialog({ entry, onClose }: AuditDetailDialogProps) {
   const after = prettyJson(detail?.after_state);
 
   return (
-    <CustomDialog title="Activity detail" open={entry !== null} onClose={onClose} width="42rem">
+    <CustomDrawer
+      anchor="right"
+      title="Activity Log Details"
+      open={entry !== null}
+      onClose={onClose}
+      drawerWidth="38rem"
+    >
       {entry && (
         <div className="flex flex-col gap-4 text-sm">
           <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
@@ -57,7 +63,7 @@ export function AuditDetailDialog({ entry, onClose }: AuditDetailDialogProps) {
           </dl>
 
           {before || after ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <p className="mb-1 text-xs font-medium text-muted-foreground">Before</p>
                 <pre className="max-h-64 overflow-auto rounded-lg border border-border bg-muted/40 p-3 text-xs text-foreground">
@@ -78,6 +84,6 @@ export function AuditDetailDialog({ entry, onClose }: AuditDetailDialogProps) {
           )}
         </div>
       )}
-    </CustomDialog>
+    </CustomDrawer>
   );
 }

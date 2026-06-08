@@ -74,7 +74,7 @@ export const GlobalSearch = memo(function GlobalSearch() {
           type="button"
           onClick={expand}
           aria-label="Search clients"
-          className="inline-flex size-10 items-center justify-center rounded-full text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          className="inline-flex size-10 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <Search aria-hidden className="size-5" />
         </button>
@@ -86,12 +86,12 @@ export const GlobalSearch = memo(function GlobalSearch() {
           className={cn(
             'flex items-center gap-2',
             // Mobile (xs): fixed full-navbar overlay; sm+: inline pill.
-            'fixed inset-x-0 top-0 z-50 h-[var(--mhg-nav-h)] bg-primary-08 px-3 sm:static sm:h-auto sm:w-60 md:w-64 lg:w-72',
-            'sm:rounded-md sm:border sm:border-white/30 sm:bg-white/10 sm:px-3 sm:py-2',
+            'fixed inset-x-0 top-0 z-50 h-[var(--mhg-nav-h)] bg-white px-3 sm:static sm:h-auto sm:w-60 md:w-64 lg:w-72',
+            'sm:rounded-md sm:border sm:border-border sm:bg-background sm:px-3 sm:py-2',
           )}
           style={{ ['--mhg-nav-h' as never]: `${NAVBAR_HEIGHT}px` } as React.CSSProperties}
         >
-          <Search aria-hidden className="size-5 shrink-0 text-white/70" />
+          <Search aria-hidden className="size-5 shrink-0 text-muted-foreground" />
           <input
             ref={inputRef}
             type="text"
@@ -101,13 +101,13 @@ export const GlobalSearch = memo(function GlobalSearch() {
             role="combobox"
             aria-label="Search clients"
             aria-expanded={showDropdown}
-            className="min-w-0 flex-1 bg-transparent text-sm text-white placeholder:text-white/70 focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
           <button
             type="button"
             onClick={collapse}
             aria-label="Close search"
-            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-white hover:bg-white/10 sm:hidden"
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground sm:hidden"
           >
             <X aria-hidden className="size-5" />
           </button>

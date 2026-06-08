@@ -30,10 +30,10 @@ export const NavItem = memo(function NavItem({ label, path, icon }: NavItemProps
       aria-current={isActive ? 'page' : undefined}
       className={cn(
         'inline-flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors md:px-3 md:text-[15px] lg:px-4 lg:text-base',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-0',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0',
         isActive
-          ? 'border border-white/35 bg-white/90 text-primary'
-          : 'border border-transparent text-white/80 hover:bg-white/10 hover:text-white',
+          ? 'border border-transparent bg-primary-00 font-semibold text-primary-07'
+          : 'border border-transparent text-neutral-70 hover:bg-muted hover:text-foreground',
       )}
     >
       <span aria-hidden className="inline-flex size-4 items-center justify-center">

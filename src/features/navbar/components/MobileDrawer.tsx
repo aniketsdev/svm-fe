@@ -31,7 +31,7 @@ export function MobileDrawer({ open, onClose, navLinks }: MobileDrawerProps) {
       onClose={onClose}
       title=""
       drawerWidth="80vw"
-      className="bg-primary-08 text-white"
+      className="bg-white text-foreground"
     >
       <nav className="-mx-6 pt-2" aria-label="Mobile primary navigation">
         <ul className="flex flex-col">
@@ -44,10 +44,10 @@ export function MobileDrawer({ open, onClose, navLinks }: MobileDrawerProps) {
                   onClick={() => handleNav(link.path)}
                   className={cn(
                     'flex w-full items-center gap-3 px-6 py-3 text-left text-sm font-medium transition-colors',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     isActive
-                      ? 'bg-white/15 text-white'
-                      : 'text-white/85 hover:bg-white/10 hover:text-white',
+                      ? 'bg-primary-00 text-primary-07 font-semibold'
+                      : 'text-neutral-70 hover:bg-muted hover:text-foreground',
                   )}
                   aria-current={isActive ? 'page' : undefined}
                 >

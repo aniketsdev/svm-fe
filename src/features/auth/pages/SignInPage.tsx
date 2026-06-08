@@ -10,7 +10,7 @@ import { useAuthLogin } from '../../../sdk/authentication';
 import { useSignInForm, type SignInFormValues } from '../hooks/useSignInForm';
 import { useAuth } from '../hooks/useAuth';
 import { ApiError } from '../../../api/client';
-import signInImage from '../../../assets/auth-sign-in.svg';
+import signInImage from '../../../assets/home.jpg';
 
 export function SignInPage() {
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ export function SignInPage() {
     <AuthLayout imageSrc={signInImage} imageAlt="Therapy session illustration">
       <form noValidate onSubmit={handleSubmit(onSubmit)}>
         <h1 className="mb-1 text-xl font-semibold text-foreground sm:text-2xl md:text-3xl">
-          Welcome to Test
+          Welcome
         </h1>
         <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
           Please sign in using credentials provided.

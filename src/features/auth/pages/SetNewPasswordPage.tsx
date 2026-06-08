@@ -11,7 +11,7 @@ import {
   type SetNewPasswordFormValues,
 } from '../hooks/useSetNewPasswordForm';
 import { useAuth } from '../hooks/useAuth';
-import setPasswordImage from '../../../assets/auth-set-password.svg';
+import setPasswordImage from '../../../assets/home.jpg';
 
 // Mirrors backend FR-024 so users see the requirements client-side.
 const PASSWORD_REQUIREMENTS = [
