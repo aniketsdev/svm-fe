@@ -53,7 +53,7 @@ export const HeaderSearch = memo(function HeaderSearch() {
         onFocus={() => setOpen(true)}
         placeholder="Search clients…"
         aria-label="Search clients"
-        className="h-9 w-full rounded-md border border-transparent bg-white pl-9 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+        className="h-9 w-full rounded-md border border-border bg-white pl-9 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
 
       {showDropdown && (

@@ -41,8 +41,8 @@ export const SidebarUser = memo(function SidebarUser({ collapsed }: { collapsed?
       <UserAvatar firstName={initialsFirst} lastName={initialsLast} size={collapsed ? 32 : 36} />
       {!collapsed && (
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-white">{name}</p>
-          {user?.role && <p className="truncate text-xs capitalize text-white/55">{user.role}</p>}
+          <p className="truncate text-sm font-medium text-foreground">{name}</p>
+          {user?.role && <p className="truncate text-xs capitalize text-muted-foreground">{user.role}</p>}
         </div>
       )}
       <button
@@ -51,7 +51,7 @@ export const SidebarUser = memo(function SidebarUser({ collapsed }: { collapsed?
         title={collapsed ? 'Logout' : undefined}
         onClick={() => setConfirmOpen(true)}
         disabled={logoutMutation.isPending}
-        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-white/70 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 disabled:opacity-60"
+        className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
       >
         <LogOut aria-hidden className="size-4" />
       </button>
