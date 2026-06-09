@@ -5,7 +5,7 @@
 
 export type AdminListStockBalanceParams = {
 search?: string | null;
-store_id?: number | null;
+store_uuid?: string | null;
 item_type?: 'product' | 'raw_material' | null;
 /**
  * @minimum 1

@@ -8,8 +8,8 @@ export interface ProcessingResult {
   conversion_ratio: string | null;
   yield?: string | null;
   wastage: string | null;
-  output_batch_id: number | null;
+  output_batch_id: string | null;
   output_batch_no: string | null;
   completed_at: string | null;
-  completed_by: number | null;
+  completed_by: string | null;
 }

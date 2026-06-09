@@ -5,7 +5,7 @@
 
 export type AdminListStockMovementsParams = {
 search?: string | null;
-store_id?: number | null;
+store_uuid?: string | null;
 item_type?: 'product' | 'raw_material' | null;
 direction?: 'in' | 'out' | null;
 kind?: 'grn_receipt' | 'dispatch' | 'transfer' | 'adjustment' | 'return' | 'hold' | 'release' | 'processing_consume' | 'processing_output' | 'manufacturing' | 'manufacturing_consume' | null;

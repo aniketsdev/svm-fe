@@ -1,265 +1,234 @@
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Check, ChevronRight, Info, Minus, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { ShieldPlus } from 'lucide-react';
+import { useState } from 'react';
 import { CustomButton } from '../../../common/custom-buttons';
+import { CustomSearch } from '../../../common/custom-search';
 import { CustomSelect } from '../../../common/custom-select';
 import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
 import { useToast } from '../../../common/common-snackbar';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
-import { buildPermissionGrid } from '../../../utils/permission-grid';
-import {
-  useAdminGrantPermissions,
-  useAdminRevokePermissions,
-  useAdminDeleteRole,
-} from '../../../sdk/roles-permissions';
+import { useAuth } from '../../auth/hooks/useAuth';
+import { useAdminSetRoleStatus, useAdminDeleteRole } from '../../../sdk/roles-permissions';
 import { useRoles } from '../hooks/useRoles';
-import { roleDetailQueryOptions } from '../api/roles';
-import type { RoleDetailOut } from '../api/roles';
-import { PermissionMatrixTable } from '../components/PermissionMatrixTable';
-import { RoleDrawer } from '../components/RoleDrawer';
+import { RolesTable } from '../components/RolesTable';
+import { CreateRoleDialog } from '../components/CreateRoleDialog';
+import { EditRoleDialog } from '../components/EditRoleDialog';
+import type { RoleRow } from '../api/roles';
 
-const titleCase = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+const STATUS_ITEMS = [
+  { value: 'all', label: 'All statuses' },
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+];
+
+const TYPE_ITEMS = [
+  { value: 'all', label: 'All role types' },
+  { value: 'admin', label: 'Admin' },
+  { value: 'staff', label: 'Staff' },
+];
+
+type StatusFilter = 'all' | 'active' | 'inactive';
+type TypeFilter = 'all' | 'admin' | 'staff';
 
 export function RolesPermissionsPage() {
   const { toast } = useToast();
-  const { roles, isLoading, refetch } = useRoles();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  // Management actions are enforced server-side by `roles.manage`; the UI hides
+  // them for non-admin callers, who keep read-only access to the list/detail.
+  const canManage = user?.role === 'admin';
 
-  const [roleType, setRoleType] = useState('');
-  const [roleId, setRoleId] = useState<number | null>(null);
-  const [editing, setEditing] = useState(false);
-  const [edits, setEdits] = useState<Set<string>>(new Set());
+  // List state lives in the URL so navigating into a role page and back (via the
+  // page's "Back to roles" link or the browser) restores search/filter/page.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search = searchParams.get('q') ?? '';
+  const status = (searchParams.get('status') as StatusFilter) || 'all';
+  const type = (searchParams.get('type') as TypeFilter) || 'all';
+  const page = Number(searchParams.get('page') ?? '0') || 0;
+  const pageSize = Number(searchParams.get('size') ?? '10') || 10;
+
   const [createOpen, setCreateOpen] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editRole, setEditRole] = useState<RoleRow | null>(null);
+  const [deleteRole, setDeleteRole] = useState<RoleRow | null>(null);
+  const [statusRole, setStatusRole] = useState<RoleRow | null>(null);
 
-  const roleTypes = [...new Set(roles.map((r) => r.type))];
-  const effectiveType = roleType || roleTypes[0] || '';
-  const rolesOfType = roles.filter((r) => r.type === effectiveType);
-  const selected = roles.find((r) => r.id === roleId && r.type === effectiveType) ?? rolesOfType[0] ?? null;
+  const { roles, total, isLoading, refetch } = useRoles({
+    page,
+    pageSize,
+    q: search,
+    status,
+    type,
+  });
 
-  const detailQuery = useQuery(roleDetailQueryOptions(selected?.id ?? null));
-  const detail = (detailQuery.data as { data?: RoleDetailOut } | undefined)?.data;
-  const matrix = detail?.matrix ?? [];
-  const grid = useMemo(() => buildPermissionGrid(matrix), [matrix]);
-  const originalGranted = useMemo(
-    () => new Set(matrix.filter((c) => c.granted).map((c) => c.permission)),
-    [matrix],
-  );
-
-  const isOn = (perm: string) => originalGranted.has(perm) !== edits.has(perm);
-  const setPerms = (perms: string[], on: boolean) =>
-    setEdits((prev) => {
-      const n = new Set(prev);
-      perms.forEach((p) => {
-        if (on !== originalGranted.has(p)) n.add(p);
-        else n.delete(p);
-      });
-      return n;
+  // Merge param updates; null/default values are dropped to keep the URL clean.
+  const setParams = (updates: Record<string, string | null>) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === '') next.delete(key);
+        else next.set(key, value);
+      }
+      return next;
     });
-
-  const added = [...edits].filter((p) => !originalGranted.has(p));
-  const removed = [...edits].filter((p) => originalGranted.has(p));
-  const changeCount = edits.size;
-
-  const grant = useAdminGrantPermissions();
-  const revoke = useAdminRevokePermissions();
-  const del = useAdminDeleteRole();
-  const saving = grant.isPending || revoke.isPending;
-
-  const startEdit = () => {
-    setEdits(new Set());
-    setEditing(true);
-  };
-  const cancelEdit = () => {
-    setEdits(new Set());
-    setEditing(false);
-  };
-  const selectAll = () => {
-    if (selected) setPerms(matrix.map((c) => c.permission), true);
-  };
-  const pickType = (t: string) => {
-    setRoleType(t);
-    setRoleId(null);
-    setEditing(false);
-    setEdits(new Set());
-  };
-  const pickRole = (id: number) => {
-    setRoleId(id);
-    setEditing(false);
-    setEdits(new Set());
   };
 
-  const save = async () => {
-    if (!selected) return;
-    try {
-      if (added.length) await grant.mutateAsync({ roleId: selected.id, data: { permissions: added } });
-      if (removed.length) await revoke.mutateAsync({ roleId: selected.id, data: { permissions: removed } });
-      toast({ severity: 'success', message: 'Permissions saved.' });
-      setEdits(new Set());
-      setEditing(false);
-      detailQuery.refetch();
-      refetch();
-    } catch (e) {
-      toast({ severity: 'error', message: errorMessage(e) });
-    }
-  };
+  // A new search or filter should always start from the first page.
+  const handleSearch = (term: string) => setParams({ q: term || null, page: null });
+  const handleStatus = (value: StatusFilter) =>
+    setParams({ status: value === 'all' ? null : value, page: null });
+  const handleType = (value: TypeFilter) =>
+    setParams({ type: value === 'all' ? null : value, page: null });
 
-  const doDelete = () => {
-    if (!selected) return;
-    del.mutate(
-      { roleId: selected.id },
-      {
-        onSuccess: (res) => {
-          toast({ severity: 'success', message: successMessage(res, 'Role deleted.') });
-          setConfirmDelete(false);
-          setRoleId(null);
-          refetch();
-        },
-        onError: (e) => {
-          toast({ severity: 'error', message: errorMessage(e) });
-          setConfirmDelete(false);
-        },
+  const statusMutation = useAdminSetRoleStatus({
+    mutation: {
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Role status updated.') });
+        setStatusRole(null);
+        refetch();
       },
-    );
-  };
+      onError: (e) => {
+        toast({ severity: 'error', message: errorMessage(e) });
+        setStatusRole(null);
+      },
+    },
+  });
+
+  const deleteMutation = useAdminDeleteRole({
+    mutation: {
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Role deleted.') });
+        setDeleteRole(null);
+        refetch();
+      },
+      onError: (e) => {
+        toast({ severity: 'error', message: errorMessage(e) });
+        setDeleteRole(null);
+      },
+    },
+  });
+
+  // Open the dedicated role page, carrying the current list query so Back can
+  // restore exactly this search/filter/page.
+  const openRole = (role: RoleRow) =>
+    navigate(`/roles-permissions/${role.uuid}`, { state: { fromSearch: location.search } });
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-      <nav className="mb-3 flex items-center gap-1.5 text-sm text-muted-foreground">
-        <span>List of Role Types &amp; Roles</span>
-        <ChevronRight className="size-4" />
-        <span className="font-medium text-foreground">Roles and Permission</span>
-      </nav>
-
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">Roles and Permission</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">What each role can access across the system.</p>
-        </div>
-        {!editing && (
-          <CustomButton variant="primary" icon={<Plus className="size-4" />} onClick={() => setCreateOpen(true)}>
-            New Role
+    <div className="w-full px-4 py-5">
+      {/* Header: title left, search right (Activity-Log parity) */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-semibold text-foreground">Roles &amp; Permissions</h1>
+        {canManage && (
+          <CustomButton
+            variant="primary"
+            icon={<ShieldPlus className="size-4" />}
+            onClick={() => setCreateOpen(true)}
+          >
+            Add role
           </CustomButton>
         )}
+  
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
-        {editing ? (
-          <>
-            <span className="inline-flex items-center gap-2">
-              <span className="rounded-full bg-info/10 px-3 py-1 text-sm font-medium text-info-60">
-                {changeCount} {changeCount === 1 ? 'Change' : 'Changes'}
-              </span>
-              <Info className="size-4 text-muted-foreground" />
-            </span>
-            <div className="flex items-center gap-2">
-              <CustomButton variant="outline" onClick={selectAll}>
-                Select All
-              </CustomButton>
-              <CustomButton variant="outline" onClick={cancelEdit}>
-                Cancel
-              </CustomButton>
-              <CustomButton variant="primary" loading={saving} onClick={save}>
-                Save Changes
-              </CustomButton>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="flex flex-wrap items-center gap-4">
-              <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                Role Type:
-                <span
-                  title="Access tier — Admin or Staff. A tier can hold several roles."
-                  className="inline-flex cursor-help"
-                >
-                  <Info className="size-3.5 text-muted-foreground/70" />
-                </span>
-                <div className="w-40">
-                  <CustomSelect
-                    name="roleType"
-                    placeholder="Select"
-                    value={effectiveType}
-                    items={roleTypes.map((t) => ({ value: t, label: titleCase(t) }))}
-                    onChange={(e) => pickType(e.target.value)}
-                  />
-                </div>
-              </label>
-              <label className="flex items-center gap-2 text-sm text-muted-foreground">
-                Role:
-                <div className="w-52">
-                  <CustomSelect
-                    name="role"
-                    placeholder="Select"
-                    value={selected ? String(selected.id) : ''}
-                    items={rolesOfType.map((r) => ({ value: String(r.id), label: titleCase(r.name) }))}
-                    onChange={(e) => pickRole(Number(e.target.value))}
-                  />
-                </div>
-              </label>
-            </div>
-            <div className="flex items-center gap-2">
-              {selected && !selected.is_system && (
-                <CustomButton variant="outline" icon={<Trash2 className="size-4" />} onClick={() => setConfirmDelete(true)}>
-                  Delete
-                </CustomButton>
-              )}
-              <CustomButton variant="outline" icon={<Pencil className="size-4" />} onClick={startEdit} disabled={!selected}>
-                Edit Permissions
-              </CustomButton>
-            </div>
-          </>
-        )}
+      {/* Toolbar — status filter + create */}
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+        <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+          <div className="w-40">
+            <CustomSelect
+              name="type"
+              placeholder="Role Type"
+              value={type}
+              items={TYPE_ITEMS}
+              onChange={(e) => handleType(e.target.value as TypeFilter)}
+            />
+          </div>
+          <div className="w-40">
+            <CustomSelect
+              name="status"
+              placeholder="Status"
+              value={status}
+              items={STATUS_ITEMS}
+              onChange={(e) => handleStatus(e.target.value as StatusFilter)}
+            />
+          </div>
+          {/* <div className="w-40"> */}
+          <CustomSearch
+          textData={{ placeholder: 'Search by role name', btnTitle: 'Search' }}
+          onSearch={handleSearch}
+          initialValue={search}
+          hasStartSearchIcon
+          width="28rem"
+        /></div>
+        {/* </div> */}
       </div>
 
-      {!editing && selected && (
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <Check className="size-3.5 text-positive-70" /> allowed
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <Minus className="size-3.5 text-warning-60" /> partial
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <X className="size-3.5 text-destructive" /> none
-          </span>
-        </div>
-      )}
-
-      <div className="mt-5">
-        {isLoading || (selected && detailQuery.isPending) ? (
-          <div className="h-72 animate-pulse rounded-xl bg-muted" />
-        ) : selected ? (
-          <PermissionMatrixTable rows={grid} editing={editing} isOn={isOn} setPerms={setPerms} />
-        ) : (
-          <p className="py-12 text-center text-sm text-muted-foreground">
-            No roles yet. Create one to get started.
-          </p>
-        )}
+      {/* Table */}
+      <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        <RolesTable
+          roles={roles}
+          loading={isLoading}
+          page={page}
+          pageSize={pageSize}
+          total={total}
+          onPaginationChange={({ pageIndex, pageSize: nextSize }) =>
+            setParams({
+              page: pageIndex ? String(pageIndex) : null,
+              size: nextSize === 10 ? null : String(nextSize),
+            })
+          }
+          onRowClick={openRole}
+          onEdit={setEditRole}
+          onToggleStatus={setStatusRole}
+          onDelete={setDeleteRole}
+          canManage={canManage}
+        />
       </div>
 
-      <RoleDrawer open={createOpen} editing={null} onClose={() => setCreateOpen(false)} onSaved={refetch} />
+      <CreateRoleDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={() => refetch()}
+      />
+
+      <EditRoleDialog
+        role={editRole}
+        onClose={() => setEditRole(null)}
+        onUpdated={() => refetch()}
+      />
 
       <ConfirmationPopUp
-        open={confirmDelete}
-        destructive
-        title="Delete Role?"
-        onClose={() => setConfirmDelete(false)}
-        onConfirm={doDelete}
+        open={statusRole !== null}
+        title={statusRole?.status === 'active' ? 'Deactivate role' : 'Activate role'}
         message={
-          <div className="flex flex-col gap-3">
-            <div className="grid grid-cols-2 gap-4 rounded-lg bg-muted/40 p-3 text-sm">
-              <div>
-                <p className="text-xs text-muted-foreground">Role Type</p>
-                <p className="font-medium capitalize text-foreground">{selected?.type}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Role</p>
-                <p className="font-medium capitalize text-foreground">{selected?.name}</p>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground">This role will be permanently deleted.</p>
-          </div>
+          statusRole
+            ? statusRole.status === 'active'
+              ? `Deactivate “${statusRole.name}”? Holders of this role will lose its access.`
+              : `Activate “${statusRole.name}”?`
+            : ''
         }
+        confirmLabel={statusRole?.status === 'active' ? 'Deactivate' : 'Activate'}
+        destructive={statusRole?.status === 'active'}
+        onClose={() => setStatusRole(null)}
+        onConfirm={() => {
+          if (statusRole) {
+            statusMutation.mutate({
+              roleUuid: statusRole.uuid,
+              data: { status: statusRole.status === 'active' ? 'inactive' : 'active' },
+            });
+          }
+        }}
+      />
+
+      <ConfirmationPopUp
+        open={deleteRole !== null}
+        title="Delete role"
+        message={deleteRole ? `Delete “${deleteRole.name}”? This cannot be undone.` : ''}
+        confirmLabel="Delete"
+        destructive
+        onClose={() => setDeleteRole(null)}
+        onConfirm={() => {
+          if (deleteRole) deleteMutation.mutate({ roleUuid: deleteRole.uuid });
+        }}
       />
     </div>
   );

@@ -7,7 +7,7 @@ import type { StLineOut } from './stLineOut';
 import type { StoreRef } from './storeRef';
 
 export interface StDetail {
-  id: number;
+  uuid: string;
   st_no: string;
   status: string;
   from_store: StoreRef | null;
@@ -15,14 +15,14 @@ export interface StDetail {
   notes: string | null;
   lines: StLineOut[];
   requested_at: string | null;
-  requested_by: number | null;
+  requested_by: string | null;
   approved_at: string | null;
-  approved_by: number | null;
+  approved_by: string | null;
   dispatched_at: string | null;
-  dispatched_by: number | null;
+  dispatched_by: string | null;
   received_at: string | null;
-  received_by: number | null;
+  received_by: string | null;
   cancelled_at: string | null;
-  cancelled_by: number | null;
+  cancelled_by: string | null;
   warnings?: AppSchemasStockTransferWarning[];
 }

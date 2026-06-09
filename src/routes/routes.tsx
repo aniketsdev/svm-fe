@@ -29,6 +29,9 @@ const SetNewPasswordPage = lazyWithPreload(() =>
 const UsersPage = lazyWithPreload(() =>
   import('../features/users/pages/UsersPage').then((m) => ({ default: m.UsersPage })),
 );
+const ProfilePage = lazyWithPreload(() =>
+  import('../features/profile/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })),
+);
 const ActivityLogPage = lazyWithPreload(() =>
   import('../features/activity-log/pages/ActivityLogPage').then((m) => ({
     default: m.ActivityLogPage,
@@ -37,6 +40,11 @@ const ActivityLogPage = lazyWithPreload(() =>
 const RolesPermissionsPage = lazyWithPreload(() =>
   import('../features/roles-permissions/pages/RolesPermissionsPage').then((m) => ({
     default: m.RolesPermissionsPage,
+  })),
+);
+const RoleDetailPage = lazyWithPreload(() =>
+  import('../features/roles-permissions/pages/RoleDetailPage').then((m) => ({
+    default: m.RoleDetailPage,
   })),
 );
 const MastersPage = lazyWithPreload(() =>
@@ -177,6 +185,7 @@ export default function AppRoutes() {
         <Route path="users" element={<UsersPage />} />
         <Route path="activity-log" element={<ActivityLogPage />} />
         <Route path="roles-permissions" element={<RolesPermissionsPage />} />
+        <Route path="roles-permissions/:roleUuid" element={<RoleDetailPage />} />
         <Route path="masters" element={<MastersPage />} />
         <Route path="masters/vendors" element={<VendorsPage />} />
         <Route path="masters/courier-partners" element={<CouriersPage />} />
@@ -199,7 +208,14 @@ export default function AppRoutes() {
         <Route path="diagnostic-generator" element={<DiagnosticGeneratorPlaceholder />} />
         <Route path="settings" element={<SettingsPlaceholder />} />
         <Route path="settings/user/:uuid" element={<UserProfilePlaceholder />} />
-        <Route path="profile" element={<UserProfilePlaceholder />} />
+        <Route
+          path="profile"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <ProfilePage />
+            </Suspense>
+          }
+        />
       </Route>
 
       {/* Catch-all → dashboard (ProtectedRoute handles signed-out users). */}

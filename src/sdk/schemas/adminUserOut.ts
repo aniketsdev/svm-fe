@@ -11,7 +11,7 @@ stored): the resend action is offered iff the password is still unset and
 the account is live.
  */
 export interface AdminUserOut {
-  id: number;
+  uuid: string;
   email: string;
   first_name?: string | null;
   last_name?: string | null;

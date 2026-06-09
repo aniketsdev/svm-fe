@@ -4,7 +4,7 @@
  */
 
 export interface StLineOut {
-  id: number;
+  uuid: string;
   line_no: number;
   kind: string;
   material_code: string;

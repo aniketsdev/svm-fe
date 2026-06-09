@@ -7,7 +7,7 @@ import type { ProcessingOutput } from './processingOutput';
 import type { ProcessingResult } from './processingResult';
 
 export interface ProcessingDetail {
-  id: number;
+  uuid: string;
   pr_no: string;
   status: string;
   input: ProcessingInput;

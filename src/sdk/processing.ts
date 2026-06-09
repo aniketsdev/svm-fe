@@ -273,20 +273,20 @@ export type adminGetProcessingOrderResponseError = (adminGetProcessingOrderRespo
 
 export type adminGetProcessingOrderResponse = (adminGetProcessingOrderResponseSuccess | adminGetProcessingOrderResponseError)
 
-export const getAdminGetProcessingOrderUrl = (orderId: number,) => {
+export const getAdminGetProcessingOrderUrl = (orderUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/processing/orders/${orderId}`
+  return `/api/v1/admin/processing/orders/${orderUuid}`
 }
 
 /**
  * @summary Get Processing Order
  */
-export const adminGetProcessingOrder = async (orderId: number, options?: RequestInit): Promise<adminGetProcessingOrderResponse> => {
+export const adminGetProcessingOrder = async (orderUuid: string, options?: RequestInit): Promise<adminGetProcessingOrderResponse> => {
 
-  return mutator<adminGetProcessingOrderResponse>(getAdminGetProcessingOrderUrl(orderId),
+  return mutator<adminGetProcessingOrderResponse>(getAdminGetProcessingOrderUrl(orderUuid),
   {
     ...options,
     method: 'GET'
@@ -299,29 +299,29 @@ export const adminGetProcessingOrder = async (orderId: number, options?: Request
 
 
 
-export const getAdminGetProcessingOrderQueryKey = (orderId: number,) => {
+export const getAdminGetProcessingOrderQueryKey = (orderUuid: string,) => {
     return [
-    `/api/v1/admin/processing/orders/${orderId}`
+    `/api/v1/admin/processing/orders/${orderUuid}`
     ] as const;
     }
 
 
-export const getAdminGetProcessingOrderQueryOptions = <TData = Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData>>, }
+export const getAdminGetProcessingOrderQueryOptions = <TData = Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(orderUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetProcessingOrderQueryKey(orderId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetProcessingOrderQueryKey(orderUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetProcessingOrder>>> = ({ signal }) => adminGetProcessingOrder(orderId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetProcessingOrder>>> = ({ signal }) => adminGetProcessingOrder(orderUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: orderId !== null && orderId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: orderUuid !== null && orderUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminGetProcessingOrderQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetProcessingOrder>>>
@@ -329,7 +329,7 @@ export type AdminGetProcessingOrderQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminGetProcessingOrder<TData = Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData>> & Pick<
+ orderUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetProcessingOrder>>,
           TError,
@@ -339,7 +339,7 @@ export function useAdminGetProcessingOrder<TData = Awaited<ReturnType<typeof adm
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetProcessingOrder<TData = Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData>> & Pick<
+ orderUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetProcessingOrder>>,
           TError,
@@ -349,7 +349,7 @@ export function useAdminGetProcessingOrder<TData = Awaited<ReturnType<typeof adm
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetProcessingOrder<TData = Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData>>, }
+ orderUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -357,11 +357,11 @@ export function useAdminGetProcessingOrder<TData = Awaited<ReturnType<typeof adm
  */
 
 export function useAdminGetProcessingOrder<TData = Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData>>, }
+ orderUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetProcessingOrder>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetProcessingOrderQueryOptions(orderId,options)
+  const queryOptions = getAdminGetProcessingOrderQueryOptions(orderUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -392,21 +392,21 @@ export type adminUpdateProcessingOrderResponseError = (adminUpdateProcessingOrde
 
 export type adminUpdateProcessingOrderResponse = (adminUpdateProcessingOrderResponseSuccess | adminUpdateProcessingOrderResponseError)
 
-export const getAdminUpdateProcessingOrderUrl = (orderId: number,) => {
+export const getAdminUpdateProcessingOrderUrl = (orderUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/processing/orders/${orderId}`
+  return `/api/v1/admin/processing/orders/${orderUuid}`
 }
 
 /**
  * @summary Update Processing Order
  */
-export const adminUpdateProcessingOrder = async (orderId: number,
+export const adminUpdateProcessingOrder = async (orderUuid: string,
     processingUpdate: ProcessingUpdate, options?: RequestInit): Promise<adminUpdateProcessingOrderResponse> => {
 
-  return mutator<adminUpdateProcessingOrderResponse>(getAdminUpdateProcessingOrderUrl(orderId),
+  return mutator<adminUpdateProcessingOrderResponse>(getAdminUpdateProcessingOrderUrl(orderUuid),
   {
     ...options,
     method: 'PATCH',
@@ -419,8 +419,8 @@ export const adminUpdateProcessingOrder = async (orderId: number,
 
 
 export const getAdminUpdateProcessingOrderMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProcessingOrder>>, TError,{orderId: number;data: BodyType<ProcessingUpdate>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProcessingOrder>>, TError,{orderId: number;data: BodyType<ProcessingUpdate>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProcessingOrder>>, TError,{orderUuid: string;data: BodyType<ProcessingUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProcessingOrder>>, TError,{orderUuid: string;data: BodyType<ProcessingUpdate>}, TContext> => {
 
 const mutationKey = ['adminUpdateProcessingOrder'];
 const {mutation: mutationOptions} = options ?
@@ -432,10 +432,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateProcessingOrder>>, {orderId: number;data: BodyType<ProcessingUpdate>}> = (props) => {
-          const {orderId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateProcessingOrder>>, {orderUuid: string;data: BodyType<ProcessingUpdate>}> = (props) => {
+          const {orderUuid,data} = props ?? {};
 
-          return  adminUpdateProcessingOrder(orderId,data,)
+          return  adminUpdateProcessingOrder(orderUuid,data,)
         }
 
 
@@ -453,11 +453,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Update Processing Order
  */
 export const useAdminUpdateProcessingOrder = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProcessingOrder>>, TError,{orderId: number;data: BodyType<ProcessingUpdate>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProcessingOrder>>, TError,{orderUuid: string;data: BodyType<ProcessingUpdate>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminUpdateProcessingOrder>>,
         TError,
-        {orderId: number;data: BodyType<ProcessingUpdate>},
+        {orderUuid: string;data: BodyType<ProcessingUpdate>},
         TContext
       > => {
       return useMutation(getAdminUpdateProcessingOrderMutationOptions(options), queryClient);
@@ -481,7 +481,7 @@ export type adminPreviewProcessingOrderResponseError = (adminPreviewProcessingOr
 
 export type adminPreviewProcessingOrderResponse = (adminPreviewProcessingOrderResponseSuccess | adminPreviewProcessingOrderResponseError)
 
-export const getAdminPreviewProcessingOrderUrl = (orderId: number,
+export const getAdminPreviewProcessingOrderUrl = (orderUuid: string,
     params?: AdminPreviewProcessingOrderParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -494,16 +494,16 @@ export const getAdminPreviewProcessingOrderUrl = (orderId: number,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/v1/admin/processing/orders/${orderId}/preview?${stringifiedParams}` : `/api/v1/admin/processing/orders/${orderId}/preview`
+  return stringifiedParams.length > 0 ? `/api/v1/admin/processing/orders/${orderUuid}/preview?${stringifiedParams}` : `/api/v1/admin/processing/orders/${orderUuid}/preview`
 }
 
 /**
  * @summary Preview Processing Order
  */
-export const adminPreviewProcessingOrder = async (orderId: number,
+export const adminPreviewProcessingOrder = async (orderUuid: string,
     params?: AdminPreviewProcessingOrderParams, options?: RequestInit): Promise<adminPreviewProcessingOrderResponse> => {
 
-  return mutator<adminPreviewProcessingOrderResponse>(getAdminPreviewProcessingOrderUrl(orderId,params),
+  return mutator<adminPreviewProcessingOrderResponse>(getAdminPreviewProcessingOrderUrl(orderUuid,params),
   {
     ...options,
     method: 'GET'
@@ -516,31 +516,31 @@ export const adminPreviewProcessingOrder = async (orderId: number,
 
 
 
-export const getAdminPreviewProcessingOrderQueryKey = (orderId: number,
+export const getAdminPreviewProcessingOrderQueryKey = (orderUuid: string,
     params?: AdminPreviewProcessingOrderParams,) => {
     return [
-    `/api/v1/admin/processing/orders/${orderId}/preview`, ...(params ? [params] : [])
+    `/api/v1/admin/processing/orders/${orderUuid}/preview`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getAdminPreviewProcessingOrderQueryOptions = <TData = Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(orderId: number,
+export const getAdminPreviewProcessingOrderQueryOptions = <TData = Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(orderUuid: string,
     params?: AdminPreviewProcessingOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminPreviewProcessingOrderQueryKey(orderId,params);
+  const queryKey =  queryOptions?.queryKey ?? getAdminPreviewProcessingOrderQueryKey(orderUuid,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminPreviewProcessingOrder>>> = ({ signal }) => adminPreviewProcessingOrder(orderId,params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminPreviewProcessingOrder>>> = ({ signal }) => adminPreviewProcessingOrder(orderUuid,params, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: orderId !== null && orderId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: orderUuid !== null && orderUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminPreviewProcessingOrderQueryResult = NonNullable<Awaited<ReturnType<typeof adminPreviewProcessingOrder>>>
@@ -548,7 +548,7 @@ export type AdminPreviewProcessingOrderQueryError = ErrorType<HTTPValidationErro
 
 
 export function useAdminPreviewProcessingOrder<TData = Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number,
+ orderUuid: string,
     params: undefined |  AdminPreviewProcessingOrderParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminPreviewProcessingOrder>>,
@@ -559,7 +559,7 @@ export function useAdminPreviewProcessingOrder<TData = Awaited<ReturnType<typeof
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminPreviewProcessingOrder<TData = Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number,
+ orderUuid: string,
     params?: AdminPreviewProcessingOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminPreviewProcessingOrder>>,
@@ -570,7 +570,7 @@ export function useAdminPreviewProcessingOrder<TData = Awaited<ReturnType<typeof
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminPreviewProcessingOrder<TData = Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number,
+ orderUuid: string,
     params?: AdminPreviewProcessingOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -579,12 +579,12 @@ export function useAdminPreviewProcessingOrder<TData = Awaited<ReturnType<typeof
  */
 
 export function useAdminPreviewProcessingOrder<TData = Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number,
+ orderUuid: string,
     params?: AdminPreviewProcessingOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewProcessingOrder>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminPreviewProcessingOrderQueryOptions(orderId,params,options)
+  const queryOptions = getAdminPreviewProcessingOrderQueryOptions(orderUuid,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -615,21 +615,21 @@ export type adminCompleteProcessingOrderResponseError = (adminCompleteProcessing
 
 export type adminCompleteProcessingOrderResponse = (adminCompleteProcessingOrderResponseSuccess | adminCompleteProcessingOrderResponseError)
 
-export const getAdminCompleteProcessingOrderUrl = (orderId: number,) => {
+export const getAdminCompleteProcessingOrderUrl = (orderUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/processing/orders/${orderId}/complete`
+  return `/api/v1/admin/processing/orders/${orderUuid}/complete`
 }
 
 /**
  * @summary Complete Processing Order
  */
-export const adminCompleteProcessingOrder = async (orderId: number,
+export const adminCompleteProcessingOrder = async (orderUuid: string,
     processingComplete: ProcessingComplete, options?: RequestInit): Promise<adminCompleteProcessingOrderResponse> => {
 
-  return mutator<adminCompleteProcessingOrderResponse>(getAdminCompleteProcessingOrderUrl(orderId),
+  return mutator<adminCompleteProcessingOrderResponse>(getAdminCompleteProcessingOrderUrl(orderUuid),
   {
     ...options,
     method: 'POST',
@@ -642,8 +642,8 @@ export const adminCompleteProcessingOrder = async (orderId: number,
 
 
 export const getAdminCompleteProcessingOrderMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCompleteProcessingOrder>>, TError,{orderId: number;data: BodyType<ProcessingComplete>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminCompleteProcessingOrder>>, TError,{orderId: number;data: BodyType<ProcessingComplete>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCompleteProcessingOrder>>, TError,{orderUuid: string;data: BodyType<ProcessingComplete>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminCompleteProcessingOrder>>, TError,{orderUuid: string;data: BodyType<ProcessingComplete>}, TContext> => {
 
 const mutationKey = ['adminCompleteProcessingOrder'];
 const {mutation: mutationOptions} = options ?
@@ -655,10 +655,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCompleteProcessingOrder>>, {orderId: number;data: BodyType<ProcessingComplete>}> = (props) => {
-          const {orderId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCompleteProcessingOrder>>, {orderUuid: string;data: BodyType<ProcessingComplete>}> = (props) => {
+          const {orderUuid,data} = props ?? {};
 
-          return  adminCompleteProcessingOrder(orderId,data,)
+          return  adminCompleteProcessingOrder(orderUuid,data,)
         }
 
 
@@ -676,11 +676,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Complete Processing Order
  */
 export const useAdminCompleteProcessingOrder = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCompleteProcessingOrder>>, TError,{orderId: number;data: BodyType<ProcessingComplete>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCompleteProcessingOrder>>, TError,{orderUuid: string;data: BodyType<ProcessingComplete>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminCompleteProcessingOrder>>,
         TError,
-        {orderId: number;data: BodyType<ProcessingComplete>},
+        {orderUuid: string;data: BodyType<ProcessingComplete>},
         TContext
       > => {
       return useMutation(getAdminCompleteProcessingOrderMutationOptions(options), queryClient);
@@ -704,20 +704,20 @@ export type adminCancelProcessingOrderResponseError = (adminCancelProcessingOrde
 
 export type adminCancelProcessingOrderResponse = (adminCancelProcessingOrderResponseSuccess | adminCancelProcessingOrderResponseError)
 
-export const getAdminCancelProcessingOrderUrl = (orderId: number,) => {
+export const getAdminCancelProcessingOrderUrl = (orderUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/processing/orders/${orderId}/cancel`
+  return `/api/v1/admin/processing/orders/${orderUuid}/cancel`
 }
 
 /**
  * @summary Cancel Processing Order
  */
-export const adminCancelProcessingOrder = async (orderId: number, options?: RequestInit): Promise<adminCancelProcessingOrderResponse> => {
+export const adminCancelProcessingOrder = async (orderUuid: string, options?: RequestInit): Promise<adminCancelProcessingOrderResponse> => {
 
-  return mutator<adminCancelProcessingOrderResponse>(getAdminCancelProcessingOrderUrl(orderId),
+  return mutator<adminCancelProcessingOrderResponse>(getAdminCancelProcessingOrderUrl(orderUuid),
   {
     ...options,
     method: 'POST'
@@ -730,8 +730,8 @@ export const adminCancelProcessingOrder = async (orderId: number, options?: Requ
 
 
 export const getAdminCancelProcessingOrderMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelProcessingOrder>>, TError,{orderId: number}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminCancelProcessingOrder>>, TError,{orderId: number}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelProcessingOrder>>, TError,{orderUuid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminCancelProcessingOrder>>, TError,{orderUuid: string}, TContext> => {
 
 const mutationKey = ['adminCancelProcessingOrder'];
 const {mutation: mutationOptions} = options ?
@@ -743,10 +743,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCancelProcessingOrder>>, {orderId: number}> = (props) => {
-          const {orderId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCancelProcessingOrder>>, {orderUuid: string}> = (props) => {
+          const {orderUuid} = props ?? {};
 
-          return  adminCancelProcessingOrder(orderId,)
+          return  adminCancelProcessingOrder(orderUuid,)
         }
 
 
@@ -764,11 +764,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Cancel Processing Order
  */
 export const useAdminCancelProcessingOrder = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelProcessingOrder>>, TError,{orderId: number}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelProcessingOrder>>, TError,{orderUuid: string}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminCancelProcessingOrder>>,
         TError,
-        {orderId: number},
+        {orderUuid: string},
         TContext
       > => {
       return useMutation(getAdminCancelProcessingOrderMutationOptions(options), queryClient);

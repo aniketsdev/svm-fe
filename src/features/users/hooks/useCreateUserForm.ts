@@ -6,8 +6,8 @@ import { z } from 'zod';
 // name/phone optional.
 const createUserSchema = z.object({
   email: z.string().trim().min(3, 'Email is required').email('Enter a valid email'),
-  first_name: z.string().trim().max(100).optional(),
-  last_name: z.string().trim().max(100).optional(),
+  first_name: z.string().trim().min(1, 'First name is required').max(100),
+  last_name: z.string().trim().min(1, 'Last name is required').max(100),
   phone: z.string().trim().max(32).optional(),
   role: z.enum(['admin', 'staff', 'user']),
 });

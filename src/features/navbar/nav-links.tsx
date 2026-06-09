@@ -32,11 +32,11 @@ export const NAV_GROUPS: NavGroup[] = [
     heading: 'Operations',
     links: [
       { label: 'Dashboard', path: '/dashboard', icon: <Home className={ICON} /> },
-      { label: 'All Clients', path: '/clients', icon: <Users className={ICON} /> },
+      // { label: 'All Clients', path: '/clients', icon: <Users className={ICON} /> },
       { label: 'Inventory', path: '/inventory', icon: <PackageSearch className={ICON} /> },
       { label: 'Processing', path: '/processing', icon: <Workflow className={ICON} /> },
       { label: 'Manufacturing', path: '/manufacturing', icon: <Factory className={ICON} /> },
-      { label: 'Assessments', path: '/assessments', icon: <ClipboardCheck className={ICON} /> },
+      // { label: 'Assessments', path: '/assessments', icon: <ClipboardCheck className={ICON} /> },
     ],
   },
   {
@@ -52,10 +52,10 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Activity Log', path: '/activity-log', icon: <ScrollText className={ICON} /> },
     ],
   },
-  {
-    heading: 'System',
-    links: [{ label: 'Settings', path: '/settings', icon: <Settings className={ICON} /> }],
-  },
+  // {
+  //   heading: 'System',
+  //   links: [{ label: 'Settings', path: '/settings', icon: <Settings className={ICON} /> }],
+  // },
 ];
 
 /** Flat list (used by the mobile drawer). */

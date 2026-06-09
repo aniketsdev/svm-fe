@@ -27,9 +27,8 @@ export const SidebarUser = memo(function SidebarUser({ collapsed }: { collapsed?
     },
   });
 
-  const name = user?.email ? user.email.split('@', 1)[0] : 'User';
-  const initialsFirst = name.charAt(0).toUpperCase();
-  const initialsLast = name.charAt(1)?.toUpperCase() ?? '';
+  const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(' ').trim();
+  const name = fullName || (user?.email ? user.email.split('@', 1)[0] : 'User');
 
   return (
     <div
@@ -38,13 +37,27 @@ export const SidebarUser = memo(function SidebarUser({ collapsed }: { collapsed?
         collapsed ? 'flex-col items-center gap-1 py-1' : 'items-center gap-2 px-1.5 py-1',
       )}
     >
-      <UserAvatar firstName={initialsFirst} lastName={initialsLast} size={collapsed ? 32 : 36} />
-      {!collapsed && (
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-foreground">{name}</p>
-          {user?.role && <p className="truncate text-xs capitalize text-muted-foreground">{user.role}</p>}
-        </div>
-      )}
+      <button
+        type="button"
+        aria-label="Open profile"
+        title={collapsed ? 'Open profile' : undefined}
+        onClick={() => navigate('/profile')}
+        className={cn(
+          'flex min-w-0 items-center rounded-md transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          collapsed ? 'justify-center p-1' : 'flex-1 gap-2 px-1 py-0.5 text-left',
+        )}
+      >
+        <UserAvatar
+          firstName={user?.first_name || name}
+          lastName={user?.last_name}
+          size={collapsed ? 32 : 36}
+        />
+        {!collapsed && (
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-foreground">{name}</p>
+          </div>
+        )}
+      </button>
       <button
         type="button"
         aria-label="Logout"

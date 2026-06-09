@@ -1,19 +1,36 @@
-// Data access for Roles & Permissions onto the generated SDK.
+// Data access for the Roles & Permissions feature. Single entry point onto the
+// generated SDK (`adminListRoles` / `adminGetRole` / `adminListPermissions`).
 import {
   getAdminListRolesQueryOptions,
   getAdminGetRoleQueryOptions,
+  getAdminListPermissionsQueryOptions,
 } from '../../../sdk/roles-permissions';
-import type { RoleOut, RoleList, RoleDetailOut, PermissionOut } from '../../../sdk/schemas';
+import type {
+  RoleOut,
+  RoleDetailOut,
+  RoleList,
+  PermissionOut,
+  FeatureRow,
+  ActionCell,
+  AdminListRolesParams,
+} from '../../../sdk/schemas';
 
 export type RoleRow = RoleOut;
 export type RoleListResponse = RoleList;
 export type PermissionItem = PermissionOut;
-export type { RoleDetailOut };
+export type { RoleDetailOut, FeatureRow, ActionCell, AdminListRolesParams };
 
-export function rolesQueryOptions() {
-  return getAdminListRolesQueryOptions();
+/** TanStack Query options for `GET /api/v1/admin/roles` (search/status/pagination). */
+export function rolesQueryOptions(params: AdminListRolesParams) {
+  return getAdminListRolesQueryOptions(params);
 }
 
-export function roleDetailQueryOptions(roleId: number | null) {
-  return getAdminGetRoleQueryOptions(roleId ?? 0, { query: { enabled: roleId !== null } });
+/** TanStack Query options for `GET /api/v1/admin/roles/{roleUuid}` (full matrix). */
+export function roleDetailQueryOptions(roleUuid: string) {
+  return getAdminGetRoleQueryOptions(roleUuid);
+}
+
+/** TanStack Query options for `GET /api/v1/admin/permissions` (the catalog). */
+export function permissionsQueryOptions() {
+  return getAdminListPermissionsQueryOptions();
 }

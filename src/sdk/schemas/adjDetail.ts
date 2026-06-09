@@ -6,7 +6,7 @@ import type { MaterialRef } from './materialRef';
 import type { StoreRef } from './storeRef';
 
 export interface AdjDetail {
-  id: number;
+  uuid: string;
   adj_no: string;
   status: string;
   store: StoreRef | null;
@@ -21,7 +21,7 @@ export interface AdjDetail {
   before_quantity: string | null;
   after_quantity: string | null;
   requested_at: string | null;
-  requested_by: number | null;
+  requested_by: string | null;
   approved_at: string | null;
-  approved_by: number | null;
+  approved_by: string | null;
 }

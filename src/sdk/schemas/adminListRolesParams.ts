@@ -10,6 +10,7 @@ export type AdminListRolesParams = {
  */
 q?: string | null;
 status?: AdminListRolesStatus;
+type?: 'admin' | 'staff' | null;
 /**
  * @minimum 1
  * @maximum 100

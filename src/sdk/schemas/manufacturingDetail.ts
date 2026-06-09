@@ -5,7 +5,7 @@
 import type { ManufacturingLineView } from './manufacturingLineView';
 
 export interface ManufacturingDetail {
-  id: number;
+  uuid: string;
   mo_no: string;
   status: string;
   product_code: string;

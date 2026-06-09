@@ -64,7 +64,7 @@ export function EditUserDialog({ user, onClose, onUpdated }: EditUserDialogProps
   const onSubmit = (data: EditUserFormValues) => {
     if (!user) return;
     updateMutation.mutate({
-      userId: user.id,
+      userUuid: user.uuid,
       data: {
         email: data.email,
         first_name: data.first_name || null,
@@ -76,9 +76,14 @@ export function EditUserDialog({ user, onClose, onUpdated }: EditUserDialogProps
   };
 
   return (
-    <CustomDrawer anchor="right" title="Edit user" open={user !== null} onClose={onClose} drawerWidth="30rem">
+    <CustomDrawer anchor="right" title="Edit user" open={user !== null} onClose={onClose} drawerWidth="38rem">
       {user && (
-        <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col gap-4">
+          <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-3">
+            <RHFInput<EditUserFormValues> name="first_name" control={control} label="First name" required placeholder="Enter first name" />
+            <RHFInput<EditUserFormValues> name="last_name" control={control} label="Last name" required placeholder="Enter last name" />
+          </div>
           <RHFInput<EditUserFormValues>
             name="email"
             control={control}
@@ -86,26 +91,21 @@ export function EditUserDialog({ user, onClose, onUpdated }: EditUserDialogProps
             required
             placeholder="Enter email"
           />
-          <div className="grid grid-cols-2 gap-3">
-            <RHFInput<EditUserFormValues> name="first_name" control={control} label="First name" placeholder="Enter first name" />
-            <RHFInput<EditUserFormValues> name="last_name" control={control} label="Last name" placeholder="Enter last name" />
+          <RHFInput<EditUserFormValues> name="phone" control={control} label="Phone" phone placeholder="Enter phone" />
+          <RHFSelect<EditUserFormValues>
+            name="role"
+            control={control}
+            label="Role"
+            required
+            placeholder="Select role"
+            items={ROLE_ITEMS}
+          />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <RHFInput<EditUserFormValues> name="phone" control={control} label="Phone" placeholder="Enter phone" />
-            <RHFSelect<EditUserFormValues>
-              name="role"
-              control={control}
-              label="Role"
-              required
-              placeholder="Select role"
-              items={ROLE_ITEMS}
-            />
-          </div>
-          <div className="mt-2 flex justify-end gap-3">
-            <CustomButton type="button" variant="outline" onClick={onClose}>
+          <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pt-4">
+            <CustomButton type="button" variant="outline" onClick={onClose} size="md">
               Cancel
             </CustomButton>
-            <CustomButton type="submit" variant="primary" loading={updateMutation.isPending}>
+            <CustomButton type="submit" variant="primary" loading={updateMutation.isPending} size="md">
               Save changes
             </CustomButton>
           </div>

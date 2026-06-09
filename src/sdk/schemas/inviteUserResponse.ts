@@ -4,7 +4,7 @@
  */
 
 export interface InviteUserResponse {
-  id: number;
+  uuid: string;
   email: string;
   role: string;
   invitation_expires_at: string;

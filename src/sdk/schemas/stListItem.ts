@@ -4,7 +4,7 @@
  */
 
 export interface StListItem {
-  id: number;
+  uuid: string;
   st_no: string;
   from_store_code: string | null;
   to_store_code: string | null;

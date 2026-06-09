@@ -275,20 +275,20 @@ export type adminGetRoleResponseError = (adminGetRoleResponse422) & {
 
 export type adminGetRoleResponse = (adminGetRoleResponseSuccess | adminGetRoleResponseError)
 
-export const getAdminGetRoleUrl = (roleId: number,) => {
+export const getAdminGetRoleUrl = (roleUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/roles/${roleId}`
+  return `/api/v1/admin/roles/${roleUuid}`
 }
 
 /**
  * @summary Get Role
  */
-export const adminGetRole = async (roleId: number, options?: RequestInit): Promise<adminGetRoleResponse> => {
+export const adminGetRole = async (roleUuid: string, options?: RequestInit): Promise<adminGetRoleResponse> => {
 
-  return mutator<adminGetRoleResponse>(getAdminGetRoleUrl(roleId),
+  return mutator<adminGetRoleResponse>(getAdminGetRoleUrl(roleUuid),
   {
     ...options,
     method: 'GET'
@@ -301,29 +301,29 @@ export const adminGetRole = async (roleId: number, options?: RequestInit): Promi
 
 
 
-export const getAdminGetRoleQueryKey = (roleId: number,) => {
+export const getAdminGetRoleQueryKey = (roleUuid: string,) => {
     return [
-    `/api/v1/admin/roles/${roleId}`
+    `/api/v1/admin/roles/${roleUuid}`
     ] as const;
     }
 
 
-export const getAdminGetRoleQueryOptions = <TData = Awaited<ReturnType<typeof adminGetRole>>, TError = ErrorType<HTTPValidationError>>(roleId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData>>, }
+export const getAdminGetRoleQueryOptions = <TData = Awaited<ReturnType<typeof adminGetRole>>, TError = ErrorType<HTTPValidationError>>(roleUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetRoleQueryKey(roleId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetRoleQueryKey(roleUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetRole>>> = ({ signal }) => adminGetRole(roleId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetRole>>> = ({ signal }) => adminGetRole(roleUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: roleId !== null && roleId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: roleUuid !== null && roleUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminGetRoleQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetRole>>>
@@ -331,7 +331,7 @@ export type AdminGetRoleQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminGetRole<TData = Awaited<ReturnType<typeof adminGetRole>>, TError = ErrorType<HTTPValidationError>>(
- roleId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData>> & Pick<
+ roleUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetRole>>,
           TError,
@@ -341,7 +341,7 @@ export function useAdminGetRole<TData = Awaited<ReturnType<typeof adminGetRole>>
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetRole<TData = Awaited<ReturnType<typeof adminGetRole>>, TError = ErrorType<HTTPValidationError>>(
- roleId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData>> & Pick<
+ roleUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetRole>>,
           TError,
@@ -351,7 +351,7 @@ export function useAdminGetRole<TData = Awaited<ReturnType<typeof adminGetRole>>
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetRole<TData = Awaited<ReturnType<typeof adminGetRole>>, TError = ErrorType<HTTPValidationError>>(
- roleId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData>>, }
+ roleUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -359,11 +359,11 @@ export function useAdminGetRole<TData = Awaited<ReturnType<typeof adminGetRole>>
  */
 
 export function useAdminGetRole<TData = Awaited<ReturnType<typeof adminGetRole>>, TError = ErrorType<HTTPValidationError>>(
- roleId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData>>, }
+ roleUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetRole>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetRoleQueryOptions(roleId,options)
+  const queryOptions = getAdminGetRoleQueryOptions(roleUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -394,21 +394,21 @@ export type adminUpdateRoleResponseError = (adminUpdateRoleResponse422) & {
 
 export type adminUpdateRoleResponse = (adminUpdateRoleResponseSuccess | adminUpdateRoleResponseError)
 
-export const getAdminUpdateRoleUrl = (roleId: number,) => {
+export const getAdminUpdateRoleUrl = (roleUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/roles/${roleId}`
+  return `/api/v1/admin/roles/${roleUuid}`
 }
 
 /**
  * @summary Update Role
  */
-export const adminUpdateRole = async (roleId: number,
+export const adminUpdateRole = async (roleUuid: string,
     roleUpdate: RoleUpdate, options?: RequestInit): Promise<adminUpdateRoleResponse> => {
 
-  return mutator<adminUpdateRoleResponse>(getAdminUpdateRoleUrl(roleId),
+  return mutator<adminUpdateRoleResponse>(getAdminUpdateRoleUrl(roleUuid),
   {
     ...options,
     method: 'PATCH',
@@ -421,8 +421,8 @@ export const adminUpdateRole = async (roleId: number,
 
 
 export const getAdminUpdateRoleMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRole>>, TError,{roleId: number;data: BodyType<RoleUpdate>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRole>>, TError,{roleId: number;data: BodyType<RoleUpdate>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRole>>, TError,{roleUuid: string;data: BodyType<RoleUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRole>>, TError,{roleUuid: string;data: BodyType<RoleUpdate>}, TContext> => {
 
 const mutationKey = ['adminUpdateRole'];
 const {mutation: mutationOptions} = options ?
@@ -434,10 +434,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateRole>>, {roleId: number;data: BodyType<RoleUpdate>}> = (props) => {
-          const {roleId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateRole>>, {roleUuid: string;data: BodyType<RoleUpdate>}> = (props) => {
+          const {roleUuid,data} = props ?? {};
 
-          return  adminUpdateRole(roleId,data,)
+          return  adminUpdateRole(roleUuid,data,)
         }
 
 
@@ -455,11 +455,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Update Role
  */
 export const useAdminUpdateRole = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRole>>, TError,{roleId: number;data: BodyType<RoleUpdate>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRole>>, TError,{roleUuid: string;data: BodyType<RoleUpdate>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminUpdateRole>>,
         TError,
-        {roleId: number;data: BodyType<RoleUpdate>},
+        {roleUuid: string;data: BodyType<RoleUpdate>},
         TContext
       > => {
       return useMutation(getAdminUpdateRoleMutationOptions(options), queryClient);
@@ -483,20 +483,20 @@ export type adminDeleteRoleResponseError = (adminDeleteRoleResponse422) & {
 
 export type adminDeleteRoleResponse = (adminDeleteRoleResponseSuccess | adminDeleteRoleResponseError)
 
-export const getAdminDeleteRoleUrl = (roleId: number,) => {
+export const getAdminDeleteRoleUrl = (roleUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/roles/${roleId}`
+  return `/api/v1/admin/roles/${roleUuid}`
 }
 
 /**
  * @summary Delete Role
  */
-export const adminDeleteRole = async (roleId: number, options?: RequestInit): Promise<adminDeleteRoleResponse> => {
+export const adminDeleteRole = async (roleUuid: string, options?: RequestInit): Promise<adminDeleteRoleResponse> => {
 
-  return mutator<adminDeleteRoleResponse>(getAdminDeleteRoleUrl(roleId),
+  return mutator<adminDeleteRoleResponse>(getAdminDeleteRoleUrl(roleUuid),
   {
     ...options,
     method: 'DELETE'
@@ -509,8 +509,8 @@ export const adminDeleteRole = async (roleId: number, options?: RequestInit): Pr
 
 
 export const getAdminDeleteRoleMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteRole>>, TError,{roleId: number}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteRole>>, TError,{roleId: number}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteRole>>, TError,{roleUuid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteRole>>, TError,{roleUuid: string}, TContext> => {
 
 const mutationKey = ['adminDeleteRole'];
 const {mutation: mutationOptions} = options ?
@@ -522,10 +522,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteRole>>, {roleId: number}> = (props) => {
-          const {roleId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteRole>>, {roleUuid: string}> = (props) => {
+          const {roleUuid} = props ?? {};
 
-          return  adminDeleteRole(roleId,)
+          return  adminDeleteRole(roleUuid,)
         }
 
 
@@ -543,11 +543,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Delete Role
  */
 export const useAdminDeleteRole = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteRole>>, TError,{roleId: number}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteRole>>, TError,{roleUuid: string}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminDeleteRole>>,
         TError,
-        {roleId: number},
+        {roleUuid: string},
         TContext
       > => {
       return useMutation(getAdminDeleteRoleMutationOptions(options), queryClient);
@@ -571,21 +571,21 @@ export type adminSetRoleStatusResponseError = (adminSetRoleStatusResponse422) & 
 
 export type adminSetRoleStatusResponse = (adminSetRoleStatusResponseSuccess | adminSetRoleStatusResponseError)
 
-export const getAdminSetRoleStatusUrl = (roleId: number,) => {
+export const getAdminSetRoleStatusUrl = (roleUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/roles/${roleId}/status`
+  return `/api/v1/admin/roles/${roleUuid}/status`
 }
 
 /**
  * @summary Set Role Status
  */
-export const adminSetRoleStatus = async (roleId: number,
+export const adminSetRoleStatus = async (roleUuid: string,
     roleStatusUpdate: RoleStatusUpdate, options?: RequestInit): Promise<adminSetRoleStatusResponse> => {
 
-  return mutator<adminSetRoleStatusResponse>(getAdminSetRoleStatusUrl(roleId),
+  return mutator<adminSetRoleStatusResponse>(getAdminSetRoleStatusUrl(roleUuid),
   {
     ...options,
     method: 'PATCH',
@@ -598,8 +598,8 @@ export const adminSetRoleStatus = async (roleId: number,
 
 
 export const getAdminSetRoleStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRoleStatus>>, TError,{roleId: number;data: BodyType<RoleStatusUpdate>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminSetRoleStatus>>, TError,{roleId: number;data: BodyType<RoleStatusUpdate>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRoleStatus>>, TError,{roleUuid: string;data: BodyType<RoleStatusUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetRoleStatus>>, TError,{roleUuid: string;data: BodyType<RoleStatusUpdate>}, TContext> => {
 
 const mutationKey = ['adminSetRoleStatus'];
 const {mutation: mutationOptions} = options ?
@@ -611,10 +611,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetRoleStatus>>, {roleId: number;data: BodyType<RoleStatusUpdate>}> = (props) => {
-          const {roleId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetRoleStatus>>, {roleUuid: string;data: BodyType<RoleStatusUpdate>}> = (props) => {
+          const {roleUuid,data} = props ?? {};
 
-          return  adminSetRoleStatus(roleId,data,)
+          return  adminSetRoleStatus(roleUuid,data,)
         }
 
 
@@ -632,11 +632,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Set Role Status
  */
 export const useAdminSetRoleStatus = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRoleStatus>>, TError,{roleId: number;data: BodyType<RoleStatusUpdate>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRoleStatus>>, TError,{roleUuid: string;data: BodyType<RoleStatusUpdate>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminSetRoleStatus>>,
         TError,
-        {roleId: number;data: BodyType<RoleStatusUpdate>},
+        {roleUuid: string;data: BodyType<RoleStatusUpdate>},
         TContext
       > => {
       return useMutation(getAdminSetRoleStatusMutationOptions(options), queryClient);
@@ -660,21 +660,21 @@ export type adminGrantPermissionsResponseError = (adminGrantPermissionsResponse4
 
 export type adminGrantPermissionsResponse = (adminGrantPermissionsResponseSuccess | adminGrantPermissionsResponseError)
 
-export const getAdminGrantPermissionsUrl = (roleId: number,) => {
+export const getAdminGrantPermissionsUrl = (roleUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/roles/${roleId}/permissions`
+  return `/api/v1/admin/roles/${roleUuid}/permissions`
 }
 
 /**
  * @summary Grant Permissions
  */
-export const adminGrantPermissions = async (roleId: number,
+export const adminGrantPermissions = async (roleUuid: string,
     permissionRefs: PermissionRefs, options?: RequestInit): Promise<adminGrantPermissionsResponse> => {
 
-  return mutator<adminGrantPermissionsResponse>(getAdminGrantPermissionsUrl(roleId),
+  return mutator<adminGrantPermissionsResponse>(getAdminGrantPermissionsUrl(roleUuid),
   {
     ...options,
     method: 'POST',
@@ -687,8 +687,8 @@ export const adminGrantPermissions = async (roleId: number,
 
 
 export const getAdminGrantPermissionsMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminGrantPermissions>>, TError,{roleId: number;data: BodyType<PermissionRefs>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminGrantPermissions>>, TError,{roleId: number;data: BodyType<PermissionRefs>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminGrantPermissions>>, TError,{roleUuid: string;data: BodyType<PermissionRefs>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminGrantPermissions>>, TError,{roleUuid: string;data: BodyType<PermissionRefs>}, TContext> => {
 
 const mutationKey = ['adminGrantPermissions'];
 const {mutation: mutationOptions} = options ?
@@ -700,10 +700,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminGrantPermissions>>, {roleId: number;data: BodyType<PermissionRefs>}> = (props) => {
-          const {roleId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminGrantPermissions>>, {roleUuid: string;data: BodyType<PermissionRefs>}> = (props) => {
+          const {roleUuid,data} = props ?? {};
 
-          return  adminGrantPermissions(roleId,data,)
+          return  adminGrantPermissions(roleUuid,data,)
         }
 
 
@@ -721,11 +721,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Grant Permissions
  */
 export const useAdminGrantPermissions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminGrantPermissions>>, TError,{roleId: number;data: BodyType<PermissionRefs>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminGrantPermissions>>, TError,{roleUuid: string;data: BodyType<PermissionRefs>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminGrantPermissions>>,
         TError,
-        {roleId: number;data: BodyType<PermissionRefs>},
+        {roleUuid: string;data: BodyType<PermissionRefs>},
         TContext
       > => {
       return useMutation(getAdminGrantPermissionsMutationOptions(options), queryClient);
@@ -749,21 +749,21 @@ export type adminRevokePermissionsResponseError = (adminRevokePermissionsRespons
 
 export type adminRevokePermissionsResponse = (adminRevokePermissionsResponseSuccess | adminRevokePermissionsResponseError)
 
-export const getAdminRevokePermissionsUrl = (roleId: number,) => {
+export const getAdminRevokePermissionsUrl = (roleUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/roles/${roleId}/permissions`
+  return `/api/v1/admin/roles/${roleUuid}/permissions`
 }
 
 /**
  * @summary Revoke Permissions
  */
-export const adminRevokePermissions = async (roleId: number,
+export const adminRevokePermissions = async (roleUuid: string,
     permissionRefs: PermissionRefs, options?: RequestInit): Promise<adminRevokePermissionsResponse> => {
 
-  return mutator<adminRevokePermissionsResponse>(getAdminRevokePermissionsUrl(roleId),
+  return mutator<adminRevokePermissionsResponse>(getAdminRevokePermissionsUrl(roleUuid),
   {
     ...options,
     method: 'DELETE',
@@ -776,8 +776,8 @@ export const adminRevokePermissions = async (roleId: number,
 
 
 export const getAdminRevokePermissionsMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRevokePermissions>>, TError,{roleId: number;data: BodyType<PermissionRefs>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminRevokePermissions>>, TError,{roleId: number;data: BodyType<PermissionRefs>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRevokePermissions>>, TError,{roleUuid: string;data: BodyType<PermissionRefs>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminRevokePermissions>>, TError,{roleUuid: string;data: BodyType<PermissionRefs>}, TContext> => {
 
 const mutationKey = ['adminRevokePermissions'];
 const {mutation: mutationOptions} = options ?
@@ -789,10 +789,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRevokePermissions>>, {roleId: number;data: BodyType<PermissionRefs>}> = (props) => {
-          const {roleId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRevokePermissions>>, {roleUuid: string;data: BodyType<PermissionRefs>}> = (props) => {
+          const {roleUuid,data} = props ?? {};
 
-          return  adminRevokePermissions(roleId,data,)
+          return  adminRevokePermissions(roleUuid,data,)
         }
 
 
@@ -810,11 +810,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Revoke Permissions
  */
 export const useAdminRevokePermissions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRevokePermissions>>, TError,{roleId: number;data: BodyType<PermissionRefs>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRevokePermissions>>, TError,{roleUuid: string;data: BodyType<PermissionRefs>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminRevokePermissions>>,
         TError,
-        {roleId: number;data: BodyType<PermissionRefs>},
+        {roleUuid: string;data: BodyType<PermissionRefs>},
         TContext
       > => {
       return useMutation(getAdminRevokePermissionsMutationOptions(options), queryClient);

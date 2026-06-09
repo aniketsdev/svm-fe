@@ -7,7 +7,7 @@
  * Minimal user shape returned in the body of /auth/login and /auth/refresh.
  */
 export interface LoginUserOut {
-  id: number;
+  uuid: string;
   email: string;
   role: string;
 }

@@ -98,7 +98,7 @@ export function UserAvatar({
   const variantClasses =
     variant === 'soft'
       ? 'bg-primary/10 text-primary'
-      : 'bg-primary text-primary-foreground';
+      : 'bg-primary-05 text-primary-foreground';
 
   return (
     <span

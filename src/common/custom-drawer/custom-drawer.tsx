@@ -90,8 +90,8 @@ const CustomDrawer = ({
               className="flex items-center justify-between border-b border-border"
               style={{
                 marginTop: headerStyle,
-                paddingLeft: headerPadding ?? defaultPad,
-                paddingRight: headerPadding ?? defaultPad,
+                paddingLeft: 10,
+                paddingRight: 10,
                 paddingTop: 15,
                 paddingBottom: 15,
               }}
