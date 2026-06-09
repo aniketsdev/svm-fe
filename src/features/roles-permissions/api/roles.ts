@@ -15,7 +15,6 @@ import type {
   AdminListRolesParams,
 } from '../../../sdk/schemas';
 
-// Public type names kept stable for callers; mapped onto the real SDK shapes.
 export type RoleRow = RoleOut;
 export type RoleListResponse = RoleList;
 export type PermissionItem = PermissionOut;
@@ -34,4 +33,8 @@ export function roleDetailQueryOptions(roleUuid: string) {
 /** TanStack Query options for `GET /api/v1/admin/permissions` (the catalog). */
 export function permissionsQueryOptions() {
   return getAdminListPermissionsQueryOptions();
+}
+
+export function roleDetailQueryOptions(roleId: number | null) {
+  return getAdminGetRoleQueryOptions(roleId ?? 0, { query: { enabled: roleId !== null } });
 }
