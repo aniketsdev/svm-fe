@@ -60,7 +60,7 @@ export function ChangePasswordDrawer({ open, onClose }: ChangePasswordDrawerProp
       open={open}
       onClose={onClose}
       drawerWidth="35rem"
-      drawerPadding="1rem"
+      drawerPadding="0rem"
     >
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col">
         <div className="flex-1 space-y-4 overflow-y-auto p-2 sm:p-6">
@@ -103,10 +103,10 @@ export function ChangePasswordDrawer({ open, onClose }: ChangePasswordDrawerProp
         </div>
 
         <div className="flex justify-end gap-3 border-t border-border bg-background p-4">
-          <CustomButton type="button" variant="outline" size="sm" onClick={onClose}>
+          <CustomButton type="button" variant="outline" size="md" onClick={onClose}>
             Cancel
           </CustomButton>
-          <CustomButton type="submit" variant="primary" size="sm" loading={changeMutation.isPending}>
+          <CustomButton type="submit" variant="primary" size="md" loading={changeMutation.isPending}>
             Update password
           </CustomButton>
         </div>

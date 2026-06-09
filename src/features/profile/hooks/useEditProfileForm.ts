@@ -7,8 +7,16 @@ import { z } from 'zod';
 // — the backend uses `extra="forbid"`, so only these three fields are sent.
 // An empty (trimmed) value clears the field (submitted as null → "Not set").
 export const editProfileSchema = z.object({
-  first_name: z.string().trim().max(100, 'Max 100 characters').optional(),
-  last_name: z.string().trim().max(100, 'Max 100 characters').optional(),
+  first_name: z
+    .string()
+    .trim()
+    .min(1, 'First name is required')
+    .max(100, 'Max 100 characters'),
+  last_name: z
+    .string()
+    .trim()
+    .min(1, 'Last name is required')
+    .max(100, 'Max 100 characters'),
   phone: z
     .string()
     .trim()
