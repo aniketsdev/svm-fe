@@ -1,4 +1,5 @@
 import {
+  Boxes,
   ClipboardList,
   Contact,
   Factory,
@@ -14,14 +15,20 @@ import { MasterCard, type MasterSection } from '../components/MasterCard';
 
 const SECTIONS: MasterSection[] = [
   {
+    key: 'materials',
+    label: 'Materials',
+    description: 'Inventory catalogue — RM & FG with UOM',
+    icon: Boxes,
+    to: '/masters/materials',
+    ready: true,
+  },
+  {
     key: 'stores',
     label: 'Stores',
-    description: 'Warehouses, factory & retail locations',
+    description: 'Inventory storage locations (FG & RM)',
     icon: Warehouse,
     to: '/masters/stores',
-    // Deferred: the masters Stores schema conflicts with the inventory `stores`
-    // table, so this master has no backend yet (see inventory store endpoints).
-    ready: false,
+    ready: true,
   },
   {
     key: 'vendors',
