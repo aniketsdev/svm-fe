@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import type { SortingState } from '@tanstack/react-table';
-import { formatDateTime } from '../../../utils/format';
+import { formatDateTime, formatRelativeTime } from '../../../utils/format';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import type { AuditRow } from '../api/activity-log';
-import { ActionBadge } from './ActionBadge';
+import { ActivityAction } from './ActivityAction';
 
 interface ActivityLogTableProps {
   entries: AuditRow[];
@@ -34,14 +34,25 @@ export function ActivityLogTable({
         id: 'when',
         header: 'When',
         cell: ({ row }) => (
-          <span className="whitespace-nowrap text-muted-foreground">
-            {formatDateTime(row.original.created_at)}
+          <span
+            className="whitespace-nowrap text-muted-foreground"
+            title={formatDateTime(row.original.created_at)}
+          >
+            {formatRelativeTime(row.original.created_at)}
           </span>
         ),
       },
       {
+        accessorKey: 'action',
+        header: 'Activity',
+        cell: ({ row }) => (
+          <ActivityAction action={row.original.action} entityType={row.original.entity_type} />
+        ),
+      },
+      {
         id: 'who',
-        header: 'Who',
+        header: 'By',
+        enableSorting: false,
         cell: ({ row }) => (
           <div className="flex flex-col">
             <span className="text-foreground">{row.original.actor?.email ?? 'System'}</span>
@@ -54,20 +65,9 @@ export function ActivityLogTable({
         ),
       },
       {
-        accessorKey: 'action',
-        header: 'Action',
-        cell: ({ row }) => <ActionBadge action={row.original.action} />,
-      },
-      {
-        id: 'entity',
-        header: 'Entity',
-        cell: ({ row }) => (
-          <span className="text-foreground">{row.original.entity_type ?? '—'}</span>
-        ),
-      },
-      {
         id: 'record',
         header: 'Record',
+        enableSorting: false,
         cell: ({ row }) => {
           const { entity_type, record_id, record_name } = row.original;
           // Prefer the human label resolved by the API (e.g. a user's name).
@@ -87,11 +87,6 @@ export function ActivityLogTable({
             </span>
           );
         },
-      },
-      {
-        id: 'ip',
-        header: 'IP',
-        cell: ({ row }) => <span className="text-muted-foreground">{row.original.ip ?? '—'}</span>,
       },
     ],
     [],

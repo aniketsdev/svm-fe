@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { cn } from '../../../lib/cn';
 import { useGrns } from '../hooks/useGrns';
 import { StockMovementsTab } from '../tabs/StockMovementsTab';
+import { BatchesTab } from '../tabs/BatchesTab';
 import { GrnTab } from '../tabs/GrnTab';
 import { TransfersTab } from '../tabs/TransfersTab';
 import { AdjustmentsTab } from '../tabs/AdjustmentsTab';
 
-type TabKey = 'stock' | 'grn' | 'transfers' | 'adjustments';
+type TabKey = 'stock' | 'batches' | 'grn' | 'transfers' | 'adjustments';
 
 export function InventoryPage() {
   const [tab, setTab] = useState<TabKey>('stock');
@@ -15,6 +16,7 @@ export function InventoryPage() {
 
   const tabs: { key: TabKey; label: string; badge?: number }[] = [
     { key: 'stock', label: 'Stock' },
+    { key: 'batches', label: 'Batches' },
     { key: 'grn', label: 'GRN', badge: grnTotal || undefined },
     { key: 'transfers', label: 'Transfers' },
     { key: 'adjustments', label: 'Adjustments' },
@@ -66,6 +68,7 @@ export function InventoryPage() {
 
       <div className="mt-5">
         {tab === 'stock' && <StockMovementsTab />}
+        {tab === 'batches' && <BatchesTab />}
         {tab === 'grn' && <GrnTab />}
         {tab === 'transfers' && <TransfersTab />}
         {tab === 'adjustments' && <AdjustmentsTab />}

@@ -18,5 +18,6 @@ export function useRoles() {
     count: envelope?.data.total ?? 0,
     isLoading: query.isPending,
     isError: query.isError,
+    refetch: query.refetch,
   };
 }

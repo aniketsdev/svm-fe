@@ -1,4 +1,7 @@
 import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 
 const EMPTY = '—';
 
@@ -10,6 +13,11 @@ export function formatDate(value: string | Date | null | undefined): string {
 /** Date + time as "DD MMM YYYY, h:mm A" (em-dash when empty). */
 export function formatDateTime(value: string | Date | null | undefined): string {
   return value ? dayjs(value).format('DD MMM YYYY, h:mm A') : EMPTY;
+}
+
+/** Relative time like "2 hours ago" (em-dash when empty). */
+export function formatRelativeTime(value: string | Date | null | undefined): string {
+  return value ? dayjs(value).fromNow() : EMPTY;
 }
 
 /** Joined first/last name (em-dash when both empty). */
