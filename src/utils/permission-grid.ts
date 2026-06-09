@@ -6,12 +6,12 @@ import type { MatrixCell } from '../sdk/schemas';
 
 export type GridAction = 'view' | 'create' | 'update' | 'delete' | 'manage';
 
-export const GRID_COLUMNS: { key: GridAction; label: string }[] = [
-  { key: 'view', label: 'View' },
-  { key: 'create', label: 'Create' },
-  { key: 'update', label: 'Update' },
-  { key: 'delete', label: 'Delete' },
-  { key: 'manage', label: 'Manage' },
+export const GRID_COLUMNS: { key: GridAction; label: string; hint: string }[] = [
+  { key: 'view', label: 'View', hint: 'See / read' },
+  { key: 'create', label: 'Create', hint: 'Add new' },
+  { key: 'update', label: 'Update', hint: 'Edit existing' },
+  { key: 'delete', label: 'Delete', hint: 'Remove' },
+  { key: 'manage', label: 'Manage', hint: 'Full control' },
 ];
 
 /** Map a permission's trailing verb to a CRUD-style column. */

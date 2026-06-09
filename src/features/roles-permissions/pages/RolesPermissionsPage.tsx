@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronRight, Info, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Check, ChevronRight, Info, Minus, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { CustomButton } from '../../../common/custom-buttons';
 import { CustomSelect } from '../../../common/custom-select';
 import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
@@ -131,7 +131,10 @@ export function RolesPermissionsPage() {
       </nav>
 
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-foreground">Roles and Permission</h1>
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Roles and Permission</h1>
+          <p className="mt-0.5 text-sm text-muted-foreground">What each role can access across the system.</p>
+        </div>
         {!editing && (
           <CustomButton variant="primary" icon={<Plus className="size-4" />} onClick={() => setCreateOpen(true)}>
             New Role
@@ -163,8 +166,14 @@ export function RolesPermissionsPage() {
         ) : (
           <>
             <div className="flex flex-wrap items-center gap-4">
-              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <label className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 Role Type:
+                <span
+                  title="Access tier — Admin or Staff. A tier can hold several roles."
+                  className="inline-flex cursor-help"
+                >
+                  <Info className="size-3.5 text-muted-foreground/70" />
+                </span>
                 <div className="w-40">
                   <CustomSelect
                     name="roleType"
@@ -201,6 +210,20 @@ export function RolesPermissionsPage() {
           </>
         )}
       </div>
+
+      {!editing && selected && (
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1">
+            <Check className="size-3.5 text-positive-70" /> allowed
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Minus className="size-3.5 text-warning-60" /> partial
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <X className="size-3.5 text-destructive" /> none
+          </span>
+        </div>
+      )}
 
       <div className="mt-5">
         {isLoading || (selected && detailQuery.isPending) ? (

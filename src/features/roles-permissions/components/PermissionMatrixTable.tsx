@@ -48,9 +48,18 @@ export function PermissionMatrixTable({ rows, editing, isOn, setPerms }: Props) 
         <thead>
           <tr className="border-b border-border bg-muted/50 text-left">
             <th className="px-4 py-3 font-semibold text-foreground">Features</th>
-            <th className="px-4 py-3 text-center font-semibold text-foreground">All</th>
+            <th
+              className="px-4 py-3 text-center font-semibold text-foreground"
+              title="Every permission in this feature"
+            >
+              All
+            </th>
             {GRID_COLUMNS.map((c) => (
-              <th key={c.key} className="px-4 py-3 text-center font-semibold text-foreground">
+              <th
+                key={c.key}
+                className="px-4 py-3 text-center font-semibold text-foreground"
+                title={c.hint}
+              >
                 {c.label}
               </th>
             ))}
