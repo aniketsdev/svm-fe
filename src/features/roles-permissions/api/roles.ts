@@ -34,7 +34,3 @@ export function roleDetailQueryOptions(roleUuid: string) {
 export function permissionsQueryOptions() {
   return getAdminListPermissionsQueryOptions();
 }
-
-export function roleDetailQueryOptions(roleId: number | null) {
-  return getAdminGetRoleQueryOptions(roleId ?? 0, { query: { enabled: roleId !== null } });
-}

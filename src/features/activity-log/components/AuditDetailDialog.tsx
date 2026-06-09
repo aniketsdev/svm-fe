@@ -6,7 +6,7 @@ import { describeActivity, activityToneClass } from '../../../utils/activity';
 import { useAdminGetActivityLogEntry } from '../../../sdk/activity-log';
 import type { ActivityLogDetail } from '../../../sdk/schemas';
 import type { AuditRow } from '../api/activity-log';
-import { ActionBadge } from './ActionBadge';
+import { ActivityAction } from './ActivityAction';
 
 interface AuditDetailDialogProps {
   entry: AuditRow | null;
@@ -95,7 +95,7 @@ export function AuditDetailDialog({ entry, onClose }: AuditDetailDialogProps) {
             <div>
               <dt className="text-xs text-muted-foreground">Action</dt>
               <dd className="text-foreground">
-                {row?.action ? <ActionBadge action={row.action} /> : '—'}
+                {row?.action ? <ActivityAction action={row.action} /> : '—'}
               </dd>
             </div>
             <div>
