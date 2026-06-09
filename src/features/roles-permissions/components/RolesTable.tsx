@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
-import { Eye, Pencil, Power, Trash2 } from 'lucide-react';
+import { ArrowRight, Pencil, Power, Trash2 } from 'lucide-react';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import { ActionMenu, type ActionMenuItem } from '../../../common/action-menu';
+import { CustomButton } from '../../../common/custom-buttons';
 import { cn } from '../../../lib/cn';
 import { formatDateTime } from '../../../utils/format';
 import type { RoleRow } from '../api/roles';
@@ -109,7 +110,6 @@ export function RolesTable({
         cell: ({ row }) => {
           const role = row.original;
           const items: ActionMenuItem[] = [
-            { label: 'View', icon: <Eye className="size-4" />, onClick: () => onRowClick(role) },
             { label: 'Edit', icon: <Pencil className="size-4" />, onClick: () => onEdit(role) },
             {
               label: role.status === 'active' ? 'Deactivate' : 'Activate',
@@ -126,10 +126,20 @@ export function RolesTable({
               onClick: () => onDelete(role),
             });
           }
-          // Stop propagation so opening the menu does not also trigger the
-          // row-click (which opens the detail dialog).
+          // Stop propagation so the buttons/menu don't also trigger the row-click.
           return (
-            <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="flex items-center justify-end gap-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CustomButton
+                type="button"
+                variant="outline"
+                icon={<ArrowRight className="size-4" />}
+                onClick={() => onRowClick(role)}
+              >
+                Set Permissions
+              </CustomButton>
               <ActionMenu items={items} ariaLabel={`Actions for ${role.name}`} />
             </div>
           );

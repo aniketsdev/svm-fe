@@ -10,7 +10,8 @@ import type {
   RoleDetailOut,
   RoleList,
   PermissionOut,
-  MatrixCell,
+  FeatureRow,
+  ActionCell,
   AdminListRolesParams,
 } from '../../../sdk/schemas';
 
@@ -18,7 +19,7 @@ import type {
 export type RoleRow = RoleOut;
 export type RoleListResponse = RoleList;
 export type PermissionItem = PermissionOut;
-export type { RoleDetailOut, MatrixCell, AdminListRolesParams };
+export type { RoleDetailOut, FeatureRow, ActionCell, AdminListRolesParams };
 
 /** TanStack Query options for `GET /api/v1/admin/roles` (search/status/pagination). */
 export function rolesQueryOptions(params: AdminListRolesParams) {

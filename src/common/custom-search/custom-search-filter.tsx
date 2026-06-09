@@ -42,7 +42,11 @@ const SearchFilter = ({
   // were a dependency, any unrelated parent re-render (e.g. paging) would
   // re-run the debounce and fire a spurious search, resetting parent state.
   const onSearchRef = useRef(onSearch);
-  onSearchRef.current = onSearch;
+  // Keep the ref pointing at the latest handler without making it an effect
+  // dependency (assigning in an effect, not during render).
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  });
   // Skip the initial mount so we don't emit an empty search on first render.
   const mountedRef = useRef(false);
 

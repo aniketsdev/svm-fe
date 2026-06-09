@@ -18,17 +18,20 @@ export interface UseRolesArgs {
   q?: string;
   /** Status filter; `'all'` means no status filter. */
   status?: 'all' | 'active' | 'inactive';
+  /** Role-type (tier) filter; `'all'` means no type filter. */
+  type?: 'all' | 'admin' | 'staff';
 }
 
-export function useRoles({ page, pageSize, q, status = 'all' }: UseRolesArgs) {
-  // Search, status AND pagination are all handled server-side. The list API has
-  // no sort param, so there is no sort/order wiring here (research D2).
+export function useRoles({ page, pageSize, q, status = 'all', type = 'all' }: UseRolesArgs) {
+  // Search, status, type AND pagination are all handled server-side. The list
+  // API has no sort param, so there is no sort/order wiring here (research D2).
   const query = useQuery(
     rolesQueryOptions({
       limit: pageSize,
       offset: page * pageSize,
       q: q?.trim() || undefined,
       status: status === 'all' ? undefined : (status as AdminListRolesStatus),
+      type: type === 'all' ? undefined : type,
     }),
   );
   const envelope = query.data as RolesEnvelope | undefined;

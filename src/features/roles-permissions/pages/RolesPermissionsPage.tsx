@@ -21,7 +21,14 @@ const STATUS_ITEMS = [
   { value: 'inactive', label: 'Inactive' },
 ];
 
+const TYPE_ITEMS = [
+  { value: 'all', label: 'All role types' },
+  { value: 'admin', label: 'Admin' },
+  { value: 'staff', label: 'Staff' },
+];
+
 type StatusFilter = 'all' | 'active' | 'inactive';
+type TypeFilter = 'all' | 'admin' | 'staff';
 
 export function RolesPermissionsPage() {
   const { toast } = useToast();
@@ -37,6 +44,7 @@ export function RolesPermissionsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get('q') ?? '';
   const status = (searchParams.get('status') as StatusFilter) || 'all';
+  const type = (searchParams.get('type') as TypeFilter) || 'all';
   const page = Number(searchParams.get('page') ?? '0') || 0;
   const pageSize = Number(searchParams.get('size') ?? '10') || 10;
 
@@ -45,7 +53,13 @@ export function RolesPermissionsPage() {
   const [deleteRole, setDeleteRole] = useState<RoleRow | null>(null);
   const [statusRole, setStatusRole] = useState<RoleRow | null>(null);
 
-  const { roles, total, isLoading, refetch } = useRoles({ page, pageSize, q: search, status });
+  const { roles, total, isLoading, refetch } = useRoles({
+    page,
+    pageSize,
+    q: search,
+    status,
+    type,
+  });
 
   // Merge param updates; null/default values are dropped to keep the URL clean.
   const setParams = (updates: Record<string, string | null>) => {
@@ -63,6 +77,8 @@ export function RolesPermissionsPage() {
   const handleSearch = (term: string) => setParams({ q: term || null, page: null });
   const handleStatus = (value: StatusFilter) =>
     setParams({ status: value === 'all' ? null : value, page: null });
+  const handleType = (value: TypeFilter) =>
+    setParams({ type: value === 'all' ? null : value, page: null });
 
   const statusMutation = useAdminSetRoleStatus({
     mutation: {
@@ -102,18 +118,30 @@ export function RolesPermissionsPage() {
       {/* Header: title left, search right (Activity-Log parity) */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold text-foreground">Roles &amp; Permissions</h1>
-        <CustomSearch
-          textData={{ placeholder: 'Search by role name', btnTitle: 'Search' }}
-          onSearch={handleSearch}
-          initialValue={search}
-          hasStartSearchIcon
-          width="28rem"
-        />
+        {canManage && (
+          <CustomButton
+            variant="primary"
+            icon={<ShieldPlus className="size-4" />}
+            onClick={() => setCreateOpen(true)}
+          >
+            Add role
+          </CustomButton>
+        )}
+  
       </div>
 
       {/* Toolbar — status filter + create */}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+          <div className="w-40">
+            <CustomSelect
+              name="type"
+              placeholder="Role Type"
+              value={type}
+              items={TYPE_ITEMS}
+              onChange={(e) => handleType(e.target.value as TypeFilter)}
+            />
+          </div>
           <div className="w-40">
             <CustomSelect
               name="status"
@@ -123,16 +151,15 @@ export function RolesPermissionsPage() {
               onChange={(e) => handleStatus(e.target.value as StatusFilter)}
             />
           </div>
-          {canManage && (
-            <CustomButton
-              variant="primary"
-              icon={<ShieldPlus className="size-4" />}
-              onClick={() => setCreateOpen(true)}
-            >
-              Add role
-            </CustomButton>
-          )}
-        </div>
+          {/* <div className="w-40"> */}
+          <CustomSearch
+          textData={{ placeholder: 'Search by role name', btnTitle: 'Search' }}
+          onSearch={handleSearch}
+          initialValue={search}
+          hasStartSearchIcon
+          width="28rem"
+        /></div>
+        {/* </div> */}
       </div>
 
       {/* Table */}

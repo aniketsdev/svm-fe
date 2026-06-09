@@ -7,7 +7,6 @@ import { ApiError } from '../../../api/client';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCreateRole } from '../../../sdk/roles-permissions';
 import { useCreateRoleForm, type CreateRoleFormValues } from '../hooks/useCreateRoleForm';
-import { PermissionPicker } from './PermissionPicker';
 
 const TIER_ITEMS = [
   { value: 'staff', label: 'Staff' },
@@ -21,8 +20,9 @@ interface CreateRoleDialogProps {
 }
 
 /**
- * "Create role" uses the dynamic-roles endpoint (feature 009): POST /admin/roles.
- * Initial permissions are sent in the same call via RoleCreate.permissions.
+ * "Create role" uses the dynamic-roles endpoint: POST /admin/roles. The role is
+ * created with no permissions (feature 023) — grants are managed afterwards from
+ * the role page's grid.
  */
 export function CreateRoleDialog({ open, onClose, onCreated }: CreateRoleDialogProps) {
   const { toast } = useToast();
@@ -60,7 +60,6 @@ export function CreateRoleDialog({ open, onClose, onCreated }: CreateRoleDialogP
         name: data.name,
         type: data.type,
         description: data.description,
-        permissions: data.permissions,
       },
     });
   };
@@ -92,7 +91,6 @@ export function CreateRoleDialog({ open, onClose, onCreated }: CreateRoleDialogP
             placeholder="Select tier"
             items={TIER_ITEMS}
           />
-          <PermissionPicker<CreateRoleFormValues> name="permissions" control={control} />
         </div>
         <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pt-4">
           <CustomButton type="button" variant="outline" onClick={handleClose}>

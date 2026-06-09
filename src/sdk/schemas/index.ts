@@ -4,6 +4,7 @@
  */
 
 export * from './acceptInvitationRequest';
+export * from './actionCell';
 export * from './activityLogDetail';
 export * from './activityLogDetailAfterState';
 export * from './activityLogDetailBeforeState';
@@ -89,6 +90,7 @@ export * from './doctorListResponse';
 export * from './doctorPricingListItem';
 export * from './doctorPricingListResponse';
 export * from './expiryCard';
+export * from './featureRow';
 export * from './fgFields';
 export * from './forgotPasswordAck';
 export * from './forgotPasswordRequest';
@@ -129,7 +131,6 @@ export * from './materialList';
 export * from './materialOut';
 export * from './materialRef';
 export * from './materialUpdate';
-export * from './matrixCell';
 export * from './meResponse';
 export * from './movementListItem';
 export * from './movementListItemDirection';

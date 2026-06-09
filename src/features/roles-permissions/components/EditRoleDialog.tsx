@@ -6,14 +6,9 @@ import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { ApiError } from '../../../api/client';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
-import {
-  useAdminUpdateRole,
-  useAdminGrantPermissions,
-  useAdminRevokePermissions,
-} from '../../../sdk/roles-permissions';
+import { useAdminUpdateRole } from '../../../sdk/roles-permissions';
 import type { RoleRow } from '../api/roles';
 import { useEditRoleForm, type EditRoleFormValues } from '../hooks/useEditRoleForm';
-import { PermissionPicker } from './PermissionPicker';
 
 const TIER_ITEMS = [
   { value: 'staff', label: 'Staff' },
@@ -29,9 +24,9 @@ interface EditRoleDialogProps {
 }
 
 /**
- * "Edit role" updates identity/description via PATCH /admin/roles/{uuid}, then
- * applies the permission diff via grant/revoke. Built-in (system) roles keep
- * their name and tier locked; description and grants stay editable.
+ * "Edit role" updates a role's identity/description via PATCH /admin/roles/{uuid}.
+ * Permissions are NOT edited here (feature 023) — they are managed from the role
+ * page's grid. Built-in (system) roles keep their name and tier locked.
  */
 export function EditRoleDialog({ role, onClose, onUpdated }: EditRoleDialogProps) {
   const { toast } = useToast();
@@ -39,10 +34,7 @@ export function EditRoleDialog({ role, onClose, onUpdated }: EditRoleDialogProps
   const { handleApiError } = useFormApiErrors(setError);
 
   const updateMutation = useAdminUpdateRole();
-  const grantMutation = useAdminGrantPermissions();
-  const revokeMutation = useAdminRevokePermissions();
-  const isSaving =
-    updateMutation.isPending || grantMutation.isPending || revokeMutation.isPending;
+  const isSaving = updateMutation.isPending;
 
   const isSystem = role?.is_system ?? false;
 
@@ -52,18 +44,12 @@ export function EditRoleDialog({ role, onClose, onUpdated }: EditRoleDialogProps
         name: role.name,
         description: role.description,
         type: asTier(role.type),
-        permissions: role.permissions ?? [],
       });
     }
   }, [role, reset]);
 
   const onSubmit = async (data: EditRoleFormValues) => {
     if (!role) return;
-
-    const current = new Set(role.permissions ?? []);
-    const selected = new Set(data.permissions);
-    const toGrant = data.permissions.filter((p) => !current.has(p));
-    const toRevoke = (role.permissions ?? []).filter((p) => !selected.has(p));
 
     try {
       // Identity/description — for system roles only description is sent (name
@@ -74,12 +60,6 @@ export function EditRoleDialog({ role, onClose, onUpdated }: EditRoleDialogProps
           ? { description: data.description }
           : { name: data.name, type: data.type, description: data.description },
       });
-      if (toGrant.length) {
-        await grantMutation.mutateAsync({ roleUuid: role.uuid, data: { permissions: toGrant } });
-      }
-      if (toRevoke.length) {
-        await revokeMutation.mutateAsync({ roleUuid: role.uuid, data: { permissions: toRevoke } });
-      }
       toast({ severity: 'success', message: successMessage(undefined, 'Role updated.') });
       onUpdated();
       onClose();
@@ -128,7 +108,6 @@ export function EditRoleDialog({ role, onClose, onUpdated }: EditRoleDialogProps
                 Built-in role — name and tier are managed by the system and cannot be changed.
               </p>
             )}
-            <PermissionPicker<EditRoleFormValues> name="permissions" control={control} />
           </div>
           <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pb-6 pt-4">
             <CustomButton type="button" variant="outline" onClick={onClose}>

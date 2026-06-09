@@ -2,9 +2,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-// Mirrors the editable surface of a role (feature 009): description always
-// editable; name + tier editable for custom roles only (the dialog disables
-// them for built-in roles). Permissions are applied via grant/revoke diff.
+// Mirrors the editable identity of a role: description always editable; name +
+// tier editable for custom roles only (the dialog disables them for built-in
+// roles). Permissions are NOT edited here (feature 023) — they are managed from
+// the role page's grid via grant/revoke.
 const editRoleSchema = z.object({
   name: z.string().trim().min(1, 'Name is required').max(50, 'Name must be at most 50 characters'),
   description: z
@@ -13,7 +14,6 @@ const editRoleSchema = z.object({
     .min(1, 'Description is required')
     .max(255, 'Description must be at most 255 characters'),
   type: z.enum(['admin', 'staff']),
-  permissions: z.array(z.string()),
 });
 
 export type EditRoleFormValues = z.infer<typeof editRoleSchema>;
@@ -21,7 +21,7 @@ export type EditRoleFormValues = z.infer<typeof editRoleSchema>;
 export function useEditRoleForm() {
   return useForm<EditRoleFormValues>({
     resolver: zodResolver(editRoleSchema),
-    defaultValues: { name: '', description: '', type: 'staff', permissions: [] },
+    defaultValues: { name: '', description: '', type: 'staff' },
     mode: 'onSubmit',
   });
 }

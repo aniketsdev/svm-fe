@@ -1,18 +1,23 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { ArrowLeft, Loader2, Pencil, Power, Trash2 } from 'lucide-react';
+import { ArrowLeft, Loader2, ListChecks, Pencil, Power, Save, Trash2, X } from 'lucide-react';
 import { CustomButton } from '../../../common/custom-buttons';
 import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
 import { useToast } from '../../../common/common-snackbar';
 import { cn } from '../../../lib/cn';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAuth } from '../../auth/hooks/useAuth';
-import { useAdminSetRoleStatus, useAdminDeleteRole } from '../../../sdk/roles-permissions';
+import {
+  useAdminSetRoleStatus,
+  useAdminDeleteRole,
+  useAdminGrantPermissions,
+  useAdminRevokePermissions,
+} from '../../../sdk/roles-permissions';
 import { useRoleDetail } from '../hooks/useRoleDetail';
 import { RoleStatusBadge } from '../components/RoleStatusBadge';
-import { RolePermissionMatrix } from '../components/RolePermissionMatrix';
+import { PermissionGrid } from '../components/PermissionGrid';
 import { EditRoleDialog } from '../components/EditRoleDialog';
-import type { RoleRow } from '../api/roles';
+import type { FeatureRow, RoleRow } from '../api/roles';
 
 /** Tier badge (admin / staff) — mirrors the list/table treatment. */
 function TierBadge({ tier }: { tier: string }) {
@@ -28,12 +33,23 @@ function TierBadge({ tier }: { tier: string }) {
   );
 }
 
+/** Granted permission names across a feature×action matrix. */
+function grantedNames(matrix: FeatureRow[]): Set<string> {
+  const out = new Set<string>();
+  for (const row of matrix) {
+    for (const cell of row.cells) {
+      if (cell.applicable && cell.granted) out.add(cell.permission);
+    }
+  }
+  return out;
+}
+
 /**
- * Dedicated role page (route `roles-permissions/:roleUuid`). Replaces the old
- * modal detail: full-width metadata header, the complete permission matrix
- * grouped by category, and the management actions (Edit drawer, Deactivate/
- * Activate, Delete). The "Back" link restores the list's search/filter/page,
- * carried through router state from the row that opened this page.
+ * Dedicated role page (route `roles-permissions/:roleUuid`). Renders the role's
+ * metadata, the feature×action permission grid (view mode), and an "Edit
+ * Permissions" mode (checkboxes + Select All / Cancel / Save Changes with a live
+ * change counter) that persists via the grant/revoke endpoints. Role identity
+ * actions (Edit role / Deactivate / Delete) live in the header.
  */
 export function RoleDetailPage() {
   const { roleUuid } = useParams<{ roleUuid: string }>();
@@ -41,20 +57,36 @@ export function RoleDetailPage() {
   const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
-  // Management actions are enforced server-side by `roles.manage`; the UI hides
-  // them for non-admin callers, who keep read-only access to the detail.
   const canManage = user?.role === 'admin';
 
-  // The originating list preserves its query string here so Back returns to the
-  // same search/filter/page; default to a clean list when opened directly.
   const fromSearch = (location.state as { fromSearch?: string } | null)?.fromSearch ?? '';
   const backTo = `/roles-permissions${fromSearch}`;
 
   const { role, isLoading, isError, refetch } = useRoleDetail(roleUuid);
 
-  const [editOpen, setEditOpen] = useState(false);
+  const [editRoleOpen, setEditRoleOpen] = useState(false);
   const [confirmStatus, setConfirmStatus] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  // Permission edit mode: `selected` holds the in-progress grant set.
+  const [editingPerms, setEditingPerms] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  const matrix = useMemo<FeatureRow[]>(() => role?.matrix ?? [], [role]);
+  const original = useMemo(() => grantedNames(matrix), [matrix]);
+
+  // Count permissions whose membership differs between the edit set and server.
+  const changeCount = useMemo(() => {
+    let n = 0;
+    for (const p of selected) if (!original.has(p)) n += 1;
+    for (const p of original) if (!selected.has(p)) n += 1;
+    return n;
+  }, [selected, original]);
+
+  const allApplicable = useMemo(
+    () => matrix.flatMap((r) => r.cells.filter((c) => c.applicable).map((c) => c.permission)),
+    [matrix],
+  );
 
   const statusMutation = useAdminSetRoleStatus({
     mutation: {
@@ -83,7 +115,61 @@ export function RoleDetailPage() {
     },
   });
 
+  const grantMutation = useAdminGrantPermissions();
+  const revokeMutation = useAdminRevokePermissions();
+  const savingPerms = grantMutation.isPending || revokeMutation.isPending;
+
   const isActive = role?.status === 'active';
+
+  const startEditPerms = () => {
+    setSelected(new Set(original));
+    setEditingPerms(true);
+  };
+  const cancelEditPerms = () => {
+    setEditingPerms(false);
+    setSelected(new Set(original));
+  };
+  const toggle = (permission: string, checked: boolean) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(permission);
+      else next.delete(permission);
+      return next;
+    });
+  const toggleRow = (permissions: string[], checked: boolean) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      for (const p of permissions) {
+        if (checked) next.add(p);
+        else next.delete(p);
+      }
+      return next;
+    });
+  const selectAll = () => setSelected(new Set(allApplicable));
+
+  const savePerms = async () => {
+    if (!role || changeCount === 0) {
+      setEditingPerms(false);
+      return;
+    }
+    const added = [...selected].filter((p) => !original.has(p));
+    const removed = [...original].filter((p) => !selected.has(p));
+    try {
+      let last: unknown;
+      if (added.length)
+        last = await grantMutation.mutateAsync({ roleUuid: role.uuid, data: { permissions: added } });
+      if (removed.length)
+        last = await revokeMutation.mutateAsync({
+          roleUuid: role.uuid,
+          data: { permissions: removed },
+        });
+      toast({ severity: 'success', message: successMessage(last, 'Permissions updated.') });
+      setEditingPerms(false);
+      refetch();
+    } catch (e) {
+      toast({ severity: 'error', message: errorMessage(e) });
+    }
+  };
 
   return (
     <div className="w-full px-4 py-5">
@@ -106,7 +192,7 @@ export function RoleDetailPage() {
         </p>
       ) : (
         <>
-          {/* Metadata header — name, tier, status, description + actions. */}
+          {/* Metadata header — name, tier, status, description + identity actions. */}
           <div className="mt-4 flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -119,7 +205,7 @@ export function RoleDetailPage() {
               </p>
             </div>
 
-            {canManage && (
+            {canManage && !editingPerms && (
               <div className="flex flex-wrap gap-3 sm:justify-end">
                 <CustomButton
                   type="button"
@@ -143,7 +229,7 @@ export function RoleDetailPage() {
                   type="button"
                   variant="primary"
                   icon={<Pencil className="size-4" />}
-                  onClick={() => setEditOpen(true)}
+                  onClick={() => setEditRoleOpen(true)}
                 >
                   Edit role
                 </CustomButton>
@@ -151,17 +237,66 @@ export function RoleDetailPage() {
             )}
           </div>
 
-          {/* Full-width permission matrix, grouped by category. */}
-          <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-            <RolePermissionMatrix matrix={role.matrix} loading={isLoading} />
+          {/* Permission grid toolbar */}
+          <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-foreground">Permissions</h2>
+            {canManage &&
+              (editingPerms ? (
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center rounded-full bg-info/10 px-3 py-1 text-xs font-medium text-info">
+                    {changeCount} {changeCount === 1 ? 'Change' : 'Changes'}
+                  </span>
+                  <CustomButton type="button" variant="outline" onClick={selectAll}>
+                    Select All
+                  </CustomButton>
+                  <CustomButton
+                    type="button"
+                    variant="outline"
+                    icon={<X className="size-4" />}
+                    onClick={cancelEditPerms}
+                    disabled={savingPerms}
+                  >
+                    Cancel
+                  </CustomButton>
+                  <CustomButton
+                    type="button"
+                    variant="primary"
+                    icon={<Save className="size-4" />}
+                    onClick={savePerms}
+                    loading={savingPerms}
+                    disabled={changeCount === 0}
+                  >
+                    Save Changes
+                  </CustomButton>
+                </div>
+              ) : (
+                <CustomButton
+                  type="button"
+                  variant="primary"
+                  icon={<ListChecks className="size-4" />}
+                  onClick={startEditPerms}
+                >
+                  Edit Permissions
+                </CustomButton>
+              ))}
           </div>
 
-          {/* Edit reuses the same drawer as the list; RoleDetailOut satisfies RoleRow. */}
+          {/* Feature × action grid */}
+          <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+            <PermissionGrid
+              matrix={matrix}
+              editing={editingPerms}
+              selected={selected}
+              onToggle={toggle}
+              onToggleRow={toggleRow}
+            />
+          </div>
+
           <EditRoleDialog
-            role={editOpen ? (role as RoleRow) : null}
-            onClose={() => setEditOpen(false)}
+            role={editRoleOpen ? (role as RoleRow) : null}
+            onClose={() => setEditRoleOpen(false)}
             onUpdated={() => {
-              setEditOpen(false);
+              setEditRoleOpen(false);
               refetch();
             }}
           />
