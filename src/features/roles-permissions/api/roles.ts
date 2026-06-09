@@ -1,14 +1,19 @@
-// Data access for the Roles & Permissions feature. Single entry point onto the
-// generated SDK (`adminListRoles`).
-import { getAdminListRolesQueryOptions } from '../../../sdk/roles-permissions';
-import type { RoleOut, RoleList, PermissionOut } from '../../../sdk/schemas';
+// Data access for Roles & Permissions onto the generated SDK.
+import {
+  getAdminListRolesQueryOptions,
+  getAdminGetRoleQueryOptions,
+} from '../../../sdk/roles-permissions';
+import type { RoleOut, RoleList, RoleDetailOut, PermissionOut } from '../../../sdk/schemas';
 
-// Public type names kept stable for callers; mapped onto the real SDK shapes.
 export type RoleRow = RoleOut;
 export type RoleListResponse = RoleList;
 export type PermissionItem = PermissionOut;
+export type { RoleDetailOut };
 
-/** TanStack Query options for `GET /api/v1/admin/roles`. */
 export function rolesQueryOptions() {
   return getAdminListRolesQueryOptions();
+}
+
+export function roleDetailQueryOptions(roleId: number | null) {
+  return getAdminGetRoleQueryOptions(roleId ?? 0, { query: { enabled: roleId !== null } });
 }
