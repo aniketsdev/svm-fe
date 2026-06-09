@@ -49,7 +49,7 @@ export function ActivityLogPage() {
           textData={{ placeholder: 'Search by user, action or entity', btnTitle: 'Search' }}
           onSearch={handleSearch}
           hasStartSearchIcon
-          width="22rem"
+          width="28rem"
         />
       </div>
 

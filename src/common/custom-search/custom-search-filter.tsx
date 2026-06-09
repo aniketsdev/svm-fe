@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { CustomInput } from '../custom-input';
 import { cn } from '../../lib/cn';
 
@@ -34,11 +34,23 @@ const SearchFilter = ({
 }: SearchFilterProps) => {
   const [inputValue, setInputValue] = useState('');
 
+  // Hold the latest onSearch in a ref so it is NOT an effect dependency.
+  // Callers often pass an inline handler (new identity every render); if that
+  // were a dependency, any unrelated parent re-render (e.g. paging) would
+  // re-run the debounce and fire a spurious search, resetting parent state.
+  const onSearchRef = useRef(onSearch);
+  onSearchRef.current = onSearch;
+  // Skip the initial mount so we don't emit an empty search on first render.
+  const mountedRef = useRef(false);
+
   useEffect(() => {
-    if (!onSearch) return;
-    const t = setTimeout(() => onSearch(inputValue), debounceMs);
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    const t = setTimeout(() => onSearchRef.current?.(inputValue), debounceMs);
     return () => clearTimeout(t);
-  }, [inputValue, onSearch, debounceMs]);
+  }, [inputValue, debounceMs]);
 
   return (
     <div className={cn('flex items-center', className)} style={width ? { width } : undefined}>

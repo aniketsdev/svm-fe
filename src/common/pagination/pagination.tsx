@@ -135,7 +135,7 @@ const Paginator = ({
                 className={cn(
                   'inline-flex size-9 items-center justify-center rounded-md text-sm sm:size-10',
                   item === current1
-                    ? 'bg-primary text-primary-foreground'
+                    ? 'bg-primary/15 font-semibold text-primary'
                     : 'text-foreground hover:bg-secondary',
                 )}
               >
