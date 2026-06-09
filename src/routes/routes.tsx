@@ -96,9 +96,11 @@ const ManufacturingPage = lazyWithPreload(() =>
     default: m.ManufacturingPage,
   })),
 );
+const DashboardPage = lazyWithPreload(() =>
+  import('../features/dashboard/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
+);
 
 // ── Placeholder pages for routes whose features aren't built yet ────────────
-const DashboardPlaceholder = () => <PlaceholderPage title="Dashboard" />;
 const ClientsPlaceholder = () => <PlaceholderPage title="Clients" />;
 const ClientDetailPlaceholder = () => <PlaceholderPage title="Client Detail" />;
 const SchedulingPlaceholder = () => <PlaceholderPage title="Scheduling" />;
@@ -171,7 +173,7 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="dashboard" element={<DashboardPlaceholder />} />
+        <Route path="dashboard" element={<DashboardPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="activity-log" element={<ActivityLogPage />} />
         <Route path="roles-permissions" element={<RolesPermissionsPage />} />
