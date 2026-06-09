@@ -54,9 +54,17 @@ export function ChangePasswordDrawer({ open, onClose }: ChangePasswordDrawerProp
   };
 
   return (
-    <CustomDrawer anchor="right" title="Change password" open={open} onClose={onClose} drawerWidth="30rem">
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <RHFInput<ChangePasswordFormValues>
+    <CustomDrawer
+      anchor="right"
+      title="Change password"
+      open={open}
+      onClose={onClose}
+      drawerWidth="35rem"
+      drawerPadding="1rem"
+    >
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col">
+        <div className="flex-1 space-y-4 overflow-y-auto p-2 sm:p-6">
+          <RHFInput<ChangePasswordFormValues>
           name="currentPassword"
           control={control}
           label="Current password"
@@ -92,11 +100,13 @@ export function ChangePasswordDrawer({ open, onClose }: ChangePasswordDrawerProp
           You&apos;ll stay signed in here; other devices will be signed out.
         </p>
 
-        <div className="mt-2 flex justify-end gap-3">
-          <CustomButton type="button" variant="outline" onClick={onClose}>
+        </div>
+
+        <div className="flex justify-end gap-3 border-t border-border bg-background p-4">
+          <CustomButton type="button" variant="outline" size="sm" onClick={onClose}>
             Cancel
           </CustomButton>
-          <CustomButton type="submit" variant="primary" loading={changeMutation.isPending}>
+          <CustomButton type="submit" variant="primary" size="sm" loading={changeMutation.isPending}>
             Update password
           </CustomButton>
         </div>

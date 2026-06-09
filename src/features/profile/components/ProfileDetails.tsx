@@ -24,7 +24,7 @@ export const ProfileDetails = memo(function ProfileDetails({ user }: ProfileDeta
 
   return (
     <section className="rounded-lg border border-border bg-background">
-      <div className="flex flex-col items-start gap-4 border-b border-border p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-6">
+      <div className="flex flex-col items-start gap-4 p-4 sm:flex-row sm:items-center sm:gap-5 sm:p-6">
         <UserAvatar firstName={initialsFirst} lastName={initialsLast} size={64} />
         <div className="min-w-0">
           <h2 className="truncate text-lg font-semibold text-foreground sm:text-xl">{displayName}</h2>

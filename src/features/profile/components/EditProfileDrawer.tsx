@@ -57,40 +57,48 @@ export function EditProfileDrawer({ user, open, onClose, onUpdated }: EditProfil
   };
 
   return (
-    <CustomDrawer anchor="right" title="Edit profile" open={open} onClose={onClose} drawerWidth="30rem">
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <ReadOnlyField label="Email" value={user.email} />
-        <ReadOnlyField label="Role" value={user.role} capitalize />
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <CustomDrawer
+      anchor="right"
+      title="Edit profile"
+      open={open}
+      onClose={onClose}
+      drawerWidth="38rem"
+      drawerPadding="1rem"
+    >
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:p-6">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <RHFInput<EditProfileFormValues>
+              name="first_name"
+              control={control}
+              label="First name"
+              placeholder="Enter first name"
+              maxLength={100}
+            />
+            <RHFInput<EditProfileFormValues>
+              name="last_name"
+              control={control}
+              label="Last name"
+              placeholder="Enter last name"
+              maxLength={100}
+            />
+          </div>
+          <ReadOnlyField label="Email" value={user.email} />
           <RHFInput<EditProfileFormValues>
-            name="first_name"
+            name="phone"
             control={control}
-            label="First name"
-            placeholder="Enter first name"
-            maxLength={100}
+            label="Phone"
+            placeholder="Enter phone"
+            maxLength={32}
           />
-          <RHFInput<EditProfileFormValues>
-            name="last_name"
-            control={control}
-            label="Last name"
-            placeholder="Enter last name"
-            maxLength={100}
-          />
+          <ReadOnlyField label="Role" value={user.role} capitalize />
         </div>
-        <RHFInput<EditProfileFormValues>
-          name="phone"
-          control={control}
-          label="Phone"
-          placeholder="Enter phone"
-          maxLength={32}
-        />
 
-        <div className="mt-2 flex justify-end gap-3">
-          <CustomButton type="button" variant="outline" onClick={onClose}>
+        <div className="flex justify-end gap-2 border-t border-border bg-background p-3">
+          <CustomButton type="button" variant="outline" size="sm" onClick={onClose}>
             Cancel
           </CustomButton>
-          <CustomButton type="submit" variant="primary" loading={updateMutation.isPending}>
+          <CustomButton type="submit" variant="primary" size="sm" loading={updateMutation.isPending}>
             Save changes
           </CustomButton>
         </div>

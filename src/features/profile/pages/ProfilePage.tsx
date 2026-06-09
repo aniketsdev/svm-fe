@@ -22,9 +22,9 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl p-4 sm:p-6">
+    <div className="w-full px-4 py-5">
       <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl font-semibold text-foreground sm:text-2xl">My Profile</h1>
+        <h1 className="text-2xl font-semibold text-foreground">My Profile</h1>
         <div className="flex flex-wrap gap-3">
           <CustomButton type="button" variant="outline" onClick={() => setEditOpen(true)}>
             <Pencil aria-hidden className="size-4" />
