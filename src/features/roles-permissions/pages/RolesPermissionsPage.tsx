@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
-import { CustomButton } from '../../../common/custom-buttons';
-import { cn } from '../../../lib/cn';
 import { useRoles } from '../hooks/useRoles';
 import { RoleEditor } from '../components/RoleEditor';
+import { RoleRail } from '../components/RoleRail';
 import { RoleDrawer } from '../components/RoleDrawer';
 import type { RoleRow } from '../api/roles';
 
@@ -31,59 +29,44 @@ export function RolesPermissionsPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">Roles &amp; Permissions</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Manage roles and toggle their permissions. Pick a role, check the permissions it needs,
-            and save.
-          </p>
-        </div>
-        <CustomButton variant="primary" icon={<Plus className="size-4" />} onClick={openCreate}>
-          New Role
-        </CustomButton>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-foreground">Roles &amp; Permissions</h1>
+        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+          Pick a role to see what it can do. Tick the permissions it needs and save — changes apply
+          immediately.
+        </p>
       </div>
 
-      {/* Role selector */}
-      <div className="mt-6 flex flex-wrap gap-2">
-        {roles.map((r) => (
-          <button
-            key={r.id}
-            type="button"
-            onClick={() => setSelectedId(r.id)}
-            aria-pressed={selected?.id === r.id}
-            className={cn(
-              'rounded-lg border px-4 py-1.5 text-sm font-medium capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              selected?.id === r.id
-                ? 'border-primary bg-primary text-primary-foreground shadow-sm'
-                : 'border-border bg-card text-muted-foreground hover:text-foreground',
-            )}
-          >
-            {r.name}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-5">
-        {isLoading ? (
-          <div className="h-40 animate-pulse rounded-xl bg-muted" />
-        ) : selected ? (
-          <RoleEditor
-            key={selected.id}
-            role={selected}
-            onChanged={refetch}
-            onEdit={openEdit}
-            onDeleted={() => {
-              setSelectedId(null);
-              refetch();
-            }}
+      {isLoading ? (
+        <div className="h-64 animate-pulse rounded-xl bg-muted" />
+      ) : roles.length === 0 ? (
+        <p className="py-12 text-center text-sm text-muted-foreground">
+          No roles yet. Create one to get started.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
+          <RoleRail
+            roles={roles}
+            selectedId={selected?.id ?? null}
+            onSelect={setSelectedId}
+            onCreate={openCreate}
           />
-        ) : (
-          <p className="py-12 text-center text-sm text-muted-foreground">
-            No roles yet. Click “New Role” to create one.
-          </p>
-        )}
-      </div>
+          <div className="min-w-0">
+            {selected && (
+              <RoleEditor
+                key={selected.id}
+                role={selected}
+                onChanged={refetch}
+                onEdit={openEdit}
+                onDeleted={() => {
+                  setSelectedId(null);
+                  refetch();
+                }}
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       <RoleDrawer open={drawerOpen} editing={editing} onClose={closeDrawer} onSaved={refetch} />
     </div>

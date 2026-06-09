@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Pencil, Power, RotateCcw, ShieldCheck, Trash2 } from 'lucide-react';
 import { CustomButton } from '../../../common/custom-buttons';
 import { CustomCheckbox } from '../../../common/custom-checkbox';
+import { CustomSearch } from '../../../common/custom-search';
 import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
 import { useToast } from '../../../common/common-snackbar';
 import { cn } from '../../../lib/cn';
@@ -32,6 +33,7 @@ export function RoleEditor({ role, onChanged, onEdit, onDeleted }: Props) {
   // so the live state derives from (saved XOR edits) — no refs, no effects.
   const [edits, setEdits] = useState<Set<string>>(new Set());
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [permSearch, setPermSearch] = useState('');
 
   const originalGranted = useMemo(
     () => new Set((detail?.matrix ?? []).filter((c) => c.granted).map((c) => c.permission)),
@@ -39,14 +41,21 @@ export function RoleEditor({ role, onChanged, onEdit, onDeleted }: Props) {
   );
 
   const categories = useMemo(() => {
+    const term = permSearch.trim().toLowerCase();
     const map = new Map<string, RoleDetailOut['matrix']>();
     (detail?.matrix ?? []).forEach((cell) => {
+      if (
+        term &&
+        !cell.permission.toLowerCase().includes(term) &&
+        !cell.description.toLowerCase().includes(term)
+      )
+        return;
       const arr = map.get(cell.category) ?? [];
       arr.push(cell);
       map.set(cell.category, arr);
     });
     return [...map.entries()];
-  }, [detail]);
+  }, [detail, permSearch]);
 
   const isOn = (perm: string) => originalGranted.has(perm) !== edits.has(perm);
   const added = [...edits].filter((p) => !originalGranted.has(p));
@@ -189,8 +198,22 @@ export function RoleEditor({ role, onChanged, onEdit, onDeleted }: Props) {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          {categories.map(([category, cells]) => {
-            const perms = cells.map((c) => c.permission);
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-sm font-semibold text-foreground">Permissions</span>
+            <CustomSearch
+              textData={{ placeholder: 'Filter permissions', btnTitle: 'Search' }}
+              onSearch={setPermSearch}
+              hasStartSearchIcon
+              width="16rem"
+            />
+          </div>
+          {categories.length === 0 ? (
+            <p className="rounded-xl border border-border bg-card py-10 text-center text-sm text-muted-foreground">
+              No permissions match your filter.
+            </p>
+          ) : (
+            categories.map(([category, cells]) => {
+              const perms = cells.map((c) => c.permission);
             const onCount = perms.filter((p) => isOn(p)).length;
             const allOn = onCount === perms.length && perms.length > 0;
             const someOn = onCount > 0 && !allOn;
@@ -216,7 +239,8 @@ export function RoleEditor({ role, onChanged, onEdit, onDeleted }: Props) {
                 </ul>
               </div>
             );
-          })}
+            })
+          )}
         </div>
       )}
 
