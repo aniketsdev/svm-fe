@@ -20,14 +20,14 @@ import { UserMenu } from './UserMenu';
 
 const NAV_LINKS = [
   { label: 'Dashboard', path: '/dashboard', icon: <Home className="size-4" /> },
-  { label: 'All Clients', path: '/clients', icon: <Users className="size-4" /> },
+  // { label: 'All Clients', path: '/clients', icon: <Users className="size-4" /> },
   { label: 'Users', path: '/users', icon: <UserCog className="size-4" /> },
   { label: 'Masters', path: '/masters', icon: <Boxes className="size-4" /> },
   { label: 'Inventory', path: '/inventory', icon: <PackageSearch className="size-4" /> },
   { label: 'Roles & Permissions', path: '/roles-permissions', icon: <ShieldCheck className="size-4" /> },
   { label: 'Activity Log', path: '/activity-log', icon: <ScrollText className="size-4" /> },
-  { label: 'Assessments', path: '/assessments', icon: <ClipboardCheck className="size-4" /> },
-  { label: 'Settings', path: '/settings', icon: <Settings className="size-4" /> },
+  // { label: 'Assessments', path: '/assessments', icon: <ClipboardCheck className="size-4" /> },
+  // { label: 'Settings', path: '/settings', icon: <Settings className="size-4" /> },
 ];
 
 export function Navbar() {
