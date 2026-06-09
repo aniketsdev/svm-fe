@@ -10,7 +10,8 @@ interface RoleDetailEnvelope {
 
 /**
  * Full single-role view including the catalog matrix (granted/not-granted).
- * The query is disabled while `roleUuid` is undefined (e.g. detail dialog closed).
+ * The query is disabled while `roleUuid` is undefined (e.g. on the detail page
+ * before the route param resolves).
  */
 export function useRoleDetail(roleUuid: string | undefined) {
   const query = useQuery({
@@ -23,5 +24,6 @@ export function useRoleDetail(roleUuid: string | undefined) {
     role: envelope?.data,
     isLoading: query.isPending || query.isFetching,
     isError: query.isError,
+    refetch: query.refetch,
   };
 }

@@ -94,7 +94,7 @@ export function CreateRoleDialog({ open, onClose, onCreated }: CreateRoleDialogP
           />
           <PermissionPicker<CreateRoleFormValues> name="permissions" control={control} />
         </div>
-        <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pb-6 pt-4">
+        <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pt-4">
           <CustomButton type="button" variant="outline" onClick={handleClose}>
             Cancel
           </CustomButton>

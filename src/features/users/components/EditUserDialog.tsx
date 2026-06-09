@@ -101,11 +101,11 @@ export function EditUserDialog({ user, onClose, onUpdated }: EditUserDialogProps
             items={ROLE_ITEMS}
           />
           </div>
-          <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pb-6 pt-4">
-            <CustomButton type="button" variant="outline" onClick={onClose}>
+          <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pt-4">
+            <CustomButton type="button" variant="outline" onClick={onClose} size="md">
               Cancel
             </CustomButton>
-            <CustomButton type="submit" variant="primary" loading={updateMutation.isPending}>
+            <CustomButton type="submit" variant="primary" loading={updateMutation.isPending} size="md">
               Save changes
             </CustomButton>
           </div>

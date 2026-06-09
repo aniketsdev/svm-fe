@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { ShieldPlus } from 'lucide-react';
+import { useState } from 'react';
 import { CustomButton } from '../../../common/custom-buttons';
 import { CustomSearch } from '../../../common/custom-search';
 import { CustomSelect } from '../../../common/custom-select';
@@ -10,7 +11,6 @@ import { useAuth } from '../../auth/hooks/useAuth';
 import { useAdminSetRoleStatus, useAdminDeleteRole } from '../../../sdk/roles-permissions';
 import { useRoles } from '../hooks/useRoles';
 import { RolesTable } from '../components/RolesTable';
-import { RoleDetailDialog } from '../components/RoleDetailDialog';
 import { CreateRoleDialog } from '../components/CreateRoleDialog';
 import { EditRoleDialog } from '../components/EditRoleDialog';
 import type { RoleRow } from '../api/roles';
@@ -26,44 +26,50 @@ type StatusFilter = 'all' | 'active' | 'inactive';
 export function RolesPermissionsPage() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   // Management actions are enforced server-side by `roles.manage`; the UI hides
   // them for non-admin callers, who keep read-only access to the list/detail.
   const canManage = user?.role === 'admin';
 
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<StatusFilter>('all');
-  const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  // List state lives in the URL so navigating into a role page and back (via the
+  // page's "Back to roles" link or the browser) restores search/filter/page.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search = searchParams.get('q') ?? '';
+  const status = (searchParams.get('status') as StatusFilter) || 'all';
+  const page = Number(searchParams.get('page') ?? '0') || 0;
+  const pageSize = Number(searchParams.get('size') ?? '10') || 10;
+
   const [createOpen, setCreateOpen] = useState(false);
-  const [detailRole, setDetailRole] = useState<RoleRow | null>(null);
   const [editRole, setEditRole] = useState<RoleRow | null>(null);
   const [deleteRole, setDeleteRole] = useState<RoleRow | null>(null);
   const [statusRole, setStatusRole] = useState<RoleRow | null>(null);
 
   const { roles, total, isLoading, refetch } = useRoles({ page, pageSize, q: search, status });
 
-  // A new search or filter should always start from the first page.
-  const handleSearch = (term: string) => {
-    setSearch(term);
-    setPage(0);
-  };
-  const handleStatus = (value: StatusFilter) => {
-    setStatus(value);
-    setPage(0);
+  // Merge param updates; null/default values are dropped to keep the URL clean.
+  const setParams = (updates: Record<string, string | null>) => {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === '') next.delete(key);
+        else next.set(key, value);
+      }
+      return next;
+    });
   };
 
-  const refreshAll = () => {
-    refetch();
-    // Keep the open detail in sync after a change (re-selecting refetches it).
-    setDetailRole((current) => (current ? { ...current } : current));
-  };
+  // A new search or filter should always start from the first page.
+  const handleSearch = (term: string) => setParams({ q: term || null, page: null });
+  const handleStatus = (value: StatusFilter) =>
+    setParams({ status: value === 'all' ? null : value, page: null });
 
   const statusMutation = useAdminSetRoleStatus({
     mutation: {
       onSuccess: (response) => {
         toast({ severity: 'success', message: successMessage(response, 'Role status updated.') });
         setStatusRole(null);
-        refreshAll();
+        refetch();
       },
       onError: (e) => {
         toast({ severity: 'error', message: errorMessage(e) });
@@ -77,7 +83,6 @@ export function RolesPermissionsPage() {
       onSuccess: (response) => {
         toast({ severity: 'success', message: successMessage(response, 'Role deleted.') });
         setDeleteRole(null);
-        setDetailRole(null);
         refetch();
       },
       onError: (e) => {
@@ -87,6 +92,11 @@ export function RolesPermissionsPage() {
     },
   });
 
+  // Open the dedicated role page, carrying the current list query so Back can
+  // restore exactly this search/filter/page.
+  const openRole = (role: RoleRow) =>
+    navigate(`/roles-permissions/${role.uuid}`, { state: { fromSearch: location.search } });
+
   return (
     <div className="w-full px-4 py-5">
       {/* Header: title left, search right (Activity-Log parity) */}
@@ -95,6 +105,7 @@ export function RolesPermissionsPage() {
         <CustomSearch
           textData={{ placeholder: 'Search by role name', btnTitle: 'Search' }}
           onSearch={handleSearch}
+          initialValue={search}
           hasStartSearchIcon
           width="28rem"
         />
@@ -132,29 +143,19 @@ export function RolesPermissionsPage() {
           page={page}
           pageSize={pageSize}
           total={total}
-          onPaginationChange={({ pageIndex, pageSize: nextSize }) => {
-            setPage(pageIndex);
-            setPageSize(nextSize);
-          }}
-          onRowClick={setDetailRole}
+          onPaginationChange={({ pageIndex, pageSize: nextSize }) =>
+            setParams({
+              page: pageIndex ? String(pageIndex) : null,
+              size: nextSize === 10 ? null : String(nextSize),
+            })
+          }
+          onRowClick={openRole}
           onEdit={setEditRole}
           onToggleStatus={setStatusRole}
           onDelete={setDeleteRole}
           canManage={canManage}
         />
       </div>
-
-      <RoleDetailDialog
-        role={detailRole}
-        onClose={() => setDetailRole(null)}
-        onEdit={(role) => {
-          setDetailRole(null);
-          setEditRole(role);
-        }}
-        onToggleStatus={setStatusRole}
-        onDelete={setDeleteRole}
-        canManage={canManage}
-      />
 
       <CreateRoleDialog
         open={createOpen}
@@ -165,7 +166,7 @@ export function RolesPermissionsPage() {
       <EditRoleDialog
         role={editRole}
         onClose={() => setEditRole(null)}
-        onUpdated={() => refreshAll()}
+        onUpdated={() => refetch()}
       />
 
       <ConfirmationPopUp

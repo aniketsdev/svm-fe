@@ -125,11 +125,11 @@ export function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogP
               items={ROLE_ITEMS}
             />
           </div>
-          <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pb-6 pt-4">
-            <CustomButton type="button" variant="outline" onClick={handleClose}>
+          <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pt-4">
+            <CustomButton type="button" variant="outline" onClick={handleClose} size="md">
               Cancel
             </CustomButton>
-            <CustomButton type="submit" variant="primary" loading={createMutation.isPending}>
+            <CustomButton type="submit" variant="primary" loading={createMutation.isPending} size="md">
               Create user
             </CustomButton>
           </div>

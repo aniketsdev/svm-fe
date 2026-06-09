@@ -42,6 +42,11 @@ const RolesPermissionsPage = lazyWithPreload(() =>
     default: m.RolesPermissionsPage,
   })),
 );
+const RoleDetailPage = lazyWithPreload(() =>
+  import('../features/roles-permissions/pages/RoleDetailPage').then((m) => ({
+    default: m.RoleDetailPage,
+  })),
+);
 const MastersPage = lazyWithPreload(() =>
   import('../features/masters/pages/MastersPage').then((m) => ({ default: m.MastersPage })),
 );
@@ -173,6 +178,7 @@ export default function AppRoutes() {
         <Route path="users" element={<UsersPage />} />
         <Route path="activity-log" element={<ActivityLogPage />} />
         <Route path="roles-permissions" element={<RolesPermissionsPage />} />
+        <Route path="roles-permissions/:roleUuid" element={<RoleDetailPage />} />
         <Route path="masters" element={<MastersPage />} />
         <Route path="masters/vendors" element={<VendorsPage />} />
         <Route path="masters/courier-partners" element={<CouriersPage />} />

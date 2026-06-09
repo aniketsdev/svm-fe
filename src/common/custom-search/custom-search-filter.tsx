@@ -10,6 +10,8 @@ export interface SearchFilterProps {
   };
   /** Fires (debounced) with the current input value. */
   onSearch?: (value: string) => void;
+  /** Seed the input on mount (e.g. restoring a search term from the URL). */
+  initialValue?: string;
   /** Wrapper width passthrough (Tailwind-friendly e.g. `"24rem"` or `"100%"`). */
   width?: string;
   /** Render a search icon on the left. */
@@ -26,13 +28,14 @@ export interface SearchFilterProps {
 const SearchFilter = ({
   textData,
   onSearch,
+  initialValue = '',
   width,
   hasStartSearchIcon,
   startSearchIconOnRight,
   debounceMs = 300,
   className,
 }: SearchFilterProps) => {
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(initialValue);
 
   // Hold the latest onSearch in a ref so it is NOT an effect dependency.
   // Callers often pass an inline handler (new identity every render); if that
