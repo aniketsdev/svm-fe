@@ -66,7 +66,7 @@ export function StockTransfersTable({ transfers, loading, onRowClick }: Props) {
       enableSorting
       enablePagination
       pageSize={12}
-      getRowId={(row) => String(row.id)}
+      getRowId={(row) => row.uuid}
       onRowClick={onRowClick}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">

@@ -1,16 +1,13 @@
 import type { ReactNode } from 'react';
 import {
   Boxes,
-  ClipboardCheck,
   Factory,
   Home,
   PackageSearch,
   ScrollText,
-  Settings,
   ShieldCheck,
   Truck,
   UserCog,
-  Users,
   Workflow,
 } from 'lucide-react';
 

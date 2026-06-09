@@ -63,14 +63,14 @@ export function StockMovementsTab() {
 
   const { stores } = useInventoryOptions();
   const storeItems = useMemo(
-    () => [{ value: ALL, label: 'All stores' }, ...stores.map((s) => ({ value: String(s.id), label: s.store_name }))],
+    () => [{ value: ALL, label: 'All stores' }, ...stores.map((s) => ({ value: s.uuid, label: s.store_name }))],
     [stores],
   );
 
   const stockFilters = useMemo<AdminListStockParams>(
     () => ({
       search: search || undefined,
-      store_id: storeId === ALL ? undefined : Number(storeId),
+      store_uuid: storeId === ALL ? undefined : storeId,
       item_type: itemType === ALL ? undefined : itemType,
       limit: PAGE_LIMIT,
       offset: 0,

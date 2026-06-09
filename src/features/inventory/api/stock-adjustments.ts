@@ -18,6 +18,6 @@ export function adjustmentsQueryOptions(params: AdminListStockAdjustmentsParams 
   return getAdminListStockAdjustmentsQueryOptions(params);
 }
 
-export function adjustmentDetailQueryOptions(adjId: number | null) {
-  return getAdminGetStockAdjustmentQueryOptions(adjId ?? 0, { query: { enabled: adjId !== null } });
+export function adjustmentDetailQueryOptions(adjUuid: string | null) {
+  return getAdminGetStockAdjustmentQueryOptions(adjUuid ?? '', { query: { enabled: adjUuid !== null } });
 }

@@ -1,14 +1,11 @@
 import {
   Boxes,
-  ClipboardCheck,
   Home,
   Menu,
   PackageSearch,
   ScrollText,
-  Settings,
   ShieldCheck,
   UserCog,
-  Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import logoDark from '../../../assets/logo-dark-font.png';

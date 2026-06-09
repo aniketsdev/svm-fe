@@ -18,6 +18,6 @@ export function transfersQueryOptions(params: AdminListStockTransfersParams = {}
   return getAdminListStockTransfersQueryOptions(params);
 }
 
-export function transferDetailQueryOptions(stId: number | null) {
-  return getAdminGetStockTransferQueryOptions(stId ?? 0, { query: { enabled: stId !== null } });
+export function transferDetailQueryOptions(stUuid: string | null) {
+  return getAdminGetStockTransferQueryOptions(stUuid ?? '', { query: { enabled: stUuid !== null } });
 }

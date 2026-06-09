@@ -87,7 +87,7 @@ export function StockTable({ stock, loading }: { stock: StockRow[]; loading: boo
       enableSorting
       enablePagination
       pageSize={12}
-      getRowId={(row) => `${row.store_id}-${row.item_type}-${row.item_id}`}
+      getRowId={(row) => `${row.store_uuid}-${row.item_type}-${row.item_id}`}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">
           No stock yet. Record a movement to get started.

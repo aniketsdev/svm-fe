@@ -72,7 +72,7 @@ export function StoresTable({ stores, loading, onEdit }: Props) {
       enableSorting
       enablePagination
       pageSize={12}
-      getRowId={(row) => String(row.id)}
+      getRowId={(row) => row.uuid}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">
           No stores yet. Click “New Store” to add one.

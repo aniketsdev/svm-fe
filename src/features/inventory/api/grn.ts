@@ -21,10 +21,10 @@ export function grnsQueryOptions(params: AdminListGrnsParams = {}) {
   return getAdminListGrnsQueryOptions(params);
 }
 
-export function grnDetailQueryOptions(grnId: number | null) {
-  return getAdminGetGrnQueryOptions(grnId ?? 0, { query: { enabled: grnId !== null } });
+export function grnDetailQueryOptions(grnUuid: string | null) {
+  return getAdminGetGrnQueryOptions(grnUuid ?? '', { query: { enabled: grnUuid !== null } });
 }
 
-export function grnPreviewQueryOptions(grnId: number | null, enabled: boolean) {
-  return getAdminPreviewGrnQueryOptions(grnId ?? 0, { query: { enabled: grnId !== null && enabled } });
+export function grnPreviewQueryOptions(grnUuid: string | null, enabled: boolean) {
+  return getAdminPreviewGrnQueryOptions(grnUuid ?? '', { query: { enabled: grnUuid !== null && enabled } });
 }

@@ -43,9 +43,9 @@ export function AdjustmentDetailDrawer({ adjustment, onClose, onActed }: Props) 
   const { toast } = useToast();
   const [pending, setPending] = useState<{ title: string; message: string; run: () => void } | null>(null);
 
-  const query = useQuery(adjustmentDetailQueryOptions(adjustment?.id ?? null));
+  const query = useQuery(adjustmentDetailQueryOptions(adjustment?.uuid ?? null));
   const detail = (query.data as { data?: AdjDetail } | undefined)?.data;
-  const id = adjustment?.id;
+  const id = adjustment?.uuid;
 
   const done = (msg: string) => (res: unknown) => {
     toast({ severity: 'success', message: successMessage(res, msg) });
@@ -119,7 +119,7 @@ export function AdjustmentDetailDrawer({ adjustment, onClose, onActed }: Props) 
                     setPending({
                       title: 'Delete adjustment',
                       message: `Delete draft ${detail.adj_no}?`,
-                      run: () => del.mutate({ adjId: id! }),
+                      run: () => del.mutate({ adjUuid: id! }),
                     })
                   }
                 >
@@ -134,7 +134,7 @@ export function AdjustmentDetailDrawer({ adjustment, onClose, onActed }: Props) 
                     setPending({
                       title: 'Approve adjustment',
                       message: `Approve ${detail.adj_no}? This applies the stock correction and can't be undone.`,
-                      run: () => approve.mutate({ adjId: id!, data: { confirm: true } }),
+                      run: () => approve.mutate({ adjUuid: id!, data: { confirm: true } }),
                     })
                   }
                 >
