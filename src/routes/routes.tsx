@@ -29,6 +29,9 @@ const SetNewPasswordPage = lazyWithPreload(() =>
 const UsersPage = lazyWithPreload(() =>
   import('../features/users/pages/UsersPage').then((m) => ({ default: m.UsersPage })),
 );
+const ProfilePage = lazyWithPreload(() =>
+  import('../features/profile/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })),
+);
 const ActivityLogPage = lazyWithPreload(() =>
   import('../features/activity-log/pages/ActivityLogPage').then((m) => ({
     default: m.ActivityLogPage,
@@ -191,7 +194,14 @@ export default function AppRoutes() {
         <Route path="diagnostic-generator" element={<DiagnosticGeneratorPlaceholder />} />
         <Route path="settings" element={<SettingsPlaceholder />} />
         <Route path="settings/user/:uuid" element={<UserProfilePlaceholder />} />
-        <Route path="profile" element={<UserProfilePlaceholder />} />
+        <Route
+          path="profile"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <ProfilePage />
+            </Suspense>
+          }
+        />
       </Route>
 
       {/* Catch-all → dashboard (ProtectedRoute handles signed-out users). */}

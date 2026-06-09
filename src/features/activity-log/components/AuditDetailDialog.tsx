@@ -3,10 +3,29 @@ import { formatDateTime, prettyJson } from '../../../utils/format';
 import { useAdminGetActivityLogEntry } from '../../../sdk/activity-log';
 import type { ActivityLogDetail } from '../../../sdk/schemas';
 import type { AuditRow } from '../api/activity-log';
+import { ActionBadge } from './ActionBadge';
 
 interface AuditDetailDialogProps {
   entry: AuditRow | null;
   onClose: () => void;
+}
+
+/** Render the entity as a friendly label, matching the list's "Record" column:
+ *  prefer the API-resolved name, else a prettified entity type with `#id`. */
+function renderEntity(row?: { entity_type?: string | null; record_id?: number | string | null; record_name?: string | null } | null) {
+  if (!row) return '—';
+  const { entity_type, record_id, record_name } = row;
+  if (record_name) return record_name;
+  if (!entity_type && record_id == null) return '—';
+  const name = entity_type
+    ? entity_type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+    : 'Record';
+  return (
+    <>
+      {name}
+      {record_id != null && <span className="text-muted-foreground"> #{record_id}</span>}
+    </>
+  );
 }
 
 /** Row-click detail: actor/action metadata + the before/after JSON snapshots.
@@ -47,14 +66,13 @@ export function AuditDetailDialog({ entry, onClose }: AuditDetailDialogProps) {
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Action</dt>
-              <dd className="text-foreground">{row?.action}</dd>
+              <dd className="text-foreground">
+                {row?.action ? <ActionBadge action={row.action} /> : '—'}
+              </dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">Entity</dt>
-              <dd className="text-foreground">
-                {row?.entity_type ?? '—'}
-                {row?.record_id ? ` #${row?.record_id}` : ''}
-              </dd>
+              <dd className="text-foreground">{renderEntity(row)}</dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">IP</dt>
