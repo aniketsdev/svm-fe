@@ -212,34 +212,38 @@ export function RoleEditor({ role, onChanged, onEdit, onDeleted }: Props) {
               No permissions match your filter.
             </p>
           ) : (
-            categories.map(([category, cells]) => {
-              const perms = cells.map((c) => c.permission);
-            const onCount = perms.filter((p) => isOn(p)).length;
-            const allOn = onCount === perms.length && perms.length > 0;
-            const someOn = onCount > 0 && !allOn;
-            return (
-              <div key={category} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-                <div className="flex items-center gap-3 border-b border-border bg-muted/40 px-4 py-2.5">
-                  <CustomCheckbox checked={allOn} indeterminate={someOn} onChange={() => toggleCategory(perms, allOn)} showText={false} />
-                  <span className="text-sm font-semibold capitalize text-foreground">{category.replace(/_/g, ' ')}</span>
-                  <span className="ml-auto text-xs tabular-nums text-muted-foreground">
-                    {onCount}/{perms.length}
-                  </span>
-                </div>
-                <ul className="divide-y divide-border/60">
-                  {cells.map((cell) => (
-                    <li key={cell.permission} className="flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-muted/30">
-                      <CustomCheckbox checked={isOn(cell.permission)} onChange={() => toggle(cell.permission)} showText={false} />
-                      <button type="button" onClick={() => toggle(cell.permission)} className="min-w-0 text-left">
-                        <p className="text-sm font-medium text-foreground">{cell.permission}</p>
-                        {cell.description && <p className="text-xs text-muted-foreground">{cell.description}</p>}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-            })
+            <div className="gap-4 lg:columns-2 2xl:columns-3 [&>*]:mb-4 [&>*]:break-inside-avoid">
+              {categories.map(([category, cells]) => {
+                const perms = cells.map((c) => c.permission);
+                const onCount = perms.filter((p) => isOn(p)).length;
+                const allOn = onCount === perms.length && perms.length > 0;
+                const someOn = onCount > 0 && !allOn;
+                return (
+                  <div key={category} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                    <div className="flex items-center gap-2.5 border-b border-border bg-muted/40 px-3.5 py-2">
+                      <CustomCheckbox checked={allOn} indeterminate={someOn} onChange={() => toggleCategory(perms, allOn)} showText={false} />
+                      <span className="text-sm font-semibold capitalize text-foreground">{category.replace(/_/g, ' ')}</span>
+                      <span className="ml-auto rounded-full bg-background px-2 py-0.5 text-xs tabular-nums text-muted-foreground">
+                        {onCount}/{perms.length}
+                      </span>
+                    </div>
+                    <ul className="divide-y divide-border/60">
+                      {cells.map((cell) => (
+                        <li key={cell.permission} className="flex items-start gap-2.5 px-3.5 py-2 transition-colors hover:bg-muted/30">
+                          <CustomCheckbox checked={isOn(cell.permission)} onChange={() => toggle(cell.permission)} showText={false} />
+                          <button type="button" onClick={() => toggle(cell.permission)} className="min-w-0 text-left">
+                            <p className="text-sm font-medium text-foreground">{cell.permission}</p>
+                            {cell.description && (
+                              <p className="text-xs leading-snug text-muted-foreground">{cell.description}</p>
+                            )}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
       )}
