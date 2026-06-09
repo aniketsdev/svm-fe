@@ -11,7 +11,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useState } from 'react';
-import logoLight from '../../../assets/logo-light-font.svg';
+import logoDark from '../../../assets/logo-dark-font.png';
 import { NAVBAR_HEIGHT } from '../constants';
 import { GlobalSearch } from './GlobalSearch';
 import { MobileDrawer } from './MobileDrawer';
@@ -36,7 +36,7 @@ export function Navbar() {
   return (
     <>
       <header
-        className="fixed inset-x-0 top-0 z-40 flex items-center gap-4 bg-primary-08 px-2 md:px-4"
+        className="fixed inset-x-0 top-0 z-40 flex items-center gap-4 border-b border-border bg-white px-2 md:px-4"
         style={{ height: NAVBAR_HEIGHT }}
         data-slot="navbar"
       >
@@ -45,14 +45,14 @@ export function Navbar() {
           type="button"
           onClick={() => setDrawerOpen(true)}
           aria-label="Open navigation menu"
-          className="inline-flex size-10 items-center justify-center rounded-md text-white hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:hidden"
+          className="inline-flex size-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
         >
           <Menu aria-hidden className="size-5" />
         </button>
 
         {/* Logo */}
         <img
-          src={logoLight}
+          src={logoDark}
           alt="Test"
           className="h-8 w-auto shrink-0"
         />

@@ -9,7 +9,7 @@ import { OtpInput } from '../components/OtpInput';
 import { useAuthForgotPassword, useAuthVerifyOtp } from '../../../sdk/authentication';
 import { useEnterOtpForm, type EnterOtpFormValues } from '../hooks/useEnterOtpForm';
 import { clearOtpExpiry, useOtpTimer } from '../hooks/useOtpTimer';
-import enterOtpImage from '../../../assets/auth-enter-otp.svg';
+import enterOtpImage from '../../../assets/home.jpg';
 
 const OTP_EXPIRY_SECONDS = 10 * 60;
 

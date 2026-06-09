@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import logoDarkFont from '../../../assets/logo-dark-font.svg';
+import logoDarkFont from '../../../assets/logo-dark-font.png';
 
 interface AuthLayoutProps {
   imageSrc: string;

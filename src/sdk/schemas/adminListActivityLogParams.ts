@@ -14,6 +14,18 @@ action?: string | null;
 date_from?: string | null;
 date_to?: string | null;
 /**
+ * free-text search (actor/action/entity/record)
+ */
+q?: string | null;
+/**
+ * column id: when|who|action|entity|record|ip
+ */
+sort?: string | null;
+/**
+ * asc|desc
+ */
+order?: string | null;
+/**
  * @minimum 1
  * @maximum 100
  */
