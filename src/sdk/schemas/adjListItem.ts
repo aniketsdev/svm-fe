@@ -4,7 +4,7 @@
  */
 
 export interface AdjListItem {
-  id: number;
+  uuid: string;
   adj_no: string;
   store_code: string | null;
   material_name: string | null;

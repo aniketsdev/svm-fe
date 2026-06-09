@@ -6,7 +6,7 @@
 export type AdminListGrnsParams = {
 status?: string | null;
 supplier_id?: number | null;
-store_id?: number | null;
+store_uuid?: string | null;
 date_from?: string | null;
 date_to?: string | null;
 search?: string | null;

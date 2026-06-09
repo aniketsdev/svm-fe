@@ -7,7 +7,7 @@ export interface ProcessingOutput {
   material_id: number;
   material_code: string;
   material_name: string;
-  to_store_id: number;
+  to_store_id: string;
   to_store_name: string;
   notes: string | null;
 }

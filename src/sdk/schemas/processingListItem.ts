@@ -4,7 +4,7 @@
  */
 
 export interface ProcessingListItem {
-  id: number;
+  uuid: string;
   pr_no: string;
   status: string;
   input_material_name: string;

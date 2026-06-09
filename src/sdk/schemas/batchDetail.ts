@@ -11,7 +11,7 @@ import type { OutboundSummary } from './outboundSummary';
 import type { RmFields } from './rmFields';
 
 export interface BatchDetail {
-  batch_id: number;
+  batch_uuid: string;
   batch_no: string;
   material_name: string;
   material_code: string;

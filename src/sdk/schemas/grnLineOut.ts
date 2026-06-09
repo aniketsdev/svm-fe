@@ -4,7 +4,7 @@
  */
 
 export interface GrnLineOut {
-  id: number;
+  uuid: string;
   line_no: number;
   material_code: string;
   material_name: string;
@@ -14,5 +14,5 @@ export interface GrnLineOut {
   rate: string;
   amount: string;
   expiry_date: string | null;
-  posted_batch_id: number | null;
+  posted_batch_id: string | null;
 }

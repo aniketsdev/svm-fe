@@ -4,7 +4,7 @@
  */
 
 export interface RoleOut {
-  id: number;
+  uuid: string;
   name: string;
   type: string;
   status: string;

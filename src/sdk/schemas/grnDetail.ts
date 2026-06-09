@@ -8,7 +8,7 @@ import type { StoreRef } from './storeRef';
 import type { SupplierRef } from './supplierRef';
 
 export interface GrnDetail {
-  id: number;
+  uuid: string;
   grn_no: string;
   status: string;
   supplier: SupplierRef | null;
@@ -20,7 +20,7 @@ export interface GrnDetail {
   grand_total: string;
   lines: GrnLineOut[];
   posted_at: string | null;
-  posted_by: number | null;
+  posted_by: string | null;
   created_at: string;
   warnings?: AppSchemasGrnWarning[];
 }

@@ -8,7 +8,7 @@ import type { MatrixCell } from './matrixCell';
  * Single-role view including the full catalog matrix (granted/not).
  */
 export interface RoleDetailOut {
-  id: number;
+  uuid: string;
   name: string;
   type: string;
   status: string;

@@ -273,20 +273,20 @@ export type adminGetManufacturingOrderResponseError = (adminGetManufacturingOrde
 
 export type adminGetManufacturingOrderResponse = (adminGetManufacturingOrderResponseSuccess | adminGetManufacturingOrderResponseError)
 
-export const getAdminGetManufacturingOrderUrl = (orderId: number,) => {
+export const getAdminGetManufacturingOrderUrl = (orderUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/manufacturing/orders/${orderId}`
+  return `/api/v1/admin/manufacturing/orders/${orderUuid}`
 }
 
 /**
  * @summary Get Manufacturing Order
  */
-export const adminGetManufacturingOrder = async (orderId: number, options?: RequestInit): Promise<adminGetManufacturingOrderResponse> => {
+export const adminGetManufacturingOrder = async (orderUuid: string, options?: RequestInit): Promise<adminGetManufacturingOrderResponse> => {
 
-  return mutator<adminGetManufacturingOrderResponse>(getAdminGetManufacturingOrderUrl(orderId),
+  return mutator<adminGetManufacturingOrderResponse>(getAdminGetManufacturingOrderUrl(orderUuid),
   {
     ...options,
     method: 'GET'
@@ -299,29 +299,29 @@ export const adminGetManufacturingOrder = async (orderId: number, options?: Requ
 
 
 
-export const getAdminGetManufacturingOrderQueryKey = (orderId: number,) => {
+export const getAdminGetManufacturingOrderQueryKey = (orderUuid: string,) => {
     return [
-    `/api/v1/admin/manufacturing/orders/${orderId}`
+    `/api/v1/admin/manufacturing/orders/${orderUuid}`
     ] as const;
     }
 
 
-export const getAdminGetManufacturingOrderQueryOptions = <TData = Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData>>, }
+export const getAdminGetManufacturingOrderQueryOptions = <TData = Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(orderUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetManufacturingOrderQueryKey(orderId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetManufacturingOrderQueryKey(orderUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetManufacturingOrder>>> = ({ signal }) => adminGetManufacturingOrder(orderId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetManufacturingOrder>>> = ({ signal }) => adminGetManufacturingOrder(orderUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: orderId !== null && orderId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: orderUuid !== null && orderUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminGetManufacturingOrderQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetManufacturingOrder>>>
@@ -329,7 +329,7 @@ export type AdminGetManufacturingOrderQueryError = ErrorType<HTTPValidationError
 
 
 export function useAdminGetManufacturingOrder<TData = Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData>> & Pick<
+ orderUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetManufacturingOrder>>,
           TError,
@@ -339,7 +339,7 @@ export function useAdminGetManufacturingOrder<TData = Awaited<ReturnType<typeof 
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetManufacturingOrder<TData = Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData>> & Pick<
+ orderUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetManufacturingOrder>>,
           TError,
@@ -349,7 +349,7 @@ export function useAdminGetManufacturingOrder<TData = Awaited<ReturnType<typeof 
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetManufacturingOrder<TData = Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData>>, }
+ orderUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -357,11 +357,11 @@ export function useAdminGetManufacturingOrder<TData = Awaited<ReturnType<typeof 
  */
 
 export function useAdminGetManufacturingOrder<TData = Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData>>, }
+ orderUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetManufacturingOrder>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetManufacturingOrderQueryOptions(orderId,options)
+  const queryOptions = getAdminGetManufacturingOrderQueryOptions(orderUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -392,21 +392,21 @@ export type adminUpdateManufacturingOrderResponseError = (adminUpdateManufacturi
 
 export type adminUpdateManufacturingOrderResponse = (adminUpdateManufacturingOrderResponseSuccess | adminUpdateManufacturingOrderResponseError)
 
-export const getAdminUpdateManufacturingOrderUrl = (orderId: number,) => {
+export const getAdminUpdateManufacturingOrderUrl = (orderUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/manufacturing/orders/${orderId}`
+  return `/api/v1/admin/manufacturing/orders/${orderUuid}`
 }
 
 /**
  * @summary Update Manufacturing Order
  */
-export const adminUpdateManufacturingOrder = async (orderId: number,
+export const adminUpdateManufacturingOrder = async (orderUuid: string,
     manufacturingUpdate: ManufacturingUpdate, options?: RequestInit): Promise<adminUpdateManufacturingOrderResponse> => {
 
-  return mutator<adminUpdateManufacturingOrderResponse>(getAdminUpdateManufacturingOrderUrl(orderId),
+  return mutator<adminUpdateManufacturingOrderResponse>(getAdminUpdateManufacturingOrderUrl(orderUuid),
   {
     ...options,
     method: 'PATCH',
@@ -419,8 +419,8 @@ export const adminUpdateManufacturingOrder = async (orderId: number,
 
 
 export const getAdminUpdateManufacturingOrderMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateManufacturingOrder>>, TError,{orderId: number;data: BodyType<ManufacturingUpdate>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateManufacturingOrder>>, TError,{orderId: number;data: BodyType<ManufacturingUpdate>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateManufacturingOrder>>, TError,{orderUuid: string;data: BodyType<ManufacturingUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateManufacturingOrder>>, TError,{orderUuid: string;data: BodyType<ManufacturingUpdate>}, TContext> => {
 
 const mutationKey = ['adminUpdateManufacturingOrder'];
 const {mutation: mutationOptions} = options ?
@@ -432,10 +432,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateManufacturingOrder>>, {orderId: number;data: BodyType<ManufacturingUpdate>}> = (props) => {
-          const {orderId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateManufacturingOrder>>, {orderUuid: string;data: BodyType<ManufacturingUpdate>}> = (props) => {
+          const {orderUuid,data} = props ?? {};
 
-          return  adminUpdateManufacturingOrder(orderId,data,)
+          return  adminUpdateManufacturingOrder(orderUuid,data,)
         }
 
 
@@ -453,11 +453,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Update Manufacturing Order
  */
 export const useAdminUpdateManufacturingOrder = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateManufacturingOrder>>, TError,{orderId: number;data: BodyType<ManufacturingUpdate>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateManufacturingOrder>>, TError,{orderUuid: string;data: BodyType<ManufacturingUpdate>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminUpdateManufacturingOrder>>,
         TError,
-        {orderId: number;data: BodyType<ManufacturingUpdate>},
+        {orderUuid: string;data: BodyType<ManufacturingUpdate>},
         TContext
       > => {
       return useMutation(getAdminUpdateManufacturingOrderMutationOptions(options), queryClient);
@@ -481,7 +481,7 @@ export type adminPreviewManufacturingOrderResponseError = (adminPreviewManufactu
 
 export type adminPreviewManufacturingOrderResponse = (adminPreviewManufacturingOrderResponseSuccess | adminPreviewManufacturingOrderResponseError)
 
-export const getAdminPreviewManufacturingOrderUrl = (orderId: number,
+export const getAdminPreviewManufacturingOrderUrl = (orderUuid: string,
     params?: AdminPreviewManufacturingOrderParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -494,16 +494,16 @@ export const getAdminPreviewManufacturingOrderUrl = (orderId: number,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/v1/admin/manufacturing/orders/${orderId}/preview?${stringifiedParams}` : `/api/v1/admin/manufacturing/orders/${orderId}/preview`
+  return stringifiedParams.length > 0 ? `/api/v1/admin/manufacturing/orders/${orderUuid}/preview?${stringifiedParams}` : `/api/v1/admin/manufacturing/orders/${orderUuid}/preview`
 }
 
 /**
  * @summary Preview Manufacturing Order
  */
-export const adminPreviewManufacturingOrder = async (orderId: number,
+export const adminPreviewManufacturingOrder = async (orderUuid: string,
     params?: AdminPreviewManufacturingOrderParams, options?: RequestInit): Promise<adminPreviewManufacturingOrderResponse> => {
 
-  return mutator<adminPreviewManufacturingOrderResponse>(getAdminPreviewManufacturingOrderUrl(orderId,params),
+  return mutator<adminPreviewManufacturingOrderResponse>(getAdminPreviewManufacturingOrderUrl(orderUuid,params),
   {
     ...options,
     method: 'GET'
@@ -516,31 +516,31 @@ export const adminPreviewManufacturingOrder = async (orderId: number,
 
 
 
-export const getAdminPreviewManufacturingOrderQueryKey = (orderId: number,
+export const getAdminPreviewManufacturingOrderQueryKey = (orderUuid: string,
     params?: AdminPreviewManufacturingOrderParams,) => {
     return [
-    `/api/v1/admin/manufacturing/orders/${orderId}/preview`, ...(params ? [params] : [])
+    `/api/v1/admin/manufacturing/orders/${orderUuid}/preview`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getAdminPreviewManufacturingOrderQueryOptions = <TData = Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(orderId: number,
+export const getAdminPreviewManufacturingOrderQueryOptions = <TData = Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(orderUuid: string,
     params?: AdminPreviewManufacturingOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminPreviewManufacturingOrderQueryKey(orderId,params);
+  const queryKey =  queryOptions?.queryKey ?? getAdminPreviewManufacturingOrderQueryKey(orderUuid,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>> = ({ signal }) => adminPreviewManufacturingOrder(orderId,params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>> = ({ signal }) => adminPreviewManufacturingOrder(orderUuid,params, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: orderId !== null && orderId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: orderUuid !== null && orderUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminPreviewManufacturingOrderQueryResult = NonNullable<Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>>
@@ -548,7 +548,7 @@ export type AdminPreviewManufacturingOrderQueryError = ErrorType<HTTPValidationE
 
 
 export function useAdminPreviewManufacturingOrder<TData = Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number,
+ orderUuid: string,
     params: undefined |  AdminPreviewManufacturingOrderParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>,
@@ -559,7 +559,7 @@ export function useAdminPreviewManufacturingOrder<TData = Awaited<ReturnType<typ
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminPreviewManufacturingOrder<TData = Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number,
+ orderUuid: string,
     params?: AdminPreviewManufacturingOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>,
@@ -570,7 +570,7 @@ export function useAdminPreviewManufacturingOrder<TData = Awaited<ReturnType<typ
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminPreviewManufacturingOrder<TData = Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number,
+ orderUuid: string,
     params?: AdminPreviewManufacturingOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -579,12 +579,12 @@ export function useAdminPreviewManufacturingOrder<TData = Awaited<ReturnType<typ
  */
 
 export function useAdminPreviewManufacturingOrder<TData = Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError = ErrorType<HTTPValidationError>>(
- orderId: number,
+ orderUuid: string,
     params?: AdminPreviewManufacturingOrderParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewManufacturingOrder>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminPreviewManufacturingOrderQueryOptions(orderId,params,options)
+  const queryOptions = getAdminPreviewManufacturingOrderQueryOptions(orderUuid,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -615,21 +615,21 @@ export type adminCompleteManufacturingOrderResponseError = (adminCompleteManufac
 
 export type adminCompleteManufacturingOrderResponse = (adminCompleteManufacturingOrderResponseSuccess | adminCompleteManufacturingOrderResponseError)
 
-export const getAdminCompleteManufacturingOrderUrl = (orderId: number,) => {
+export const getAdminCompleteManufacturingOrderUrl = (orderUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/manufacturing/orders/${orderId}/complete`
+  return `/api/v1/admin/manufacturing/orders/${orderUuid}/complete`
 }
 
 /**
  * @summary Complete Manufacturing Order
  */
-export const adminCompleteManufacturingOrder = async (orderId: number,
+export const adminCompleteManufacturingOrder = async (orderUuid: string,
     manufacturingComplete: ManufacturingComplete, options?: RequestInit): Promise<adminCompleteManufacturingOrderResponse> => {
 
-  return mutator<adminCompleteManufacturingOrderResponse>(getAdminCompleteManufacturingOrderUrl(orderId),
+  return mutator<adminCompleteManufacturingOrderResponse>(getAdminCompleteManufacturingOrderUrl(orderUuid),
   {
     ...options,
     method: 'POST',
@@ -642,8 +642,8 @@ export const adminCompleteManufacturingOrder = async (orderId: number,
 
 
 export const getAdminCompleteManufacturingOrderMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCompleteManufacturingOrder>>, TError,{orderId: number;data: BodyType<ManufacturingComplete>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminCompleteManufacturingOrder>>, TError,{orderId: number;data: BodyType<ManufacturingComplete>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCompleteManufacturingOrder>>, TError,{orderUuid: string;data: BodyType<ManufacturingComplete>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminCompleteManufacturingOrder>>, TError,{orderUuid: string;data: BodyType<ManufacturingComplete>}, TContext> => {
 
 const mutationKey = ['adminCompleteManufacturingOrder'];
 const {mutation: mutationOptions} = options ?
@@ -655,10 +655,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCompleteManufacturingOrder>>, {orderId: number;data: BodyType<ManufacturingComplete>}> = (props) => {
-          const {orderId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCompleteManufacturingOrder>>, {orderUuid: string;data: BodyType<ManufacturingComplete>}> = (props) => {
+          const {orderUuid,data} = props ?? {};
 
-          return  adminCompleteManufacturingOrder(orderId,data,)
+          return  adminCompleteManufacturingOrder(orderUuid,data,)
         }
 
 
@@ -676,11 +676,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Complete Manufacturing Order
  */
 export const useAdminCompleteManufacturingOrder = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCompleteManufacturingOrder>>, TError,{orderId: number;data: BodyType<ManufacturingComplete>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCompleteManufacturingOrder>>, TError,{orderUuid: string;data: BodyType<ManufacturingComplete>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminCompleteManufacturingOrder>>,
         TError,
-        {orderId: number;data: BodyType<ManufacturingComplete>},
+        {orderUuid: string;data: BodyType<ManufacturingComplete>},
         TContext
       > => {
       return useMutation(getAdminCompleteManufacturingOrderMutationOptions(options), queryClient);
@@ -704,20 +704,20 @@ export type adminCancelManufacturingOrderResponseError = (adminCancelManufacturi
 
 export type adminCancelManufacturingOrderResponse = (adminCancelManufacturingOrderResponseSuccess | adminCancelManufacturingOrderResponseError)
 
-export const getAdminCancelManufacturingOrderUrl = (orderId: number,) => {
+export const getAdminCancelManufacturingOrderUrl = (orderUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/manufacturing/orders/${orderId}/cancel`
+  return `/api/v1/admin/manufacturing/orders/${orderUuid}/cancel`
 }
 
 /**
  * @summary Cancel Manufacturing Order
  */
-export const adminCancelManufacturingOrder = async (orderId: number, options?: RequestInit): Promise<adminCancelManufacturingOrderResponse> => {
+export const adminCancelManufacturingOrder = async (orderUuid: string, options?: RequestInit): Promise<adminCancelManufacturingOrderResponse> => {
 
-  return mutator<adminCancelManufacturingOrderResponse>(getAdminCancelManufacturingOrderUrl(orderId),
+  return mutator<adminCancelManufacturingOrderResponse>(getAdminCancelManufacturingOrderUrl(orderUuid),
   {
     ...options,
     method: 'POST'
@@ -730,8 +730,8 @@ export const adminCancelManufacturingOrder = async (orderId: number, options?: R
 
 
 export const getAdminCancelManufacturingOrderMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelManufacturingOrder>>, TError,{orderId: number}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminCancelManufacturingOrder>>, TError,{orderId: number}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelManufacturingOrder>>, TError,{orderUuid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminCancelManufacturingOrder>>, TError,{orderUuid: string}, TContext> => {
 
 const mutationKey = ['adminCancelManufacturingOrder'];
 const {mutation: mutationOptions} = options ?
@@ -743,10 +743,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCancelManufacturingOrder>>, {orderId: number}> = (props) => {
-          const {orderId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCancelManufacturingOrder>>, {orderUuid: string}> = (props) => {
+          const {orderUuid} = props ?? {};
 
-          return  adminCancelManufacturingOrder(orderId,)
+          return  adminCancelManufacturingOrder(orderUuid,)
         }
 
 
@@ -764,11 +764,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Cancel Manufacturing Order
  */
 export const useAdminCancelManufacturingOrder = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelManufacturingOrder>>, TError,{orderId: number}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelManufacturingOrder>>, TError,{orderUuid: string}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminCancelManufacturingOrder>>,
         TError,
-        {orderId: number},
+        {orderUuid: string},
         TContext
       > => {
       return useMutation(getAdminCancelManufacturingOrderMutationOptions(options), queryClient);
