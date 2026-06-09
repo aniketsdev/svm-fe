@@ -3,7 +3,7 @@ import {
   usersQueryOptions,
   type UserRow,
   type AdminUserList,
-  type AdminListUsersStatus,
+  type UsersQueryArgs,
 } from '../api/users';
 
 // The SDK mutator wraps every response as { data, status, headers }; unwrap it
@@ -13,15 +13,18 @@ interface UsersEnvelope {
   status: number;
 }
 
-export function useUsers(search?: string, status?: AdminListUsersStatus) {
-  const query = useQuery(usersQueryOptions(search, status));
+export function useUsers(args: UsersQueryArgs) {
+  // Search, status/role filtering, sort AND pagination are all server-side.
+  const query = useQuery(usersQueryOptions(args));
   const envelope = query.data as UsersEnvelope | undefined;
   const users: UserRow[] = envelope?.data.items ?? [];
+  const total = envelope?.data.total ?? 0;
 
   return {
     users,
-    count: envelope?.data.total ?? 0,
-    isLoading: query.isPending,
+    total,
+    // Include isFetching so page/sort/filter transitions show the loading state.
+    isLoading: query.isPending || query.isFetching,
     isError: query.isError,
     refetch: query.refetch,
   };
