@@ -42,9 +42,9 @@ export function ProcessingDetailDrawer({ order, onClose, onActed }: Props) {
   const { control, handleSubmit, reset, setError } = useCompleteProcessingForm();
   const { handleApiError } = useFormApiErrors(setError);
 
-  const query = useQuery(processingDetailQueryOptions(order?.id ?? null));
+  const query = useQuery(processingDetailQueryOptions(order?.uuid ?? null));
   const detail = (query.data as { data?: ProcessingDetail } | undefined)?.data;
-  const id = order?.id;
+  const id = order?.uuid;
 
   const complete = useAdminCompleteProcessingOrder({
     mutation: {
@@ -80,7 +80,7 @@ export function ProcessingDetailDrawer({ order, onClose, onActed }: Props) {
   const canAct = Boolean(detail) && !isDone && !isCancelled;
 
   const onComplete = (d: CompleteProcessingFormValues) =>
-    complete.mutate({ orderId: id!, data: { output_quantity: d.output_quantity, expiry_date: d.expiry_date || null } });
+    complete.mutate({ orderUuid: id!, data: { output_quantity: d.output_quantity, expiry_date: d.expiry_date || null } });
 
   return (
     <CustomDrawer
@@ -175,7 +175,7 @@ export function ProcessingDetailDrawer({ order, onClose, onActed }: Props) {
         title="Cancel processing"
         message={detail ? `Cancel ${detail.pr_no}? This stops the conversion.` : ''}
         onClose={() => setConfirmCancel(false)}
-        onConfirm={() => cancel.mutate({ orderId: id! })}
+        onConfirm={() => cancel.mutate({ orderUuid: id! })}
       />
     </CustomDrawer>
   );

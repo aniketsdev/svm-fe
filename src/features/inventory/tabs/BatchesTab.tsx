@@ -37,7 +37,7 @@ export function BatchesTab() {
 
   const storeItems = [
     { value: ALL, label: 'All stores' },
-    ...stores.map((s) => ({ value: String(s.id), label: `${s.store_name} (${s.store_code})` })),
+    ...stores.map((s) => ({ value: s.uuid, label: `${s.store_name} (${s.store_code})` })),
   ];
 
   const params = useMemo<AdminListStockParams>(
@@ -46,7 +46,7 @@ export function BatchesTab() {
       material_type: type === ALL ? undefined : (type as 'rm' | 'fg'),
       status: status === ALL ? undefined : (status as AdminListStockParams['status']),
       strategy: strategy as 'fefo' | 'fifo',
-      store_id: store === ALL ? undefined : Number(store),
+      store_uuid: store === ALL ? undefined : store,
       limit: 100,
       offset: 0,
     }),

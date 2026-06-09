@@ -18,8 +18,8 @@ export function processingQueryOptions(params: AdminListProcessingOrdersParams =
   return getAdminListProcessingOrdersQueryOptions(params);
 }
 
-export function processingDetailQueryOptions(orderId: number | null) {
-  return getAdminGetProcessingOrderQueryOptions(orderId ?? 0, {
-    query: { enabled: orderId !== null },
+export function processingDetailQueryOptions(orderUuid: string | null) {
+  return getAdminGetProcessingOrderQueryOptions(orderUuid ?? '', {
+    query: { enabled: orderUuid !== null },
   });
 }

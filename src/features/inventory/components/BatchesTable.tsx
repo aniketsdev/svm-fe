@@ -93,7 +93,7 @@ export function BatchesTable({ batches, loading, onRowClick }: Props) {
       enableSorting
       enablePagination
       pageSize={15}
-      getRowId={(row) => String(row.batch_id)}
+      getRowId={(row) => row.batch_uuid}
       onRowClick={onRowClick}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">
