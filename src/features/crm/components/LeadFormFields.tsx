@@ -19,10 +19,7 @@ export function LeadFormFields({ control }: LeadFormFieldsProps) {
   const users = (usersQuery.data as Envelope<AdminUserList> | undefined)?.data.items ?? [];
 
   const sourceItems = sources.map((s) => ({ value: s.uuid, label: s.name }));
-  const assigneeItems = [
-    { value: '', label: '— Unassigned —' },
-    ...users.map((u) => ({ value: u.uuid, label: personLabel(u) })),
-  ];
+  const assigneeItems = users.map((u) => ({ value: u.uuid, label: personLabel(u) }));
 
   return (
     <div className="flex flex-col gap-4">
@@ -37,7 +34,7 @@ export function LeadFormFields({ control }: LeadFormFieldsProps) {
       <RHFInput<LeadFormValues> name="email" control={control} label="Email" placeholder="Enter email" />
       <div className="grid grid-cols-2 gap-3">
         <RHFSelect<LeadFormValues> name="source_uuid" control={control} label="Source" required placeholder="Select source" items={sourceItems} />
-        <RHFSelect<LeadFormValues> name="assignee_uuid" control={control} label="Assignee" placeholder="Assign to" items={assigneeItems} />
+        <RHFSelect<LeadFormValues> name="assignee_uuid" control={control} label="Assignee" placeholder="Assign to" items={assigneeItems} enableDeselect />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <RHFInput<LeadFormValues> name="estimated_annual_value" control={control} label="Est. annual value (₹)" placeholder="e.g. 250000" />

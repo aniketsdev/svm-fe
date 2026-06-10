@@ -21,7 +21,6 @@ interface LeadNotesPanelProps {
 }
 
 const TYPE_ITEMS = [
-  { value: '', label: '— Type —' },
   { value: 'CALL', label: 'Call' },
   { value: 'MEETING', label: 'Meeting' },
   { value: 'WHATSAPP', label: 'WhatsApp' },
@@ -90,7 +89,7 @@ export function LeadNotesPanel({
           <RHFTextarea<NoteFormValues> name="body" control={control} placeholder="What was discussed / what they want…" minRow={2} />
           <div className="flex items-center gap-2">
             <div className="w-40">
-              <RHFSelect<NoteFormValues> name="interaction_type" control={control} placeholder="Type" items={TYPE_ITEMS} />
+              <RHFSelect<NoteFormValues> name="interaction_type" control={control} placeholder="Type" items={TYPE_ITEMS} enableDeselect />
             </div>
             <CustomButton type="submit" variant="primary" size="sm" loading={addMutation.isPending || updateMutation.isPending}>
               {editingId ? 'Save note' : 'Add note'}
