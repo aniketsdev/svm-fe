@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import {
   Boxes,
   ClipboardCheck,
+  Contact,
   Factory,
   Home,
   PackageSearch,
@@ -50,6 +51,7 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: <ShieldCheck className={ICON} />,
       },
       { label: 'Activity Log', path: '/activity-log', icon: <ScrollText className={ICON} /> },
+      { label: 'CRM', path: '/crm', icon: <Contact className={ICON} /> },
     ],
   },
   // {
