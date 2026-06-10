@@ -7,10 +7,8 @@ import {
   Home,
   PackageSearch,
   ScrollText,
-  Settings,
   ShieldCheck,
   UserCog,
-  Users,
   Workflow,
 } from 'lucide-react';
 
@@ -52,6 +50,7 @@ export const NAV_GROUPS: NavGroup[] = [
       },
       { label: 'Activity Log', path: '/activity-log', icon: <ScrollText className={ICON} /> },
       { label: 'CRM', path: '/crm', icon: <Contact className={ICON} /> },
+      { label: 'My Follow-ups', path: '/crm/follow-ups', icon: <ClipboardCheck className={ICON} /> },
     ],
   },
   // {

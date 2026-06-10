@@ -1,10 +1,14 @@
-import { useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useCallback, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Plus, Settings2 } from 'lucide-react';
 import type { SortingState } from '@tanstack/react-table';
+import { CustomButton } from '../../../common/custom-buttons';
 import { useLeads } from '../hooks/useLeads';
+import { useCrmPermissions } from '../hooks/usePermissions';
 import { LeadsToolbar } from '../components/LeadsToolbar';
 import { LeadsTable } from '../components/LeadsTable';
 import { CrmGuard } from '../components/CrmGuard';
+import { CreateLeadDrawer } from '../components/CreateLeadDrawer';
 import type { LeadListItem, LeadsQueryArgs, Stage } from '../api/crm';
 
 type SortField = NonNullable<LeadsQueryArgs['sort']>;
@@ -18,6 +22,8 @@ const SORT_FIELDS: SortField[] = ['created_at', 'updated_at', 'estimated_annual_
 export function CrmPage() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
+  const { canCreate, canUpdate } = useCrmPermissions();
+  const [createOpen, setCreateOpen] = useState(false);
 
   const q = params.get('q') ?? '';
   const stage = (params.get('stage') as Stage | null) ?? 'all';
@@ -45,7 +51,7 @@ export function CrmPage() {
     [setParams],
   );
 
-  const { leads, total, isLoading } = useLeads({
+  const { leads, total, isLoading, refetch } = useLeads({
     page,
     pageSize,
     q,
@@ -76,6 +82,24 @@ export function CrmPage() {
       <div className="w-full px-4 py-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <h1 className="text-2xl font-semibold text-foreground">CRM</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            {canUpdate ? (
+              <Link to="/crm/settings">
+                <CustomButton variant="outline" icon={<Settings2 className="size-4" />}>
+                  Manage lists
+                </CustomButton>
+              </Link>
+            ) : null}
+            {canCreate ? (
+              <CustomButton
+                variant="primary"
+                icon={<Plus className="size-4" />}
+                onClick={() => setCreateOpen(true)}
+              >
+                Create lead
+              </CustomButton>
+            ) : null}
+          </div>
         </div>
 
         <LeadsToolbar
@@ -103,6 +127,8 @@ export function CrmPage() {
             onRowClick={openLead}
           />
         </div>
+
+        <CreateLeadDrawer open={createOpen} onClose={() => setCreateOpen(false)} onCreated={refetch} />
       </div>
     </CrmGuard>
   );
