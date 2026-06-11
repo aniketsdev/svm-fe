@@ -1,14 +1,11 @@
 import type { ReactNode } from 'react';
-import { AlertTriangle, Boxes, History, PackageX } from 'lucide-react';
+import { Boxes, History, TrendingDown } from 'lucide-react';
 import { formatDateTime } from '../../../utils/format';
-import { stockStatus } from '../../../utils/inventory';
-import type { MovementRow, StockRow } from '../api/inventory';
 
 interface InventorySummaryProps {
-  stock: StockRow[];
   stockTotal: number;
-  movements: MovementRow[];
   movementTotal: number;
+  lastMovementAt?: string | null;
 }
 
 function MetricCard({
@@ -47,43 +44,25 @@ function MetricCard({
   );
 }
 
-export function InventorySummary({
-  stock,
-  stockTotal,
-  movements,
-  movementTotal,
-}: InventorySummaryProps) {
-  const low = stock.filter((row) => stockStatus(row.quantity) === 'low').length;
-  const out = stock.filter((row) => stockStatus(row.quantity) === 'out').length;
-  const healthy = stock.filter((row) => stockStatus(row.quantity) === 'ok').length;
-  const lastMovement = movements[0];
-
+export function InventorySummary({ stockTotal, movementTotal, lastMovementAt }: InventorySummaryProps) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-3 sm:grid-cols-3">
       <MetricCard
         label="Stock locations"
         value={stockTotal}
-        detail={`${healthy} healthy in current view`}
+        detail="Unique item / store pairs on hand"
         icon={<Boxes className="size-5" />}
       />
       <MetricCard
-        label="Low stock"
-        value={low}
-        detail="At or below reorder attention"
-        icon={<AlertTriangle className="size-5" />}
-        tone={low ? 'warning' : 'positive'}
-      />
-      <MetricCard
-        label="Out of stock"
-        value={out}
-        detail="Needs replenishment or adjustment"
-        icon={<PackageX className="size-5" />}
-        tone={out ? 'danger' : 'positive'}
-      />
-      <MetricCard
-        label="Ledger activity"
+        label="Total movements"
         value={movementTotal}
-        detail={lastMovement ? formatDateTime(lastMovement.created_at) : 'No movement yet'}
+        detail="Ledger entries across all stores"
+        icon={<TrendingDown className="size-5" />}
+      />
+      <MetricCard
+        label="Last activity"
+        value={lastMovementAt ? formatDateTime(lastMovementAt) : '—'}
+        detail="Most recent stock movement"
         icon={<History className="size-5" />}
       />
     </div>

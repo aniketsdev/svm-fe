@@ -7,6 +7,7 @@ import { BatchesTable } from '../components/BatchesTable';
 import { BatchDetailDrawer } from '../components/BatchDetailDrawer';
 import type { AdminListStockParams, BatchRow } from '../api/batches';
 
+const PAGE_SIZE = 25;
 const ALL = 'all';
 const TYPE_ITEMS = [
   { value: ALL, label: 'All types' },
@@ -33,6 +34,7 @@ export function BatchesTab() {
   const [status, setStatus] = useState(ALL);
   const [strategy, setStrategy] = useState('fefo');
   const [store, setStore] = useState(ALL);
+  const [page, setPage] = useState(0);
   const { stores } = useInventoryOptions();
 
   const storeItems = [
@@ -47,13 +49,15 @@ export function BatchesTab() {
       status: status === ALL ? undefined : (status as AdminListStockParams['status']),
       strategy: strategy as 'fefo' | 'fifo',
       store_uuid: store === ALL ? undefined : store,
-      limit: 100,
-      offset: 0,
+      limit: PAGE_SIZE,
+      offset: page * PAGE_SIZE,
     }),
-    [search, type, status, strategy, store],
+    [search, type, status, strategy, store, page],
   );
 
   const { batches, total, isLoading } = useBatches(params);
+
+  const resetPage = () => setPage(0);
 
   return (
     <div className="flex flex-col">
@@ -63,20 +67,20 @@ export function BatchesTab() {
         </span>
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <div className="w-44">
-            <CustomSelect name="store" placeholder="Store" value={store} items={storeItems} onChange={(e) => setStore(e.target.value)} />
+            <CustomSelect name="store" placeholder="Store" value={store} items={storeItems} onChange={(e) => { setStore(e.target.value); resetPage(); }} />
           </div>
           <div className="w-40">
-            <CustomSelect name="type" placeholder="Type" value={type} items={TYPE_ITEMS} onChange={(e) => setType(e.target.value)} />
+            <CustomSelect name="type" placeholder="Type" value={type} items={TYPE_ITEMS} onChange={(e) => { setType(e.target.value); resetPage(); }} />
           </div>
           <div className="w-40">
-            <CustomSelect name="status" placeholder="Status" value={status} items={STATUS_ITEMS} onChange={(e) => setStatus(e.target.value)} />
+            <CustomSelect name="status" placeholder="Status" value={status} items={STATUS_ITEMS} onChange={(e) => { setStatus(e.target.value); resetPage(); }} />
           </div>
           <div className="w-32">
-            <CustomSelect name="strategy" placeholder="Strategy" value={strategy} items={STRATEGY_ITEMS} onChange={(e) => setStrategy(e.target.value)} />
+            <CustomSelect name="strategy" placeholder="Strategy" value={strategy} items={STRATEGY_ITEMS} onChange={(e) => { setStrategy(e.target.value); resetPage(); }} />
           </div>
           <CustomSearch
             textData={{ placeholder: 'Search material or batch', btnTitle: 'Search' }}
-            onSearch={setSearch}
+            onSearch={(val) => { setSearch(val); resetPage(); }}
             hasStartSearchIcon
             width="20rem"
           />
@@ -84,7 +88,15 @@ export function BatchesTab() {
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <BatchesTable batches={batches} loading={isLoading} onRowClick={setSelected} />
+        <BatchesTable
+          batches={batches}
+          loading={isLoading}
+          onRowClick={setSelected}
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPaginationChange={({ pageIndex }) => setPage(pageIndex)}
+        />
       </div>
 
       <BatchDetailDrawer batch={selected} onClose={() => setSelected(null)} />

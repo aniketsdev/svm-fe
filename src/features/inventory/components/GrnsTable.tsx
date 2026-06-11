@@ -8,9 +8,13 @@ interface GrnsTableProps {
   grns: GrnRow[];
   loading: boolean;
   onRowClick: (grn: GrnRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function GrnsTable({ grns, loading, onRowClick }: GrnsTableProps) {
+export function GrnsTable({ grns, loading, onRowClick, page, pageSize, total, onPaginationChange }: GrnsTableProps) {
   const columns = useMemo<ColumnDef<GrnRow, unknown>[]>(
     () => [
       {
@@ -72,7 +76,11 @@ export function GrnsTable({ grns, loading, onRowClick }: GrnsTableProps) {
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={12}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
       getRowId={(row) => row.uuid}
       onRowClick={onRowClick}
       emptyState={

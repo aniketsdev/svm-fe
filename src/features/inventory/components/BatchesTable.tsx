@@ -23,9 +23,13 @@ interface Props {
   batches: BatchRow[];
   loading: boolean;
   onRowClick: (b: BatchRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function BatchesTable({ batches, loading, onRowClick }: Props) {
+export function BatchesTable({ batches, loading, onRowClick, page, pageSize, total, onPaginationChange }: Props) {
   const columns = useMemo<ColumnDef<BatchRow, unknown>[]>(
     () => [
       {
@@ -92,7 +96,11 @@ export function BatchesTable({ batches, loading, onRowClick }: Props) {
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={15}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
       getRowId={(row) => row.batch_uuid}
       onRowClick={onRowClick}
       emptyState={

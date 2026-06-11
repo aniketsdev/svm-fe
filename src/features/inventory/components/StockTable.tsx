@@ -25,7 +25,16 @@ function StatusPill({ status }: { status: StockStatus }) {
   );
 }
 
-export function StockTable({ stock, loading }: { stock: StockRow[]; loading: boolean }) {
+interface StockTableProps {
+  stock: StockRow[];
+  loading: boolean;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
+}
+
+export function StockTable({ stock, loading, page, pageSize, total, onPaginationChange }: StockTableProps) {
   const columns = useMemo<ColumnDef<StockRow, unknown>[]>(
     () => [
       {
@@ -86,7 +95,11 @@ export function StockTable({ stock, loading }: { stock: StockRow[]; loading: boo
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={12}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
       getRowId={(row) => `${row.store_uuid}-${row.item_type}-${row.item_id}`}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">

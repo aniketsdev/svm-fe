@@ -15,6 +15,7 @@ import { DispatchDetailDrawer } from '../components/DispatchDetailDrawer';
 import type { DispatchRow } from '../api/dispatch';
 
 type TabKey = 'dispatches' | 'invoices';
+const PAGE_SIZE = 25;
 
 export function DispatchPage() {
   const { toast } = useToast();
@@ -22,10 +23,20 @@ export function DispatchPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [selected, setSelected] = useState<DispatchRow | null>(null);
   const [search, setSearch] = useState('');
+  const [dispatchPage, setDispatchPage] = useState(0);
+  const [invoicePage, setInvoicePage] = useState(0);
 
-  const dispatchParams = useMemo(() => ({ search: search || undefined, limit: 100, offset: 0 }), [search]);
+  const dispatchParams = useMemo(
+    () => ({ search: search || undefined, limit: PAGE_SIZE, offset: dispatchPage * PAGE_SIZE }),
+    [search, dispatchPage],
+  );
+  const invoiceParams = useMemo(
+    () => ({ limit: PAGE_SIZE, offset: invoicePage * PAGE_SIZE }),
+    [invoicePage],
+  );
+
   const { dispatches, total, isLoading, refetch } = useDispatches(dispatchParams);
-  const { invoices, total: invTotal, isLoading: invLoading, refetch: refetchInvoices } = useInvoices({ limit: 100 });
+  const { invoices, total: invTotal, isLoading: invLoading, refetch: refetchInvoices } = useInvoices(invoiceParams);
 
   const updatePayment = useAdminUpdateInvoicePayment({
     mutation: {
@@ -40,6 +51,8 @@ export function DispatchPage() {
   const onChangeStatus = (invoiceUuid: string, status: string) =>
     updatePayment.mutate({ invoiceUuid, data: { payment_status: status as 'unpaid' | 'partial' | 'paid' } });
 
+  const handleSearch = (val: string) => { setSearch(val); setDispatchPage(0); };
+
   const tabs: { key: TabKey; label: string; badge?: number }[] = [
     { key: 'dispatches', label: 'Dispatches', badge: total || undefined },
     { key: 'invoices', label: 'Invoices', badge: invTotal || undefined },
@@ -49,9 +62,10 @@ export function DispatchPage() {
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Sales &amp; Dispatch</h1>
+          <h1 className="text-2xl font-semibold text-foreground">Dispatch / Challans</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Sell finished goods to customers — dispatch stock, raise invoices and track payment.
+            Dispatch finished goods to doctors and customers — post challans, raise invoices and
+            track payment.
           </p>
         </div>
         <CustomButton variant="primary" icon={<Plus className="size-4" />} onClick={() => setCreateOpen(true)}>
@@ -95,20 +109,36 @@ export function DispatchPage() {
           <div className="flex items-center justify-end">
             <CustomSearch
               textData={{ placeholder: 'Search challan or customer', btnTitle: 'Search' }}
-              onSearch={setSearch}
+              onSearch={handleSearch}
               hasStartSearchIcon
               width="22rem"
             />
           </div>
           <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-            <DispatchesTable dispatches={dispatches} loading={isLoading} onRowClick={setSelected} />
+            <DispatchesTable
+              dispatches={dispatches}
+              loading={isLoading}
+              onRowClick={setSelected}
+              page={dispatchPage}
+              pageSize={PAGE_SIZE}
+              total={total}
+              onPaginationChange={({ pageIndex }) => setDispatchPage(pageIndex)}
+            />
           </div>
         </div>
       )}
 
       {tab === 'invoices' && (
         <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-          <InvoicesTable invoices={invoices} loading={invLoading} onChangeStatus={onChangeStatus} />
+          <InvoicesTable
+            invoices={invoices}
+            loading={invLoading}
+            onChangeStatus={onChangeStatus}
+            page={invoicePage}
+            pageSize={PAGE_SIZE}
+            total={invTotal}
+            onPaginationChange={({ pageIndex }) => setInvoicePage(pageIndex)}
+          />
         </div>
       )}
 

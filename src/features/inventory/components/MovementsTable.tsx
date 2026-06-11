@@ -29,9 +29,13 @@ interface MovementsTableProps {
   movements: MovementRow[];
   loading: boolean;
   onRowClick?: (movement: MovementRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function MovementsTable({ movements, loading, onRowClick }: MovementsTableProps) {
+export function MovementsTable({ movements, loading, onRowClick, page, pageSize, total, onPaginationChange }: MovementsTableProps) {
   const columns = useMemo<ColumnDef<MovementRow, unknown>[]>(
     () => [
       {
@@ -118,7 +122,11 @@ export function MovementsTable({ movements, loading, onRowClick }: MovementsTabl
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={15}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
       getRowId={(row) => String(row.id)}
       onRowClick={onRowClick}
       emptyState={

@@ -8,9 +8,13 @@ interface Props {
   orders: ManufacturingRow[];
   loading: boolean;
   onRowClick: (o: ManufacturingRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function ManufacturingTable({ orders, loading, onRowClick }: Props) {
+export function ManufacturingTable({ orders, loading, onRowClick, page, pageSize, total, onPaginationChange }: Props) {
   const columns = useMemo<ColumnDef<ManufacturingRow, unknown>[]>(
     () => [
       {
@@ -68,7 +72,11 @@ export function ManufacturingTable({ orders, loading, onRowClick }: Props) {
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={12}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
       getRowId={(row) => row.uuid}
       onRowClick={onRowClick}
       emptyState={

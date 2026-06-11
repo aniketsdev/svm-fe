@@ -9,9 +9,13 @@ interface Props {
   orders: ProcessingRow[];
   loading: boolean;
   onRowClick: (o: ProcessingRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function ProcessingTable({ orders, loading, onRowClick }: Props) {
+export function ProcessingTable({ orders, loading, onRowClick, page, pageSize, total, onPaginationChange }: Props) {
   const columns = useMemo<ColumnDef<ProcessingRow, unknown>[]>(
     () => [
       {
@@ -70,7 +74,11 @@ export function ProcessingTable({ orders, loading, onRowClick }: Props) {
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={12}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
       getRowId={(row) => row.uuid}
       onRowClick={onRowClick}
       emptyState={
