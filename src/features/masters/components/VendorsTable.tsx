@@ -64,7 +64,7 @@ export function VendorsTable({
         header: 'Docs',
         enableSorting: false,
         cell: ({ row }) =>
-          row.original.media_count > 0 ? (
+          (row.original.media_count ?? 0) > 0 ? (
             <button
               type="button"
               onClick={(event) => {

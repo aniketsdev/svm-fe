@@ -1,55 +1,108 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Plus } from 'lucide-react';
-import { CustomButton } from '../../../common/custom-buttons';
-import { CustomSearch } from '../../../common/custom-search';
+import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
+import { useToast } from '../../../common/common-snackbar';
+import { errorMessage } from '../../../utils/api-messages';
+import { useAdminSetDoctorPricingStatus } from '../../../sdk/inventory';
 import { useDoctorPricing } from '../hooks/useDoctorPricing';
+import { useMastersListState } from '../hooks/use-masters-list-state';
+import { MastersSectionLayout } from '../components/masters-section-layout';
 import { DoctorPricingTable } from '../components/DoctorPricingTable';
-import { CreateDoctorPricingDialog } from '../components/CreateDoctorPricingDialog';
+import { DoctorPricingDrawer } from '../components/DoctorPricingDrawer';
+import type { DoctorPricingRow } from '../api/doctor-pricing';
+
+const SORTABLE = ['price', 'valid_from', 'created_at', 'is_active'] as const;
+
+type DrawerState =
+  | { open: false }
+  | { open: true; pricing: DoctorPricingRow | null; tab?: 'documents' };
 
 export function DoctorPricingPage() {
-  const [search, setSearch] = useState('');
-  const [createOpen, setCreateOpen] = useState(false);
-  const { pricing, count, isLoading, refetch } = useDoctorPricing(search);
+  const { toast } = useToast();
+  const list = useMastersListState(SORTABLE);
+  const [drawer, setDrawer] = useState<DrawerState>({ open: false });
+  const [statusTarget, setStatusTarget] = useState<DoctorPricingRow | null>(null);
+
+  const { pricing, count, isLoading, refetch } = useDoctorPricing({
+    search: list.q,
+    page: list.page,
+    pageSize: list.pageSize,
+    sort: list.sort,
+    activeOnly: list.activeOnly,
+  });
+
+  const statusMutation = useAdminSetDoctorPricingStatus({
+    mutation: {
+      onSuccess: () => {
+        toast({ severity: 'success', message: 'Pricing status updated.' });
+        setStatusTarget(null);
+        void refetch();
+      },
+      onError: (error) => toast({ severity: 'error', message: errorMessage(error) }),
+    },
+  });
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <Link
-            to="/masters"
-            className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="size-3.5" /> Masters
-          </Link>
-          <h1 className="text-2xl font-semibold text-foreground">Doctor Pricing</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Negotiated rates per doctor and product, with optional validity dates.
-          </p>
-        </div>
-        <CustomButton variant="primary" icon={<Plus className="size-4" />} onClick={() => setCreateOpen(true)}>
-          Add pricing
-        </CustomButton>
-      </div>
+    <MastersSectionLayout
+      title="Doctor Pricing"
+      description="Negotiated rates per doctor and product, with optional validity dates."
+      count={count}
+      searchPlaceholder="Search by doctor or product"
+      searchValue={list.q}
+      onSearch={list.setSearch}
+      addLabel="Add pricing"
+      onAdd={() => setDrawer({ open: true, pricing: null })}
+      activeOnly={list.activeOnly}
+      onActiveOnlyChange={list.setActiveOnly}
+    >
+      <DoctorPricingTable
+        pricing={pricing}
+        loading={isLoading}
+        rowCount={count}
+        pageIndex={list.page}
+        pageSize={list.pageSize}
+        sorting={list.sorting}
+        onPaginationChange={list.setPagination}
+        onSortingChange={list.setSorting}
+        onEdit={(row) => setDrawer({ open: true, pricing: row })}
+        onDocuments={(row) => setDrawer({ open: true, pricing: row, tab: 'documents' })}
+        onToggleStatus={setStatusTarget}
+      />
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {count} {count === 1 ? 'record' : 'records'}
-        </span>
-        <CustomSearch
-          textData={{ placeholder: 'Search by doctor or product', btnTitle: 'Search' }}
-          onSearch={setSearch}
-          hasStartSearchIcon
-          width="22rem"
-        />
-      </div>
+      <DoctorPricingDrawer
+        open={drawer.open}
+        pricing={drawer.open ? drawer.pricing : null}
+        initialTab={drawer.open ? drawer.tab : undefined}
+        onClose={() => setDrawer({ open: false })}
+        onSaved={() => void refetch()}
+      />
 
-      <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <DoctorPricingTable pricing={pricing} loading={isLoading} />
-      </div>
-
-      <CreateDoctorPricingDialog open={createOpen} onClose={() => setCreateOpen(false)} onCreated={() => refetch()} />
-    </div>
+      <ConfirmationPopUp
+        open={statusTarget !== null}
+        onClose={() => setStatusTarget(null)}
+        onConfirm={() =>
+          statusTarget &&
+          statusMutation.mutate({ pricingId: statusTarget.id, data: { is_active: !statusTarget.is_active } })
+        }
+        title={statusTarget?.is_active ? 'Deactivate pricing' : 'Activate pricing'}
+        message={
+          statusTarget ? (
+            <>
+              {statusTarget.is_active ? 'Deactivate' : 'Activate'} pricing for{' '}
+              <span className="font-medium">
+                {statusTarget.doctor_name} — {statusTarget.product_name}
+              </span>
+              ?{' '}
+              {statusTarget.is_active
+                ? 'Existing references keep working; it will be hidden from “Active only” views.'
+                : 'It will be selectable again.'}
+            </>
+          ) : null
+        }
+        confirmLabel={statusTarget?.is_active ? 'Deactivate' : 'Activate'}
+        destructive={statusTarget?.is_active ?? false}
+        confirmDisabled={statusMutation.isPending}
+      />
+    </MastersSectionLayout>
   );
 }
 
