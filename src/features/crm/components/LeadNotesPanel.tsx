@@ -1,16 +1,20 @@
 import { useState } from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { CustomButton } from '../../../common/custom-buttons';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
-import { RHFSelect, RHFTextarea } from '../../../common/rhf-wrappers';
+import { ActionMenu, type ActionMenuItem } from '../../../common/action-menu';
 import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
 import { useToast } from '../../../common/common-snackbar';
 import { errorMessage } from '../../../utils/api-messages';
 import { formatDateTime } from '../../../utils/format';
-import { useAdminAddLeadNote, useAdminUpdateLeadNote, useAdminDeleteLeadNote } from '../../../sdk/crm';
-import type { NoteCreate } from '../../../sdk/schemas';
+import { useAdminDeleteLeadNote } from '../../../sdk/crm';
 import { LEAD_ACTIVITY_PAGE_SIZE, personLabel, type NoteOut } from '../api/crm';
-import { useNoteForm, emptyNote, type NoteFormValues } from '../hooks/useNoteForm';
+import { NoteDrawer } from './NoteDrawer';
+import { NotePreviewDrawer } from './NotePreviewDrawer';
+
+const BODY_PREVIEW_LIMIT = 25;
+const truncate = (text: string, limit = BODY_PREVIEW_LIMIT) =>
+  text.length > limit ? `${text.slice(0, limit).trimEnd()}…` : text;
 
 interface LeadNotesPanelProps {
   leadUuid: string;
@@ -21,14 +25,6 @@ interface LeadNotesPanelProps {
   canDelete: boolean;
 }
 
-const TYPE_ITEMS = [
-  { value: 'CALL', label: 'Call' },
-  { value: 'MEETING', label: 'Meeting' },
-  { value: 'WHATSAPP', label: 'WhatsApp' },
-  { value: 'EMAIL', label: 'Email' },
-  { value: 'OTHER', label: 'Other' },
-];
-
 export function LeadNotesPanel({
   leadUuid,
   notes,
@@ -38,20 +34,20 @@ export function LeadNotesPanel({
   canDelete,
 }: LeadNotesPanelProps) {
   const { toast } = useToast();
-  const { control, handleSubmit, reset } = useNoteForm();
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editing, setEditing] = useState<NoteOut | null>(null);
+  const [preview, setPreview] = useState<NoteOut | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const onDone = (msg: string) => {
-    toast({ severity: 'success', message: msg });
-    reset(emptyNote);
-    setEditingId(null);
-    onChanged();
+  const openCreate = () => {
+    setEditing(null);
+    setDrawerOpen(true);
   };
-  const onFail = (e: unknown) => toast({ severity: 'error', message: errorMessage(e) });
+  const openEdit = (n: NoteOut) => {
+    setEditing(n);
+    setDrawerOpen(true);
+  };
 
-  const addMutation = useAdminAddLeadNote({ mutation: { onSuccess: () => onDone('Note added.'), onError: onFail } });
-  const updateMutation = useAdminUpdateLeadNote({ mutation: { onSuccess: () => onDone('Note updated.'), onError: onFail } });
   const deleteMutation = useAdminDeleteLeadNote({
     mutation: {
       onSuccess: () => {
@@ -60,26 +56,11 @@ export function LeadNotesPanel({
         onChanged();
       },
       onError: (e) => {
-        onFail(e);
+        toast({ severity: 'error', message: errorMessage(e) });
         setDeleteId(null);
       },
     },
   });
-
-  const toBody = (v: NoteFormValues): NoteCreate => ({
-    body: v.body,
-    interaction_type: v.interaction_type ? v.interaction_type : null,
-  });
-
-  const onSubmit = (v: NoteFormValues) => {
-    if (editingId) updateMutation.mutate({ noteUuid: editingId, data: toBody(v) });
-    else addMutation.mutate({ leadUuid, data: toBody(v) });
-  };
-
-  const startEdit = (n: NoteOut) => {
-    setEditingId(n.uuid);
-    reset({ body: n.body, interaction_type: n.interaction_type ?? '' });
-  };
 
   const columns: ColumnDef<NoteOut, unknown>[] = [
     {
@@ -102,55 +83,42 @@ export function LeadNotesPanel({
     {
       id: 'body',
       header: 'Note',
-      cell: ({ row }) => <p className="whitespace-pre-wrap text-foreground">{row.original.body}</p>,
+      cell: ({ row }) => <span className="text-foreground">{truncate(row.original.body)}</span>,
     },
     {
       id: 'actions',
       header: '',
-      cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-2">
-          {canUpdate ? (
-            <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(row.original)} aria-label="Edit note">
-              <Pencil className="size-3.5" />
-            </button>
-          ) : null}
-          {canDelete ? (
-            <button type="button" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(row.original.uuid)} aria-label="Delete note">
-              <Trash2 className="size-3.5" />
-            </button>
-          ) : null}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const n = row.original;
+        const items: ActionMenuItem[] = [
+          { label: 'Preview', icon: <Eye className="size-4" />, onClick: () => setPreview(n) },
+        ];
+        if (canUpdate) items.push({ label: 'Edit', icon: <Pencil className="size-4" />, onClick: () => openEdit(n) });
+        if (canDelete) {
+          items.push({
+            label: 'Delete',
+            icon: <Trash2 className="size-4" />,
+            onClick: () => setDeleteId(n.uuid),
+            color: 'var(--color-destructive)',
+          });
+        }
+        return (
+          <div className="flex justify-end">
+            <ActionMenu items={items} ariaLabel="Note actions" />
+          </div>
+        );
+      },
     },
   ];
 
   return (
     <div className="flex flex-col gap-4">
       {canCreate ? (
-        <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
-          <RHFTextarea<NoteFormValues> name="body" control={control} placeholder="What was discussed / what they want…" minRow={2} />
-          <div className="flex items-center gap-2">
-            <div className="w-40">
-              <RHFSelect<NoteFormValues> name="interaction_type" control={control} placeholder="Type" items={TYPE_ITEMS} enableDeselect />
-            </div>
-            <CustomButton type="submit" variant="primary" size="sm" loading={addMutation.isPending || updateMutation.isPending}>
-              {editingId ? 'Save note' : 'Add note'}
-            </CustomButton>
-            {editingId ? (
-              <CustomButton
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  reset(emptyNote);
-                  setEditingId(null);
-                }}
-              >
-                Cancel
-              </CustomButton>
-            ) : null}
-          </div>
-        </form>
+        <div className="flex justify-end">
+          <CustomButton type="button" variant="primary" size="sm" icon={<Plus className="size-4" />} onClick={openCreate}>
+            Add note
+          </CustomButton>
+        </div>
       ) : null}
 
       <CommonTable<NoteOut>
@@ -160,8 +128,20 @@ export function LeadNotesPanel({
         enablePagination
         pageSize={LEAD_ACTIVITY_PAGE_SIZE}
         density="compact"
+        stickyHeader
+        maxHeight="28rem"
         emptyState="No notes yet."
       />
+
+      <NoteDrawer
+        leadUuid={leadUuid}
+        note={editing}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onSaved={onChanged}
+      />
+
+      <NotePreviewDrawer note={preview} onClose={() => setPreview(null)} />
 
       <ConfirmationPopUp
         open={deleteId !== null}

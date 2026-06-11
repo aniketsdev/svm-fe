@@ -1,17 +1,18 @@
 import { useState } from 'react';
+import { Ban, Check, Eye, Pencil, Plus } from 'lucide-react';
 import { CustomButton } from '../../../common/custom-buttons';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
-import { RHFDatePicker, RHFTextarea } from '../../../common/rhf-wrappers';
+import { ActionMenu, type ActionMenuItem } from '../../../common/action-menu';
 import { useToast } from '../../../common/common-snackbar';
 import { errorMessage } from '../../../utils/api-messages';
-import {
-  useAdminCreateLeadReminder,
-  useAdminUpdateReminder,
-  useAdminCompleteReminder,
-  useAdminCancelReminder,
-} from '../../../sdk/crm';
+import { useAdminCompleteReminder, useAdminCancelReminder } from '../../../sdk/crm';
 import { LEAD_ACTIVITY_PAGE_SIZE, personLabel, type ReminderOut } from '../api/crm';
-import { useReminderForm, emptyReminder, type ReminderFormValues } from '../hooks/useReminderForm';
+import { ReminderDrawer } from './ReminderDrawer';
+import { ReminderPreviewDrawer } from './ReminderPreviewDrawer';
+
+const NOTE_PREVIEW_LIMIT = 25;
+const truncate = (text: string, limit = NOTE_PREVIEW_LIMIT) =>
+  text.length > limit ? `${text.slice(0, limit).trimEnd()}…` : text;
 
 interface LeadRemindersPanelProps {
   leadUuid: string;
@@ -40,33 +41,22 @@ export function LeadRemindersPanel({
   canUpdate,
 }: LeadRemindersPanelProps) {
   const { toast } = useToast();
-  const { control, handleSubmit, reset } = useReminderForm();
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editing, setEditing] = useState<ReminderOut | null>(null);
+  const [preview, setPreview] = useState<ReminderOut | null>(null);
 
-  const onDone = (msg: string) => {
-    toast({ severity: 'success', message: msg });
-    reset(emptyReminder);
-    setEditingId(null);
-    onChanged();
+  const openCreate = () => {
+    setEditing(null);
+    setDrawerOpen(true);
   };
-  const onFail = (e: unknown) => toast({ severity: 'error', message: errorMessage(e) });
+  const openEdit = (r: ReminderOut) => {
+    setEditing(r);
+    setDrawerOpen(true);
+  };
 
-  const createMutation = useAdminCreateLeadReminder({ mutation: { onSuccess: () => onDone('Reminder scheduled.'), onError: onFail } });
-  const updateMutation = useAdminUpdateReminder({ mutation: { onSuccess: () => onDone('Reminder rescheduled.'), onError: onFail } });
+  const onFail = (e: unknown) => toast({ severity: 'error', message: errorMessage(e) });
   const completeMutation = useAdminCompleteReminder({ mutation: { onSuccess: () => { toast({ severity: 'success', message: 'Marked done.' }); onChanged(); }, onError: onFail } });
   const cancelMutation = useAdminCancelReminder({ mutation: { onSuccess: () => { toast({ severity: 'success', message: 'Reminder cancelled.' }); onChanged(); }, onError: onFail } });
-
-  const onSubmit = (v: ReminderFormValues) => {
-    const due_date = v.due_date.slice(0, 10); // ISO → YYYY-MM-DD
-    const data = { due_date, note: v.note || null };
-    if (editingId) updateMutation.mutate({ reminderUuid: editingId, data });
-    else createMutation.mutate({ leadUuid, data });
-  };
-
-  const startEdit = (r: ReminderOut) => {
-    setEditingId(r.uuid);
-    reset({ due_date: r.due_date, due_time: r.due_time ?? '', note: r.note ?? '' });
-  };
 
   const columns: ColumnDef<ReminderOut, unknown>[] = [
     {
@@ -87,7 +77,7 @@ export function LeadRemindersPanel({
     {
       id: 'note',
       header: 'Note',
-      cell: ({ row }) => <span className="text-muted-foreground">{row.original.note ?? '—'}</span>,
+      cell: ({ row }) => <span className="text-muted-foreground">{row.original.note ? truncate(row.original.note) : '—'}</span>,
     },
     {
       id: 'status',
@@ -108,18 +98,19 @@ export function LeadRemindersPanel({
       header: '',
       cell: ({ row }) => {
         const r = row.original;
-        if (!(canUpdate && r.status === 'PENDING')) return null;
+        const items: ActionMenuItem[] = [
+          { label: 'Preview', icon: <Eye className="size-4" />, onClick: () => setPreview(r) },
+        ];
+        if (canUpdate && r.status === 'PENDING') {
+          items.push(
+            { label: 'Mark done', icon: <Check className="size-4" />, onClick: () => completeMutation.mutate({ reminderUuid: r.uuid }) },
+            { label: 'Reschedule', icon: <Pencil className="size-4" />, onClick: () => openEdit(r) },
+            { label: 'Cancel', icon: <Ban className="size-4" />, onClick: () => cancelMutation.mutate({ reminderUuid: r.uuid }), color: 'var(--color-destructive)' },
+          );
+        }
         return (
-          <div className="flex items-center justify-end gap-2">
-            <CustomButton type="button" variant="ghost" size="sm" onClick={() => completeMutation.mutate({ reminderUuid: r.uuid })}>
-              Done
-            </CustomButton>
-            <CustomButton type="button" variant="ghost" size="sm" onClick={() => startEdit(r)}>
-              Reschedule
-            </CustomButton>
-            <CustomButton type="button" variant="ghost" size="sm" onClick={() => cancelMutation.mutate({ reminderUuid: r.uuid })}>
-              Cancel
-            </CustomButton>
+          <div className="flex justify-end">
+            <ActionMenu items={items} ariaLabel="Follow-up actions" />
           </div>
         );
       },
@@ -129,22 +120,11 @@ export function LeadRemindersPanel({
   return (
     <div className="flex flex-col gap-4">
       {canCreate ? (
-        <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <RHFDatePicker<ReminderFormValues> name="due_date" control={control} label="Follow-up date" />
-            <RHFTextarea<ReminderFormValues> name="note" control={control} label="Note" placeholder="e.g. follow up about order" minRow={2} />
-          </div>
-          <div className="flex items-center gap-2">
-            <CustomButton type="submit" variant="primary" size="sm" loading={createMutation.isPending || updateMutation.isPending}>
-              {editingId ? 'Reschedule' : 'Schedule reminder'}
-            </CustomButton>
-            {editingId ? (
-              <CustomButton type="button" variant="outline" size="sm" onClick={() => { reset(emptyReminder); setEditingId(null); }}>
-                Cancel edit
-              </CustomButton>
-            ) : null}
-          </div>
-        </form>
+        <div className="flex justify-end">
+          <CustomButton type="button" variant="primary" size="sm" icon={<Plus className="size-4" />} onClick={openCreate}>
+            Add follow-up
+          </CustomButton>
+        </div>
       ) : null}
 
       <CommonTable<ReminderOut>
@@ -154,8 +134,20 @@ export function LeadRemindersPanel({
         enablePagination
         pageSize={LEAD_ACTIVITY_PAGE_SIZE}
         density="compact"
+        stickyHeader
+        maxHeight="28rem"
         emptyState="No follow-ups yet."
       />
+
+      <ReminderDrawer
+        leadUuid={leadUuid}
+        reminder={editing}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onSaved={onChanged}
+      />
+
+      <ReminderPreviewDrawer reminder={preview} onClose={() => setPreview(null)} />
     </div>
   );
 }
