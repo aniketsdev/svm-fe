@@ -3,15 +3,11 @@
  * Regenerate via: bun run sdk:gen
  */
 
-export interface DoctorListItem {
-  id: number;
-  name: string;
-  code: string;
+export interface UpdateDoctorRequest {
+  name?: string | null;
+  code?: string | null;
   clinic_name?: string | null;
   phone?: string | null;
   state_code?: string | null;
   city?: string | null;
-  is_active: boolean;
-  media_count?: number;
-  created_at: string;
 }

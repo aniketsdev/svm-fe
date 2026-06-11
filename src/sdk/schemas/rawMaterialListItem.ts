@@ -11,5 +11,6 @@ export interface RawMaterialListItem {
   rm_category_name?: string | null;
   unit?: string | null;
   is_active: boolean;
+  media_count?: number;
   created_at: string;
 }

@@ -3,14 +3,10 @@
  * Regenerate via: bun run sdk:gen
  */
 
-export interface VendorListItem {
-  id: number;
-  name: string;
-  code: string;
+export interface UpdateVendorRequest {
+  name?: string | null;
+  code?: string | null;
   gstin?: string | null;
   state_code?: string | null;
   city?: string | null;
-  is_active: boolean;
-  media_count?: number;
-  created_at: string;
 }

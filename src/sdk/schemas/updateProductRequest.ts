@@ -3,15 +3,11 @@
  * Regenerate via: bun run sdk:gen
  */
 
-export interface ProductListItem {
-  id: number;
-  name: string;
-  code: string;
+export interface UpdateProductRequest {
+  name?: string | null;
+  code?: string | null;
   hsn?: string | null;
   mrp?: number | null;
   gst_rate?: number | null;
   pack_size?: string | null;
-  is_active: boolean;
-  media_count?: number;
-  created_at: string;
 }

@@ -12,5 +12,7 @@ export interface DoctorPricingListItem {
   price: number;
   valid_from?: string | null;
   valid_to?: string | null;
+  is_active: boolean;
+  media_count?: number;
   created_at: string;
 }

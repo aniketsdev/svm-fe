@@ -3,9 +3,16 @@
  * Regenerate via: bun run sdk:gen
  */
 
-export type AdminListRawMaterialsParams = {
-search?: string | null;
-is_active?: boolean | null;
+export type AdminListMediaParams = {
+/**
+ * @minLength 1
+ * @maxLength 40
+ */
+owner_type: string;
+/**
+ * @minimum 1
+ */
+owner_id: number;
 /**
  * @minimum 1
  * @maximum 100
@@ -15,8 +22,5 @@ limit?: number;
  * @minimum 0
  */
 offset?: number;
-/**
- * @maxLength 40
- */
 sort?: string;
 };
