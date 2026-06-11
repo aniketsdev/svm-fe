@@ -2,14 +2,13 @@ import type { ReactNode } from 'react';
 import {
   Boxes,
   ClipboardCheck,
+  Contact,
   Factory,
   Home,
   PackageSearch,
   ScrollText,
-  Settings,
   ShieldCheck,
   UserCog,
-  Users,
   Workflow,
 } from 'lucide-react';
 
@@ -50,6 +49,8 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: <ShieldCheck className={ICON} />,
       },
       { label: 'Activity Log', path: '/activity-log', icon: <ScrollText className={ICON} /> },
+      { label: 'CRM', path: '/crm', icon: <Contact className={ICON} /> },
+      { label: 'My Follow-ups', path: '/crm/follow-ups', icon: <ClipboardCheck className={ICON} /> },
     ],
   },
   // {

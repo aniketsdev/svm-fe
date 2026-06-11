@@ -107,6 +107,18 @@ const ManufacturingPage = lazyWithPreload(() =>
 const DashboardPage = lazyWithPreload(() =>
   import('../features/dashboard/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
 );
+const CrmPage = lazyWithPreload(() =>
+  import('../features/crm/pages/CrmPage').then((m) => ({ default: m.CrmPage })),
+);
+const CrmLeadDetailPage = lazyWithPreload(() =>
+  import('../features/crm/pages/CrmLeadDetailPage').then((m) => ({ default: m.CrmLeadDetailPage })),
+);
+const MyFollowupsPage = lazyWithPreload(() =>
+  import('../features/crm/pages/MyFollowupsPage').then((m) => ({ default: m.MyFollowupsPage })),
+);
+const CrmSettingsPage = lazyWithPreload(() =>
+  import('../features/crm/pages/CrmSettingsPage').then((m) => ({ default: m.CrmSettingsPage })),
+);
 
 // ── Placeholder pages for routes whose features aren't built yet ────────────
 const ClientsPlaceholder = () => <PlaceholderPage title="Clients" />;
@@ -186,6 +198,10 @@ export default function AppRoutes() {
         <Route path="activity-log" element={<ActivityLogPage />} />
         <Route path="roles-permissions" element={<RolesPermissionsPage />} />
         <Route path="roles-permissions/:roleUuid" element={<RoleDetailPage />} />
+        <Route path="crm" element={<CrmPage />} />
+        <Route path="crm/follow-ups" element={<MyFollowupsPage />} />
+        <Route path="crm/settings" element={<CrmSettingsPage />} />
+        <Route path="crm/:leadUuid" element={<CrmLeadDetailPage />} />
         <Route path="masters" element={<MastersPage />} />
         <Route path="masters/vendors" element={<VendorsPage />} />
         <Route path="masters/courier-partners" element={<CouriersPage />} />
