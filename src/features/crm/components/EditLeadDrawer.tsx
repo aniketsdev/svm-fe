@@ -31,9 +31,11 @@ export function EditLeadDrawer({ lead, onClose, onUpdated }: EditLeadDrawerProps
       whatsapp_phone: lead.whatsapp_phone ?? '',
       email: lead.email ?? '',
       estimated_annual_value: lead.estimated_annual_value ?? '',
+      address_line1: lead.address_line1 ?? '',
+      address_line2: lead.address_line2 ?? '',
       city: lead.city ?? '',
       state: lead.state ?? '',
-      address: lead.address ?? '',
+      zip_code: lead.zip_code ?? '',
       assignee_uuid: lead.assignee?.uuid ?? '',
       messaging_opt_in: lead.messaging_opt_in,
     });

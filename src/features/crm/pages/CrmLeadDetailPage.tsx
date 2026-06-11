@@ -10,8 +10,7 @@ import { useLeadDetail } from '../hooks/useLeadDetail';
 import { useCrmPermissions } from '../hooks/usePermissions';
 import { CrmGuard } from '../components/CrmGuard';
 import { StageBadge } from '../components/StageBadge';
-import { LeadNotesPanel } from '../components/LeadNotesPanel';
-import { LeadRemindersPanel } from '../components/LeadRemindersPanel';
+import { LeadActivityTabs } from '../components/LeadActivityTabs';
 import { EditLeadDrawer } from '../components/EditLeadDrawer';
 import { CloseLeadDialog } from '../components/CloseLeadDialog';
 
@@ -113,17 +112,19 @@ export function CrmLeadDetailPage() {
               </div>
             ) : null}
 
-            <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <section className="rounded-xl border border-border bg-card p-4 shadow-sm lg:col-span-1">
+            <div className="mt-5 flex flex-col gap-6">
+              <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
                 <h2 className="text-sm font-semibold text-foreground">Details</h2>
-                <dl className="mt-3 grid grid-cols-2 gap-4">
+                <dl className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
                   <Field label="Phone" value={lead.phone} />
                   <Field label="WhatsApp" value={lead.whatsapp_phone} />
                   <Field label="Email" value={lead.email} />
                   <Field label="Est. annual value" value={formatValue(lead.estimated_annual_value)} />
+                  <Field label="Address line 1" value={lead.address_line1} />
+                  <Field label="Address line 2" value={lead.address_line2} />
                   <Field label="City" value={lead.city} />
                   <Field label="State" value={lead.state} />
-                  <Field label="Address" value={lead.address} />
+                  <Field label="Zip code" value={lead.zip_code} />
                   <Field label="Source" value={lead.source?.name ?? '—'} />
                   <Field label="Assignee" value={personLabel(lead.assignee)} />
                   <Field label="Messaging opt-in" value={lead.messaging_opt_in ? 'Yes' : 'No'} />
@@ -134,23 +135,15 @@ export function CrmLeadDetailPage() {
                 </dl>
               </section>
 
-              <div className="flex flex-col gap-6 lg:col-span-2">
-                <LeadRemindersPanel
-                  leadUuid={leadUuid}
-                  reminders={lead.reminders ?? []}
-                  onChanged={refetch}
-                  canCreate={canCreate}
-                  canUpdate={canUpdate}
-                />
-                <LeadNotesPanel
-                  leadUuid={leadUuid}
-                  notes={lead.notes ?? []}
-                  onChanged={refetch}
-                  canCreate={canCreate}
-                  canUpdate={canUpdate}
-                  canDelete={canDelete}
-                />
-              </div>
+              <LeadActivityTabs
+                leadUuid={leadUuid}
+                notes={lead.notes ?? []}
+                reminders={lead.reminders ?? []}
+                onChanged={refetch}
+                canCreate={canCreate}
+                canUpdate={canUpdate}
+                canDelete={canDelete}
+              />
             </div>
 
             <EditLeadDrawer lead={editOpen ? lead : null} onClose={() => setEditOpen(false)} onUpdated={refetch} />

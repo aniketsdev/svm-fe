@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import type { Control } from 'react-hook-form';
-import { RHFInput, RHFSelect, RHFTextarea, RHFCheckbox } from '../../../common/rhf-wrappers';
+import { RHFInput, RHFSelect, RHFCheckbox } from '../../../common/rhf-wrappers';
 import { getAdminListUsersQueryOptions } from '../../../sdk/user-management';
 import type { AdminUserList } from '../../../sdk/schemas';
 import { personLabel, sourcesQueryOptions, type Envelope, type SourceOut } from '../api/crm';
@@ -36,14 +36,16 @@ export function LeadFormFields({ control }: LeadFormFieldsProps) {
         <RHFSelect<LeadFormValues> name="source_uuid" control={control} label="Source" required placeholder="Select source" items={sourceItems} />
         <RHFSelect<LeadFormValues> name="assignee_uuid" control={control} label="Assignee" placeholder="Assign to" items={assigneeItems} enableDeselect />
       </div>
+      <RHFInput<LeadFormValues> name="estimated_annual_value" control={control} label="Est. annual value (₹)" placeholder="e.g. 250000" />
+      <RHFInput<LeadFormValues> name="address_line1" control={control} label="Address line 1" placeholder="Street address, P.O. box" />
+      <RHFInput<LeadFormValues> name="address_line2" control={control} label="Address line 2" placeholder="Apartment, suite, unit, building (optional)" />
       <div className="grid grid-cols-2 gap-3">
-        <RHFInput<LeadFormValues> name="estimated_annual_value" control={control} label="Est. annual value (₹)" placeholder="e.g. 250000" />
         <RHFInput<LeadFormValues> name="city" control={control} label="City" placeholder="Enter city" />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
         <RHFInput<LeadFormValues> name="state" control={control} label="State" placeholder="Enter state" />
       </div>
-      <RHFTextarea<LeadFormValues> name="address" control={control} label="Address" placeholder="Enter address" minRow={2} />
+      <div className="grid grid-cols-2 gap-3">
+        <RHFInput<LeadFormValues> name="zip_code" control={control} label="Zip code" placeholder="Enter zip code" />
+      </div>
       <RHFCheckbox<LeadFormValues> name="messaging_opt_in" control={control} label="Client opted in to WhatsApp/SMS follow-ups" />
     </div>
   );

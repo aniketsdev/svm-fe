@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CustomButton } from '../../../common/custom-buttons';
+import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import { RHFDatePicker, RHFTextarea } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { errorMessage } from '../../../utils/api-messages';
@@ -9,7 +10,7 @@ import {
   useAdminCompleteReminder,
   useAdminCancelReminder,
 } from '../../../sdk/crm';
-import { personLabel, type ReminderOut } from '../api/crm';
+import { LEAD_ACTIVITY_PAGE_SIZE, personLabel, type ReminderOut } from '../api/crm';
 import { useReminderForm, emptyReminder, type ReminderFormValues } from '../hooks/useReminderForm';
 
 interface LeadRemindersPanelProps {
@@ -67,12 +68,68 @@ export function LeadRemindersPanel({
     reset({ due_date: r.due_date, due_time: r.due_time ?? '', note: r.note ?? '' });
   };
 
-  return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-foreground">Follow-up reminders</h2>
+  const columns: ColumnDef<ReminderOut, unknown>[] = [
+    {
+      id: 'due',
+      header: 'Due',
+      cell: ({ row }) => {
+        const r = row.original;
+        const overdue = isOverdue(r);
+        return (
+          <span className={`whitespace-nowrap font-medium ${overdue ? 'text-warning' : 'text-foreground'}`}>
+            {r.due_date}
+            {r.due_time ? ` ${r.due_time.slice(0, 5)}` : ''}
+            {overdue ? ' · Overdue' : ''}
+          </span>
+        );
+      },
+    },
+    {
+      id: 'note',
+      header: 'Note',
+      cell: ({ row }) => <span className="text-muted-foreground">{row.original.note ?? '—'}</span>,
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      cell: ({ row }) => (
+        <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_TONE[row.original.status] ?? 'bg-muted text-muted-foreground'}`}>
+          {row.original.status}
+        </span>
+      ),
+    },
+    {
+      id: 'owner',
+      header: 'Owner',
+      cell: ({ row }) => <span className="whitespace-nowrap text-foreground">{personLabel(row.original.owner)}</span>,
+    },
+    {
+      id: 'actions',
+      header: '',
+      cell: ({ row }) => {
+        const r = row.original;
+        if (!(canUpdate && r.status === 'PENDING')) return null;
+        return (
+          <div className="flex items-center justify-end gap-2">
+            <CustomButton type="button" variant="ghost" size="sm" onClick={() => completeMutation.mutate({ reminderUuid: r.uuid })}>
+              Done
+            </CustomButton>
+            <CustomButton type="button" variant="ghost" size="sm" onClick={() => startEdit(r)}>
+              Reschedule
+            </CustomButton>
+            <CustomButton type="button" variant="ghost" size="sm" onClick={() => cancelMutation.mutate({ reminderUuid: r.uuid })}>
+              Cancel
+            </CustomButton>
+          </div>
+        );
+      },
+    },
+  ];
 
+  return (
+    <div className="flex flex-col gap-4">
       {canCreate ? (
-        <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-3 flex flex-col gap-2">
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <RHFDatePicker<ReminderFormValues> name="due_date" control={control} label="Follow-up date" />
             <RHFTextarea<ReminderFormValues> name="note" control={control} label="Note" placeholder="e.g. follow up about order" minRow={2} />
@@ -90,51 +147,15 @@ export function LeadRemindersPanel({
         </form>
       ) : null}
 
-      {reminders.length === 0 ? (
-        <p className="mt-3 text-sm text-muted-foreground">No reminders scheduled.</p>
-      ) : (
-        <ul className="mt-3 flex flex-col gap-2">
-          {reminders.map((r) => {
-            const overdue = isOverdue(r);
-            return (
-              <li
-                key={r.uuid}
-                className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 ${
-                  overdue ? 'border-warning/40 bg-warning/5' : 'border-border bg-background'
-                }`}
-              >
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-foreground">
-                    {r.due_date}
-                    {r.due_time ? ` ${r.due_time.slice(0, 5)}` : ''}
-                    {overdue ? ' · Overdue' : ''}
-                  </span>
-                  {r.note ? <span className="text-xs text-muted-foreground">{r.note}</span> : null}
-                  <span className="text-xs text-muted-foreground">Owner: {personLabel(r.owner)}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_TONE[r.status] ?? 'bg-muted text-muted-foreground'}`}>
-                    {r.status}
-                  </span>
-                  {canUpdate && r.status === 'PENDING' ? (
-                    <>
-                      <CustomButton type="button" variant="ghost" size="sm" onClick={() => completeMutation.mutate({ reminderUuid: r.uuid })}>
-                        Done
-                      </CustomButton>
-                      <CustomButton type="button" variant="ghost" size="sm" onClick={() => startEdit(r)}>
-                        Reschedule
-                      </CustomButton>
-                      <CustomButton type="button" variant="ghost" size="sm" onClick={() => cancelMutation.mutate({ reminderUuid: r.uuid })}>
-                        Cancel
-                      </CustomButton>
-                    </>
-                  ) : null}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </section>
+      <CommonTable<ReminderOut>
+        columns={columns}
+        data={reminders}
+        getRowId={(r) => r.uuid}
+        enablePagination
+        pageSize={LEAD_ACTIVITY_PAGE_SIZE}
+        density="compact"
+        emptyState="No follow-ups yet."
+      />
+    </div>
   );
 }

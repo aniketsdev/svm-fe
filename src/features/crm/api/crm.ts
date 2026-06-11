@@ -41,6 +41,9 @@ export type {
 export type Stage = 'NEW' | 'IN_PROGRESS' | 'FOLLOW_UP' | 'WON' | 'LOST';
 export type Outcome = 'WON' | 'LOST';
 
+/** Rows per page for the lead-detail Notes & Follow-ups tables (feature 026). */
+export const LEAD_ACTIVITY_PAGE_SIZE = 10;
+
 /** The SDK mutator wraps every response as { data, status, headers }. */
 export interface Envelope<T> {
   data: T;

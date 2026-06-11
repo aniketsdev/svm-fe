@@ -19,9 +19,11 @@ export const leadSchema = z.object({
     .trim()
     .refine((v) => !v || !Number.isNaN(Number(v)), 'Must be a number')
     .optional(),
+  address_line1: z.string().trim().max(200).optional(),
+  address_line2: z.string().trim().max(200).optional(),
   city: z.string().trim().max(120).optional(),
   state: z.string().trim().max(120).optional(),
-  address: z.string().trim().optional(),
+  zip_code: z.string().trim().max(20).optional(),
   assignee_uuid: z.string().optional(),
   messaging_opt_in: z.boolean(),
 });
@@ -36,9 +38,11 @@ export const emptyLead: LeadFormValues = {
   whatsapp_phone: '',
   email: '',
   estimated_annual_value: '',
+  address_line1: '',
+  address_line2: '',
   city: '',
   state: '',
-  address: '',
+  zip_code: '',
   assignee_uuid: '',
   messaging_opt_in: false,
 };
@@ -53,9 +57,11 @@ export function toLeadBody(v: LeadFormValues): LeadCreate & LeadUpdate {
     whatsapp_phone: v.whatsapp_phone || null,
     email: v.email || null,
     estimated_annual_value: v.estimated_annual_value ? v.estimated_annual_value : null,
+    address_line1: v.address_line1 || null,
+    address_line2: v.address_line2 || null,
     city: v.city || null,
     state: v.state || null,
-    address: v.address || null,
+    zip_code: v.zip_code || null,
     assignee_uuid: v.assignee_uuid || null,
     messaging_opt_in: v.messaging_opt_in,
   };

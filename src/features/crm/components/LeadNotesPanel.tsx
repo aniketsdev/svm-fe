@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { CustomButton } from '../../../common/custom-buttons';
+import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import { RHFSelect, RHFTextarea } from '../../../common/rhf-wrappers';
 import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
 import { useToast } from '../../../common/common-snackbar';
@@ -8,7 +9,7 @@ import { errorMessage } from '../../../utils/api-messages';
 import { formatDateTime } from '../../../utils/format';
 import { useAdminAddLeadNote, useAdminUpdateLeadNote, useAdminDeleteLeadNote } from '../../../sdk/crm';
 import type { NoteCreate } from '../../../sdk/schemas';
-import { personLabel, type NoteOut } from '../api/crm';
+import { LEAD_ACTIVITY_PAGE_SIZE, personLabel, type NoteOut } from '../api/crm';
 import { useNoteForm, emptyNote, type NoteFormValues } from '../hooks/useNoteForm';
 
 interface LeadNotesPanelProps {
@@ -80,12 +81,53 @@ export function LeadNotesPanel({
     reset({ body: n.body, interaction_type: n.interaction_type ?? '' });
   };
 
-  return (
-    <section className="rounded-xl border border-border bg-card p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-foreground">Notes</h2>
+  const columns: ColumnDef<NoteOut, unknown>[] = [
+    {
+      id: 'created_at',
+      header: 'Date',
+      cell: ({ row }) => (
+        <span className="whitespace-nowrap text-muted-foreground">{formatDateTime(row.original.created_at)}</span>
+      ),
+    },
+    {
+      id: 'author',
+      header: 'By',
+      cell: ({ row }) => <span className="whitespace-nowrap text-foreground">{personLabel(row.original.author)}</span>,
+    },
+    {
+      id: 'interaction_type',
+      header: 'Type',
+      cell: ({ row }) => <span className="text-muted-foreground">{row.original.interaction_type ?? '—'}</span>,
+    },
+    {
+      id: 'body',
+      header: 'Note',
+      cell: ({ row }) => <p className="whitespace-pre-wrap text-foreground">{row.original.body}</p>,
+    },
+    {
+      id: 'actions',
+      header: '',
+      cell: ({ row }) => (
+        <div className="flex items-center justify-end gap-2">
+          {canUpdate ? (
+            <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(row.original)} aria-label="Edit note">
+              <Pencil className="size-3.5" />
+            </button>
+          ) : null}
+          {canDelete ? (
+            <button type="button" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(row.original.uuid)} aria-label="Delete note">
+              <Trash2 className="size-3.5" />
+            </button>
+          ) : null}
+        </div>
+      ),
+    },
+  ];
 
+  return (
+    <div className="flex flex-col gap-4">
       {canCreate ? (
-        <form noValidate onSubmit={handleSubmit(onSubmit)} className="mt-3 flex flex-col gap-2">
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
           <RHFTextarea<NoteFormValues> name="body" control={control} placeholder="What was discussed / what they want…" minRow={2} />
           <div className="flex items-center gap-2">
             <div className="w-40">
@@ -111,36 +153,15 @@ export function LeadNotesPanel({
         </form>
       ) : null}
 
-      {notes.length === 0 ? (
-        <p className="mt-3 text-sm text-muted-foreground">No notes yet.</p>
-      ) : (
-        <ul className="mt-3 flex flex-col gap-3">
-          {notes.map((n) => (
-            <li key={n.uuid} className="rounded-lg border border-border bg-background p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-xs font-medium text-muted-foreground">
-                  {personLabel(n.author)}
-                  {n.interaction_type ? ` · ${n.interaction_type}` : ''}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{formatDateTime(n.created_at)}</span>
-                  {canUpdate ? (
-                    <button type="button" className="text-muted-foreground hover:text-foreground" onClick={() => startEdit(n)} aria-label="Edit note">
-                      <Pencil className="size-3.5" />
-                    </button>
-                  ) : null}
-                  {canDelete ? (
-                    <button type="button" className="text-muted-foreground hover:text-destructive" onClick={() => setDeleteId(n.uuid)} aria-label="Delete note">
-                      <Trash2 className="size-3.5" />
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-              <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{n.body}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+      <CommonTable<NoteOut>
+        columns={columns}
+        data={notes}
+        getRowId={(n) => n.uuid}
+        enablePagination
+        pageSize={LEAD_ACTIVITY_PAGE_SIZE}
+        density="compact"
+        emptyState="No notes yet."
+      />
 
       <ConfirmationPopUp
         open={deleteId !== null}
@@ -152,6 +173,6 @@ export function LeadNotesPanel({
           if (deleteId) deleteMutation.mutate({ noteUuid: deleteId });
         }}
       />
-    </section>
+    </div>
   );
 }

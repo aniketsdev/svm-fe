@@ -18,9 +18,11 @@ export interface LeadDetail {
   whatsapp_phone: string | null;
   email: string | null;
   estimated_annual_value: string | null;
+  address_line1: string | null;
+  address_line2: string | null;
   city: string | null;
   state: string | null;
-  address: string | null;
+  zip_code: string | null;
   stage: LeadDetailStage;
   source: SourceOut | null;
   assignee: AssigneeOut | null;
