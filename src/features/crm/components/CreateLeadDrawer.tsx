@@ -51,10 +51,12 @@ export function CreateLeadDrawer({ open, onClose, onCreated }: CreateLeadDrawerP
   };
 
   return (
-    <CustomDrawer anchor="right" title="Create lead" open={open} onClose={handleClose} drawerWidth="40rem">
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col gap-4">
-        <LeadFormFields control={control} />
-        <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pt-4">
+    <CustomDrawer anchor="right" title="Create lead" open={open} onClose={handleClose} drawerWidth="44rem" drawerPadding="0px">
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+          <LeadFormFields control={control} />
+        </div>
+        <div className="shrink-0 flex justify-end gap-3 border-t border-border bg-background px-6 py-4">
           <CustomButton type="button" variant="outline" onClick={handleClose} size="md">
             Cancel
           </CustomButton>
