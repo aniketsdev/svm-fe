@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import {
   Boxes,
+  ClipboardCheck,
+  Contact,
   Factory,
   Home,
   PackageSearch,
@@ -34,7 +36,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Inventory', path: '/inventory', icon: <PackageSearch className={ICON} /> },
       { label: 'Processing', path: '/processing', icon: <Workflow className={ICON} /> },
       { label: 'Manufacturing', path: '/manufacturing', icon: <Factory className={ICON} /> },
-      { label: 'Sales & Dispatch', path: '/dispatch', icon: <Truck className={ICON} /> },
+      { label: 'Dispatch / Challans', path: '/dispatch', icon: <Truck className={ICON} /> },
       // { label: 'Assessments', path: '/assessments', icon: <ClipboardCheck className={ICON} /> },
     ],
   },
@@ -49,6 +51,8 @@ export const NAV_GROUPS: NavGroup[] = [
         icon: <ShieldCheck className={ICON} />,
       },
       { label: 'Activity Log', path: '/activity-log', icon: <ScrollText className={ICON} /> },
+      { label: 'CRM', path: '/crm', icon: <Contact className={ICON} /> },
+      { label: 'My Follow-ups', path: '/crm/follow-ups', icon: <ClipboardCheck className={ICON} /> },
     ],
   },
   // {
