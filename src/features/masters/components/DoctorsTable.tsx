@@ -34,6 +34,7 @@ export function DoctorsTable({ doctors, loading }: { doctors: DoctorRow[]; loadi
       {
         accessorKey: 'is_active',
         header: 'Active',
+        meta: { align: 'center' },
         cell: ({ row }) => <ActivePill active={row.original.is_active} />,
       },
     ],

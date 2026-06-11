@@ -55,6 +55,7 @@ export function StockTable({ stock, loading, page, pageSize, total, onPagination
       {
         accessorKey: 'item_type',
         header: 'Type',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
             {inventoryTypeLabel(row.original.item_type)}
@@ -64,6 +65,7 @@ export function StockTable({ stock, loading, page, pageSize, total, onPagination
       {
         accessorKey: 'quantity',
         header: 'On hand',
+        meta: { align: 'center' },
         cell: ({ row }) => {
           const q = row.original.quantity;
           const status = stockStatus(q);
@@ -82,6 +84,7 @@ export function StockTable({ stock, loading, page, pageSize, total, onPagination
       {
         id: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <StatusPill status={stockStatus(row.original.quantity)} />,
       },
     ],

@@ -47,6 +47,7 @@ export function GrnsTable({ grns, loading, onRowClick, page, pageSize, total, on
       {
         accessorKey: 'received_date',
         header: 'Received',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="text-muted-foreground">{formatDate(row.original.received_date)}</span>
         ),
@@ -54,6 +55,7 @@ export function GrnsTable({ grns, loading, onRowClick, page, pageSize, total, on
       {
         accessorKey: 'grand_total',
         header: 'Total',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="font-medium tabular-nums text-foreground">
             {formatCurrency(Number(row.original.grand_total))}
@@ -63,6 +65,7 @@ export function GrnsTable({ grns, loading, onRowClick, page, pageSize, total, on
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <GrnStatusBadge status={row.original.status} />,
       },
     ],

@@ -42,6 +42,7 @@ export function ProcessingTable({ orders, loading, onRowClick, page, pageSize, t
       {
         accessorKey: 'quantity_to_consume',
         header: 'Consume',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">{row.original.quantity_to_consume}</span>
         ),
@@ -49,6 +50,7 @@ export function ProcessingTable({ orders, loading, onRowClick, page, pageSize, t
       {
         accessorKey: 'output_quantity',
         header: 'Output',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">{row.original.output_quantity ?? '—'}</span>
         ),
@@ -56,11 +58,13 @@ export function ProcessingTable({ orders, loading, onRowClick, page, pageSize, t
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <ProcessingStatusBadge status={row.original.status} />,
       },
       {
         accessorKey: 'created_at',
         header: 'Created',
+        meta: { align: 'center' },
         cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.created_at)}</span>,
       },
     ],

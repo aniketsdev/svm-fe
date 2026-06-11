@@ -17,7 +17,7 @@ export const leadSchema = z.object({
   estimated_annual_value: z
     .string()
     .trim()
-    .refine((v) => !v || !Number.isNaN(Number(v)), 'Must be a number')
+    .refine((v) => !v || (!Number.isNaN(Number(v)) && Number(v) > 0), 'Must be a positive number')
     .optional(),
   address_line1: z.string().trim().max(200).optional(),
   address_line2: z.string().trim().max(200).optional(),

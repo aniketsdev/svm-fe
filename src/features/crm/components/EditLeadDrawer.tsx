@@ -3,7 +3,7 @@ import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
-import { errorMessage } from '../../../utils/api-messages';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminUpdateLead } from '../../../sdk/crm';
 import type { LeadDetail } from '../../../sdk/schemas';
 import { useEditLeadForm } from '../hooks/useEditLeadForm';
@@ -43,8 +43,8 @@ export function EditLeadDrawer({ lead, onClose, onUpdated }: EditLeadDrawerProps
 
   const updateMutation = useAdminUpdateLead({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Lead updated.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Lead updated.') });
         onUpdated();
         onClose();
       },

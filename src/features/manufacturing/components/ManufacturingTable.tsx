@@ -30,6 +30,7 @@ export function ManufacturingTable({ orders, loading, onRowClick, page, pageSize
       {
         accessorKey: 'planned_output_qty',
         header: 'Planned',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">
             {row.original.planned_output_qty}
@@ -40,6 +41,7 @@ export function ManufacturingTable({ orders, loading, onRowClick, page, pageSize
       {
         accessorKey: 'actual_output_qty',
         header: 'Produced',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">{row.original.actual_output_qty ?? '—'}</span>
         ),
@@ -47,6 +49,7 @@ export function ManufacturingTable({ orders, loading, onRowClick, page, pageSize
       {
         accessorKey: 'yield',
         header: 'Yield',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-muted-foreground">{row.original.yield ?? '—'}</span>
         ),
@@ -54,11 +57,13 @@ export function ManufacturingTable({ orders, loading, onRowClick, page, pageSize
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <ManufacturingStatusBadge status={row.original.status} />,
       },
       {
         accessorKey: 'created_at',
         header: 'Created',
+        meta: { align: 'center' },
         cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.created_at)}</span>,
       },
     ],

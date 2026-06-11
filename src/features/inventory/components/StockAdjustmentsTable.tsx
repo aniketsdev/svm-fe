@@ -50,6 +50,7 @@ export function StockAdjustmentsTable({ adjustments, loading, onRowClick, page, 
       {
         accessorKey: 'delta_quantity',
         header: 'Δ Qty',
+        meta: { align: 'center' },
         cell: ({ row }) => {
           const d = row.original.delta_quantity;
           const negative = d.trim().startsWith('-');
@@ -63,6 +64,7 @@ export function StockAdjustmentsTable({ adjustments, loading, onRowClick, page, 
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <DocStatusBadge status={row.original.status} />,
       },
     ],

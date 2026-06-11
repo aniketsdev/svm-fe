@@ -145,7 +145,7 @@ export function StockMovementsTab() {
           <div className="w-44">
             <CustomSelect name="store" placeholder="Store" value={storeId} items={storeItems} onChange={(e) => { setStoreId(e.target.value); resetPage(); }} />
           </div>
-          <div className="w-40">
+          <div className="w-44">
             <CustomSelect name="type" placeholder="Type" value={itemType} items={TYPE_ITEMS} onChange={(e) => { setItemType(e.target.value as ItemTypeFilter); resetPage(); }} />
           </div>
           {view === 'movements' && (
@@ -162,7 +162,7 @@ export function StockMovementsTab() {
             textData={{ placeholder: 'Search item, code, store or reference', btnTitle: 'Search' }}
             onSearch={(val) => { setSearch(val); resetPage(); }}
             hasStartSearchIcon
-            width="21rem"
+            width="20rem"
           />
           {hasFilters && (
             <CustomButton variant="outline" size="sm" icon={<RotateCcw className="size-4" />} onClick={resetFilters}>

@@ -56,17 +56,17 @@ export function AdjustmentsTab() {
           {total} {total === 1 ? 'adjustment' : 'adjustments'}
         </span>
         <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-          <div className="w-40">
+          <div className="w-44">
             <CustomSelect name="status" placeholder="Status" value={status} items={STATUS_ITEMS} onChange={(e) => handleStatus(e.target.value)} />
           </div>
-          <div className="w-48">
+          <div className="w-44">
             <CustomSelect name="reason" placeholder="Reason" value={reason} items={REASON_ITEMS} onChange={(e) => handleReason(e.target.value)} />
           </div>
           <CustomSearch
             textData={{ placeholder: 'Search adj. no. or material', btnTitle: 'Search' }}
             onSearch={handleSearch}
             hasStartSearchIcon
-            width="18rem"
+            width="20rem"
           />
           <CustomButton variant="primary" icon={<Plus className="size-4" />} onClick={() => setCreateOpen(true)}>
             New Adjustment

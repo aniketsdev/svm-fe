@@ -2,7 +2,7 @@ import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
-import { errorMessage } from '../../../utils/api-messages';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCreateLead } from '../../../sdk/crm';
 import type { LeadDetail } from '../../../sdk/schemas';
 import { useCreateLeadForm, toLeadBody, type LeadFormValues } from '../hooks/useCreateLeadForm';
@@ -23,7 +23,7 @@ export function CreateLeadDrawer({ open, onClose, onCreated }: CreateLeadDrawerP
     mutation: {
       onSuccess: (response) => {
         const body = (response as { data: LeadDetail }).data;
-        toast({ severity: 'success', message: 'Lead created.' });
+        toast({ severity: 'success', message: successMessage(response, 'Lead created.') });
         if (body.possible_duplicates && body.possible_duplicates.length > 0) {
           toast({
             severity: 'warning',

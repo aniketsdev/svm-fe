@@ -6,9 +6,17 @@ import {
   useReactTable,
   type ColumnDef,
   type Row,
+  type RowData,
   type SortingState,
   type Table as TanstackTable,
 } from '@tanstack/react-table';
+
+declare module '@tanstack/react-table' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  interface ColumnMeta<TData extends RowData, TValue> {
+    align?: 'left' | 'center' | 'right';
+  }
+}
 import { ChevronDown, ChevronsUpDown, ChevronUp } from 'lucide-react';
 import { useRef, useState, type ReactNode } from 'react';
 import { cn } from '../../lib/cn';
@@ -17,6 +25,12 @@ import TableSkeleton from './TableSkeleton';
 
 // Re-export TanStack Table types so legacy consumers' imports keep working.
 export type { ColumnDef, Row, TanstackTable as Table };
+
+function colAlign(align?: 'left' | 'center' | 'right'): string {
+  if (align === 'center') return 'text-center';
+  if (align === 'right') return 'text-right';
+  return '';
+}
 
 export interface CommonTableProps<TRow> {
   columns: ColumnDef<TRow, unknown>[];
@@ -159,6 +173,7 @@ export function CommonTable<TRow>({
                         'border-b border-border text-xs font-semibold uppercase tracking-wide text-muted-foreground',
                         cellPadding,
                         canSort && 'cursor-pointer select-none',
+                        colAlign(h.column.columnDef.meta?.align),
                       )}
                       onClick={canSort ? h.column.getToggleSortingHandler() : undefined}
                     >
@@ -198,7 +213,7 @@ export function CommonTable<TRow>({
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className={cn('text-foreground', cellPadding)}>
+                    <td key={cell.id} className={cn('text-foreground', cellPadding, colAlign(cell.column.columnDef.meta?.align))}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}

@@ -134,7 +134,7 @@ export function UsersPage() {
       {/* Toolbar — count left; filters + create right */}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-          <div className="w-40">
+          <div className="w-44">
             <CustomSelect
               name="status"
               placeholder="Status"
@@ -143,7 +143,7 @@ export function UsersPage() {
               onChange={(e) => handleStatus(e.target.value as AdminListUsersStatus)}
             />
           </div>
-          <div className="w-40">
+          <div className="w-44">
             <CustomSelect
               name="role"
               placeholder="Role"
@@ -156,7 +156,7 @@ export function UsersPage() {
             textData={{ placeholder: 'Search by email or name', btnTitle: 'Search' }}
             onSearch={handleSearch}
             hasStartSearchIcon
-            width="28rem"
+            width="20rem"
           />
         </div>
       </div>

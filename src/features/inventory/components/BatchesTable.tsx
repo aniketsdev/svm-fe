@@ -57,6 +57,7 @@ export function BatchesTable({ batches, loading, onRowClick, page, pageSize, tot
       {
         accessorKey: 'quantity',
         header: 'On hand',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">
             {row.original.quantity} {row.original.uom}
@@ -66,11 +67,13 @@ export function BatchesTable({ batches, loading, onRowClick, page, pageSize, tot
       {
         id: 'expiry',
         header: 'Expiry',
+        meta: { align: 'center' },
         cell: ({ row }) => <ExpiryCell date={row.original.expiry_date} days={row.original.days_remaining} />,
       },
       {
         id: 'fefo',
         header: 'FEFO',
+        meta: { align: 'center' },
         cell: ({ row }) =>
           row.original.fefo_rank != null ? (
             <span className="inline-flex size-6 items-center justify-center rounded-full bg-secondary text-xs font-medium text-secondary-foreground">
@@ -83,6 +86,7 @@ export function BatchesTable({ batches, loading, onRowClick, page, pageSize, tot
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <BatchStatusBadge status={row.original.status} />,
       },
     ],

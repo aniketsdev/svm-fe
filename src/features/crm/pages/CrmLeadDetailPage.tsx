@@ -3,7 +3,7 @@ import { ArrowLeft, Loader2, Pencil } from 'lucide-react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { CustomButton } from '../../../common/custom-buttons';
 import { useToast } from '../../../common/common-snackbar';
-import { errorMessage } from '../../../utils/api-messages';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminChangeLeadStage, useAdminReopenLead } from '../../../sdk/crm';
 import { formatValue, personLabel, type Stage } from '../api/crm';
 import { useLeadDetail } from '../hooks/useLeadDetail';
@@ -42,10 +42,10 @@ export function CrmLeadDetailPage() {
 
   const onFail = (e: unknown) => toast({ severity: 'error', message: errorMessage(e) });
   const stageMutation = useAdminChangeLeadStage({
-    mutation: { onSuccess: () => { toast({ severity: 'success', message: 'Stage updated.' }); refetch(); }, onError: onFail },
+    mutation: { onSuccess: (res) => { toast({ severity: 'success', message: successMessage(res, 'Stage updated.') }); refetch(); }, onError: onFail },
   });
   const reopenMutation = useAdminReopenLead({
-    mutation: { onSuccess: () => { toast({ severity: 'success', message: 'Lead reopened.' }); refetch(); }, onError: onFail },
+    mutation: { onSuccess: (res) => { toast({ severity: 'success', message: successMessage(res, 'Lead reopened.') }); refetch(); }, onError: onFail },
   });
 
   const isClosed = lead ? lead.stage === 'WON' || lead.stage === 'LOST' : false;

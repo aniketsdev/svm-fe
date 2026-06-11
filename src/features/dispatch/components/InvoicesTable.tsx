@@ -41,6 +41,7 @@ export function InvoicesTable({ invoices, loading, onChangeStatus, page, pageSiz
       {
         accessorKey: 'created_at',
         header: 'Raised',
+        meta: { align: 'center' },
         cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.created_at)}</span>,
       },
       {

@@ -49,6 +49,7 @@ export function StockTransfersTable({ transfers, loading, onRowClick, page, page
       {
         accessorKey: 'requested_at',
         header: 'Requested',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="text-muted-foreground">{formatDate(row.original.requested_at)}</span>
         ),
@@ -56,6 +57,7 @@ export function StockTransfersTable({ transfers, loading, onRowClick, page, page
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <DocStatusBadge status={row.original.status} />,
       },
     ],

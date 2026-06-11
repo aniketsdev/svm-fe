@@ -41,6 +41,7 @@ export function MovementsTable({ movements, loading, onRowClick, page, pageSize,
       {
         id: 'when',
         header: 'When',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="whitespace-nowrap text-muted-foreground">
             {formatDateTime(row.original.created_at)}
@@ -75,6 +76,7 @@ export function MovementsTable({ movements, loading, onRowClick, page, pageSize,
       {
         accessorKey: 'direction',
         header: 'Direction',
+        meta: { align: 'center' },
         cell: ({ row }) => <DirectionBadge direction={row.original.direction} />,
       },
       {
@@ -87,6 +89,7 @@ export function MovementsTable({ movements, loading, onRowClick, page, pageSize,
       {
         accessorKey: 'quantity',
         header: 'Qty',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="font-medium tabular-nums text-foreground">
             {formatSignedInventoryQuantity(

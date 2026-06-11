@@ -69,13 +69,13 @@ export function BatchesTab() {
           <div className="w-44">
             <CustomSelect name="store" placeholder="Store" value={store} items={storeItems} onChange={(e) => { setStore(e.target.value); resetPage(); }} />
           </div>
-          <div className="w-40">
+          <div className="w-44">
             <CustomSelect name="type" placeholder="Type" value={type} items={TYPE_ITEMS} onChange={(e) => { setType(e.target.value); resetPage(); }} />
           </div>
-          <div className="w-40">
+          <div className="w-44">
             <CustomSelect name="status" placeholder="Status" value={status} items={STATUS_ITEMS} onChange={(e) => { setStatus(e.target.value); resetPage(); }} />
           </div>
-          <div className="w-32">
+          <div className="w-44">
             <CustomSelect name="strategy" placeholder="Strategy" value={strategy} items={STRATEGY_ITEMS} onChange={(e) => { setStrategy(e.target.value); resetPage(); }} />
           </div>
           <CustomSearch

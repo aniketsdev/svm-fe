@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import { CustomButton } from '../../../common/custom-buttons';
 import { useToast } from '../../../common/common-snackbar';
-import { errorMessage } from '../../../utils/api-messages';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCompleteReminder, useAdminCancelReminder } from '../../../sdk/crm';
 import type { ReminderWithLead } from '../../../sdk/schemas';
 import { useMyReminders } from '../hooks/useMyReminders';
@@ -20,14 +20,15 @@ export function MyFollowupsPage() {
   const { reminders, total, isLoading, refetch } = useMyReminders({ page, pageSize, due: true, owner: 'me' });
 
   const onFail = (e: unknown) => toast({ severity: 'error', message: errorMessage(e) });
-  const completeMutation = useAdminCompleteReminder({ mutation: { onSuccess: () => { toast({ severity: 'success', message: 'Marked done.' }); refetch(); }, onError: onFail } });
-  const cancelMutation = useAdminCancelReminder({ mutation: { onSuccess: () => { toast({ severity: 'success', message: 'Cancelled.' }); refetch(); }, onError: onFail } });
+  const completeMutation = useAdminCompleteReminder({ mutation: { onSuccess: (res) => { toast({ severity: 'success', message: successMessage(res, 'Marked done.') }); refetch(); }, onError: onFail } });
+  const cancelMutation = useAdminCancelReminder({ mutation: { onSuccess: (res) => { toast({ severity: 'success', message: successMessage(res, 'Cancelled.') }); refetch(); }, onError: onFail } });
 
   const columns = useMemo<ColumnDef<ReminderWithLead, unknown>[]>(
     () => [
       {
         id: 'due',
         header: 'Due',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className={`whitespace-nowrap text-sm ${row.original.is_overdue ? 'font-semibold text-warning' : 'text-foreground'}`}>
             {row.original.due_date}
@@ -52,6 +53,7 @@ export function MyFollowupsPage() {
       {
         id: 'actions',
         header: 'Action',
+        meta: { align: 'center' },
         cell: ({ row }) =>
           canUpdate ? (
             <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>

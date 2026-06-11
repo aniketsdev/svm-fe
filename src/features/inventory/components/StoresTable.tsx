@@ -30,6 +30,7 @@ export function StoresTable({ stores, loading, onEdit }: Props) {
       {
         accessorKey: 'store_type',
         header: 'Type',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
             {TYPE_LABEL[row.original.store_type] ?? row.original.store_type}
@@ -39,6 +40,7 @@ export function StoresTable({ stores, loading, onEdit }: Props) {
       {
         accessorKey: 'total_available_units',
         header: 'On hand',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="font-medium tabular-nums text-foreground">{row.original.total_available_units}</span>
         ),

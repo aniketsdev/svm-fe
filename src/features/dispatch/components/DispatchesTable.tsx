@@ -30,11 +30,13 @@ export function DispatchesTable({ dispatches, loading, onRowClick, page, pageSiz
       {
         accessorKey: 'line_count',
         header: 'Items',
+        meta: { align: 'center' },
         cell: ({ row }) => <span className="tabular-nums text-muted-foreground">{row.original.line_count}</span>,
       },
       {
         accessorKey: 'total_quantity',
         header: 'Qty',
+        meta: { align: 'center' },
         cell: ({ row }) => <span className="tabular-nums text-foreground">{row.original.total_quantity}</span>,
       },
       {
@@ -45,11 +47,13 @@ export function DispatchesTable({ dispatches, loading, onRowClick, page, pageSiz
       {
         accessorKey: 'payment_status',
         header: 'Payment',
+        meta: { align: 'center' },
         cell: ({ row }) => <PaymentStatusBadge status={row.original.payment_status} />,
       },
       {
         accessorKey: 'dispatch_date',
         header: 'Date',
+        meta: { align: 'center' },
         cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.dispatch_date)}</span>,
       },
     ],

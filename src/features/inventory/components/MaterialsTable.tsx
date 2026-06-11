@@ -27,6 +27,7 @@ export function MaterialsTable({ materials, loading, onEdit }: Props) {
       {
         accessorKey: 'material_type',
         header: 'Type',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
             {TYPE_LABEL[row.original.material_type] ?? row.original.material_type}

@@ -52,7 +52,7 @@ export function LeadsToolbar({
   return (
     <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
       <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-        <div className="w-40">
+        <div className="w-44">
           <CustomSelect
             name="stage"
             placeholder="Stage"
@@ -70,7 +70,7 @@ export function LeadsToolbar({
             onChange={(e) => onSource(e.target.value)}
           />
         </div>
-        <div className="w-48">
+        <div className="w-44">
           <CustomSelect
             name="assignee"
             placeholder="Assignee"
@@ -83,7 +83,7 @@ export function LeadsToolbar({
           textData={{ placeholder: 'Search by name, clinic, or phone', btnTitle: 'Search' }}
           onSearch={onSearch}
           hasStartSearchIcon
-          width="26rem"
+          width="20rem"
         />
       </div>
     </div>

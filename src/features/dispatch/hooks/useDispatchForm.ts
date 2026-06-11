@@ -13,7 +13,10 @@ const lineSchema = z.object({
 
 const dispatchSchema = z.object({
   customer_or_doctor: z.string().trim().max(200).optional(),
-  dispatch_date: z.string().trim().optional(),
+  dispatch_date: z.string().trim().optional().refine(
+    (v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v),
+    'Enter a valid date',
+  ),
   generate_invoice: z.boolean(),
   lines: z.array(lineSchema).min(1, 'Add at least one line'),
 });

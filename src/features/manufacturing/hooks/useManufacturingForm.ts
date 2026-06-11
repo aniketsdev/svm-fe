@@ -11,7 +11,10 @@ const manufacturingSchema = z.object({
     .refine((v) => Number(v) > 0, 'Enter a quantity greater than 0'),
   from_store_code: z.string().min(1, 'Raw-material store is required'),
   to_store_code: z.string().min(1, 'Finished-goods store is required'),
-  start_date: z.string().trim().optional(),
+  start_date: z.string().trim().optional().refine(
+    (v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v),
+    'Enter a valid date',
+  ),
 });
 
 export type ManufacturingFormValues = z.infer<typeof manufacturingSchema>;
@@ -37,7 +40,10 @@ const completeSchema = z.object({
     .string()
     .trim()
     .refine((v) => Number(v) > 0, 'Enter the produced quantity'),
-  expiry_date: z.string().trim().optional(),
+  expiry_date: z.string().trim().optional().refine(
+    (v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v),
+    'Enter a valid date',
+  ),
 });
 
 export type CompleteManufacturingFormValues = z.infer<typeof completeSchema>;
