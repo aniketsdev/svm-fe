@@ -137,10 +137,34 @@ async function rawFetchWithMeta<T = unknown>(
 // instead of stampeding the endpoint.
 let refreshPromise: Promise<boolean> | null = null;
 
+// Cross-tab lock name. The backend rotates the refresh token on every use and
+// treats reuse of a rotated token as theft (it revokes the whole session
+// chain). The module-level guard above only dedupes within one tab, so two
+// tabs hitting the 15-min expiry together would race /auth/refresh and the
+// loser would trigger that revocation. The Web Locks API serializes the
+// refresh across all tabs of the origin; where unavailable (non-secure
+// context, old browser), we fall back to the per-tab guard alone and rely on
+// the server's concurrent-refresh grace window.
+const REFRESH_LOCK_NAME = 'svm-auth-refresh';
+
+function withCrossTabLock<T>(fn: () => Promise<T>): Promise<T> {
+  const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined;
+  if (locks?.request) {
+    return locks.request(REFRESH_LOCK_NAME, fn) as Promise<T>;
+  }
+  return fn();
+}
+
 function ensureRefreshed(): Promise<boolean> {
   if (!refreshPromise) {
-    refreshPromise = rawFetchWithMeta(REFRESH_PATH, { method: 'POST' })
-      .then(() => true)
+    refreshPromise = withCrossTabLock(() =>
+      // By the time the lock is granted another tab may already have rotated
+      // the cookies; refreshing again with the (shared, now-current) cookie
+      // is still a valid rotation, so no staleness check is needed.
+      rawFetchWithMeta(REFRESH_PATH, { method: 'POST' })
+        .then(() => true)
+        .catch(() => false),
+    )
       .catch(() => false)
       .finally(() => {
         refreshPromise = null;
