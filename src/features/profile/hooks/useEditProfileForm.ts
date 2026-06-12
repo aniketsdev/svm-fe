@@ -5,7 +5,7 @@ import { z } from 'zod';
 // Mirrors the backend UpdateProfileRequest (feature 006): a partial update of
 // the signed-in user's own profile. Email and role are NOT part of this schema
 // — the backend uses `extra="forbid"`, so only these three fields are sent.
-// An empty (trimmed) value clears the field (submitted as null → "Not set").
+// Names are required; an empty (trimmed) phone clears it (null → "Not set").
 export const editProfileSchema = z.object({
   first_name: z
     .string()
