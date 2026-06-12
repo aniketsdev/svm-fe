@@ -74,18 +74,21 @@ export function RolesTable({
         accessorKey: 'type',
         header: 'Tier',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => <TierBadge tier={row.original.type} />,
       },
       {
         accessorKey: 'status',
         header: 'Status',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => <RoleStatusBadge status={row.original.status} />,
       },
       {
         id: 'permissions',
         header: 'Permissions',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="text-foreground">{row.original.permissions.length}</span>
         ),
@@ -94,6 +97,7 @@ export function RolesTable({
         id: 'updated',
         header: 'Updated',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="whitespace-nowrap text-muted-foreground">
             {formatDateTime(row.original.updated_at)}
@@ -107,6 +111,7 @@ export function RolesTable({
         id: 'actions',
         header: 'Action',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => {
           const role = row.original;
           const items: ActionMenuItem[] = [

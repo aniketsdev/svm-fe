@@ -8,9 +8,13 @@ interface GrnsTableProps {
   grns: GrnRow[];
   loading: boolean;
   onRowClick: (grn: GrnRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function GrnsTable({ grns, loading, onRowClick }: GrnsTableProps) {
+export function GrnsTable({ grns, loading, onRowClick, page, pageSize, total, onPaginationChange }: GrnsTableProps) {
   const columns = useMemo<ColumnDef<GrnRow, unknown>[]>(
     () => [
       {
@@ -43,6 +47,7 @@ export function GrnsTable({ grns, loading, onRowClick }: GrnsTableProps) {
       {
         accessorKey: 'received_date',
         header: 'Received',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="text-muted-foreground">{formatDate(row.original.received_date)}</span>
         ),
@@ -50,6 +55,7 @@ export function GrnsTable({ grns, loading, onRowClick }: GrnsTableProps) {
       {
         accessorKey: 'grand_total',
         header: 'Total',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="font-medium tabular-nums text-foreground">
             {formatCurrency(Number(row.original.grand_total))}
@@ -59,6 +65,7 @@ export function GrnsTable({ grns, loading, onRowClick }: GrnsTableProps) {
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <GrnStatusBadge status={row.original.status} />,
       },
     ],
@@ -72,8 +79,12 @@ export function GrnsTable({ grns, loading, onRowClick }: GrnsTableProps) {
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={12}
-      getRowId={(row) => String(row.id)}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
+      getRowId={(row) => row.uuid}
       onRowClick={onRowClick}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">

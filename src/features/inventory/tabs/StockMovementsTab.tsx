@@ -13,7 +13,7 @@ import { StockTable } from '../components/StockTable';
 import { MovementsTable } from '../components/MovementsTable';
 import { MovementDetailDrawer } from '../components/MovementDetailDrawer';
 
-const PAGE_LIMIT = 500;
+const PAGE_SIZE = 25;
 const ALL = 'all';
 
 const TYPE_ITEMS = [
@@ -50,8 +50,7 @@ type KindFilter =
   | 'hold'
   | 'release';
 
-/** Stock-on-hand + movement-ledger view (extracted from the original Inventory
- *  page so it can live as the "Stock" tab of the tabbed Inventory shell). */
+/** Stock-on-hand + movement-ledger view. */
 export function StockMovementsTab() {
   const [view, setView] = useState<View>('stock');
   const [selectedMovement, setSelectedMovement] = useState<MovementRow | null>(null);
@@ -60,30 +59,36 @@ export function StockMovementsTab() {
   const [itemType, setItemType] = useState<ItemTypeFilter>(ALL);
   const [direction, setDirection] = useState<DirectionFilter>(ALL);
   const [kind, setKind] = useState<KindFilter>(ALL);
+  const [stockPage, setStockPage] = useState(0);
+  const [movePage, setMovePage] = useState(0);
 
   const { stores } = useInventoryOptions();
   const storeItems = useMemo(
-    () => [{ value: ALL, label: 'All stores' }, ...stores.map((s) => ({ value: String(s.id), label: s.store_name }))],
+    () => [{ value: ALL, label: 'All stores' }, ...stores.map((s) => ({ value: s.uuid, label: s.store_name }))],
     [stores],
   );
 
   const stockFilters = useMemo<AdminListStockParams>(
     () => ({
       search: search || undefined,
-      store_id: storeId === ALL ? undefined : Number(storeId),
+      store_uuid: storeId === ALL ? undefined : storeId,
       item_type: itemType === ALL ? undefined : itemType,
-      limit: PAGE_LIMIT,
-      offset: 0,
+      limit: PAGE_SIZE,
+      offset: stockPage * PAGE_SIZE,
     }),
-    [itemType, search, storeId],
+    [itemType, search, storeId, stockPage],
   );
   const movementFilters = useMemo<AdminListStockMovementsParams>(
     () => ({
-      ...stockFilters,
+      search: search || undefined,
+      store_uuid: storeId === ALL ? undefined : storeId,
+      item_type: itemType === ALL ? undefined : itemType,
       direction: direction === ALL ? undefined : direction,
       kind: kind === ALL ? undefined : kind,
+      limit: PAGE_SIZE,
+      offset: movePage * PAGE_SIZE,
     }),
-    [direction, kind, stockFilters],
+    [direction, kind, itemType, search, storeId, movePage],
   );
 
   const { stock, count: stockCount, isLoading: stockLoading } = useStock(stockFilters);
@@ -95,19 +100,27 @@ export function StockMovementsTab() {
     setItemType(ALL);
     setDirection(ALL);
     setKind(ALL);
+    setStockPage(0);
+    setMovePage(0);
+  };
+  const resetPage = () => {
+    setStockPage(0);
+    setMovePage(0);
   };
   const hasFilters =
     Boolean(search) || storeId !== ALL || itemType !== ALL || direction !== ALL || kind !== ALL;
-  const count = view === 'stock' ? stockCount : movementCount;
-  const shown = view === 'stock' ? stock.length : movements.length;
+
+  const switchView = (v: View) => {
+    setView(v);
+    resetPage();
+  };
 
   return (
     <div className="flex flex-col">
       <InventorySummary
-        stock={stock}
         stockTotal={stockCount}
-        movements={movements}
         movementTotal={movementCount}
+        lastMovementAt={movements[0]?.created_at}
       />
 
       <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
@@ -116,7 +129,7 @@ export function StockMovementsTab() {
             <button
               key={v}
               type="button"
-              onClick={() => setView(v)}
+              onClick={() => switchView(v)}
               aria-pressed={view === v}
               className={cn(
                 'rounded-md px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -130,26 +143,26 @@ export function StockMovementsTab() {
 
         <div className="flex flex-wrap items-center gap-3 lg:justify-end">
           <div className="w-44">
-            <CustomSelect name="store" placeholder="Store" value={storeId} items={storeItems} onChange={(e) => setStoreId(e.target.value)} />
+            <CustomSelect name="store" placeholder="Store" value={storeId} items={storeItems} onChange={(e) => { setStoreId(e.target.value); resetPage(); }} />
           </div>
-          <div className="w-40">
-            <CustomSelect name="type" placeholder="Type" value={itemType} items={TYPE_ITEMS} onChange={(e) => setItemType(e.target.value as ItemTypeFilter)} />
+          <div className="w-44">
+            <CustomSelect name="type" placeholder="Type" value={itemType} items={TYPE_ITEMS} onChange={(e) => { setItemType(e.target.value as ItemTypeFilter); resetPage(); }} />
           </div>
           {view === 'movements' && (
             <>
               <div className="w-44">
-                <CustomSelect name="direction" placeholder="Direction" value={direction} items={DIRECTION_ITEMS} onChange={(e) => setDirection(e.target.value as DirectionFilter)} />
+                <CustomSelect name="direction" placeholder="Direction" value={direction} items={DIRECTION_ITEMS} onChange={(e) => { setDirection(e.target.value as DirectionFilter); resetPage(); }} />
               </div>
               <div className="w-44">
-                <CustomSelect name="reason" placeholder="Reason" value={kind} items={KIND_ITEMS} onChange={(e) => setKind(e.target.value as KindFilter)} />
+                <CustomSelect name="reason" placeholder="Reason" value={kind} items={KIND_ITEMS} onChange={(e) => { setKind(e.target.value as KindFilter); resetPage(); }} />
               </div>
             </>
           )}
           <CustomSearch
             textData={{ placeholder: 'Search item, code, store or reference', btnTitle: 'Search' }}
-            onSearch={setSearch}
+            onSearch={(val) => { setSearch(val); resetPage(); }}
             hasStartSearchIcon
-            width="21rem"
+            width="20rem"
           />
           {hasFilters && (
             <CustomButton variant="outline" size="sm" icon={<RotateCcw className="size-4" />} onClick={resetFilters}>
@@ -159,17 +172,26 @@ export function StockMovementsTab() {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          Showing {shown} of {count} {count === 1 ? 'record' : 'records'}
-        </span>
-      </div>
-
       <div className="mt-3 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         {view === 'stock' ? (
-          <StockTable stock={stock} loading={stockLoading} />
+          <StockTable
+            stock={stock}
+            loading={stockLoading}
+            page={stockPage}
+            pageSize={PAGE_SIZE}
+            total={stockCount}
+            onPaginationChange={({ pageIndex }) => setStockPage(pageIndex)}
+          />
         ) : (
-          <MovementsTable movements={movements} loading={movementLoading} onRowClick={setSelectedMovement} />
+          <MovementsTable
+            movements={movements}
+            loading={movementLoading}
+            onRowClick={setSelectedMovement}
+            page={movePage}
+            pageSize={PAGE_SIZE}
+            total={movementCount}
+            onPaginationChange={({ pageIndex }) => setMovePage(pageIndex)}
+          />
         )}
       </div>
 

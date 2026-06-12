@@ -27,7 +27,7 @@ export function SignInPage() {
         // For a 200 response, `response.data` is the LoginResponse body.
         // Server has already set __Host-access / __Host-refresh / csrf_token
         // cookies; we just prime the in-memory user.
-        const loginBody = (response as { data: { user: { id: number; email: string; role: 'admin' | 'staff' | 'user' } } }).data;
+        const loginBody = (response as { data: { user: { uuid: string; email: string; role: 'admin' | 'staff' | 'user' } } }).data;
         signIn({ ...loginBody.user, is_active: true });
         toast({ severity: 'success', message: 'Welcome back!' });
         setTimeout(() => navigate('/dashboard'), 300);

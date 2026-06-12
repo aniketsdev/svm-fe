@@ -23,9 +23,13 @@ interface Props {
   batches: BatchRow[];
   loading: boolean;
   onRowClick: (b: BatchRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function BatchesTable({ batches, loading, onRowClick }: Props) {
+export function BatchesTable({ batches, loading, onRowClick, page, pageSize, total, onPaginationChange }: Props) {
   const columns = useMemo<ColumnDef<BatchRow, unknown>[]>(
     () => [
       {
@@ -53,6 +57,7 @@ export function BatchesTable({ batches, loading, onRowClick }: Props) {
       {
         accessorKey: 'quantity',
         header: 'On hand',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">
             {row.original.quantity} {row.original.uom}
@@ -62,11 +67,13 @@ export function BatchesTable({ batches, loading, onRowClick }: Props) {
       {
         id: 'expiry',
         header: 'Expiry',
+        meta: { align: 'center' },
         cell: ({ row }) => <ExpiryCell date={row.original.expiry_date} days={row.original.days_remaining} />,
       },
       {
         id: 'fefo',
         header: 'FEFO',
+        meta: { align: 'center' },
         cell: ({ row }) =>
           row.original.fefo_rank != null ? (
             <span className="inline-flex size-6 items-center justify-center rounded-full bg-secondary text-xs font-medium text-secondary-foreground">
@@ -79,6 +86,7 @@ export function BatchesTable({ batches, loading, onRowClick }: Props) {
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <BatchStatusBadge status={row.original.status} />,
       },
     ],
@@ -92,8 +100,12 @@ export function BatchesTable({ batches, loading, onRowClick }: Props) {
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={15}
-      getRowId={(row) => String(row.batch_id)}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
+      getRowId={(row) => row.batch_uuid}
       onRowClick={onRowClick}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">

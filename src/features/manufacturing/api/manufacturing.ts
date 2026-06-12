@@ -27,16 +27,16 @@ export function manufacturingQueryOptions(params: AdminListManufacturingOrdersPa
   return getAdminListManufacturingOrdersQueryOptions(params);
 }
 
-export function manufacturingDetailQueryOptions(orderId: number | null) {
-  return getAdminGetManufacturingOrderQueryOptions(orderId ?? 0, {
-    query: { enabled: orderId !== null },
+export function manufacturingDetailQueryOptions(orderUuid: string | null) {
+  return getAdminGetManufacturingOrderQueryOptions(orderUuid ?? '', {
+    query: { enabled: orderUuid !== null },
   });
 }
 
-export function manufacturingPreviewQueryOptions(orderId: number | null, enabled: boolean) {
+export function manufacturingPreviewQueryOptions(orderUuid: string | null, enabled: boolean) {
   return getAdminPreviewManufacturingOrderQueryOptions(
-    orderId ?? 0,
+    orderUuid ?? '',
     undefined,
-    { query: { enabled: orderId !== null && enabled } },
+    { query: { enabled: orderUuid !== null && enabled } },
   );
 }

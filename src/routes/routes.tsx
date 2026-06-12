@@ -107,6 +107,9 @@ const ManufacturingPage = lazyWithPreload(() =>
 const DashboardPage = lazyWithPreload(() =>
   import('../features/dashboard/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
 );
+const DispatchPage = lazyWithPreload(() =>
+  import('../features/dispatch/pages/DispatchPage').then((m) => ({ default: m.DispatchPage })),
+);
 const CrmPage = lazyWithPreload(() =>
   import('../features/crm/pages/CrmPage').then((m) => ({ default: m.CrmPage })),
 );
@@ -217,6 +220,7 @@ export default function AppRoutes() {
         <Route path="inventory" element={<InventoryPage />} />
         <Route path="processing" element={<ProcessingPage />} />
         <Route path="manufacturing" element={<ManufacturingPage />} />
+        <Route path="dispatch" element={<DispatchPage />} />
         <Route path="scheduling" element={<SchedulingPlaceholder />} />
         <Route path="clients" element={<ClientsPlaceholder />} />
         <Route path="clients/:clientUuid" element={<ClientDetailPlaceholder />} />

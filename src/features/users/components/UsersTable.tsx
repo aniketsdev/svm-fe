@@ -61,18 +61,21 @@ export function UsersTable({
         accessorKey: 'role',
         header: 'Role',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => <RoleBadge role={row.original.role} />,
       },
       {
         accessorKey: 'is_active',
         header: 'Active',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => <StatusPill active={row.original.is_active} />,
       },
       {
         id: 'last_login',
         header: 'Last login',
         // Server sorts this column (sort=last_login).
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="whitespace-nowrap text-muted-foreground">
             {formatDateTime(row.original.last_login_at)}
@@ -83,6 +86,7 @@ export function UsersTable({
         id: 'actions',
         header: 'Action',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => {
           const u = row.original;
           const items: ActionMenuItem[] = [

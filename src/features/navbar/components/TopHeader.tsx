@@ -28,7 +28,7 @@ export function TopHeader({ onOpenNav }: TopHeaderProps) {
 
       {/* Brand line (desktop) */}
       <div className="hidden md:block">
-        <p className="text-sm font-semibold leading-tight text-foreground">Ayurvedic Operations</p>
+        <p className="text-sm font-semibold leading-tight text-foreground">Vishwarang Ayurved OPS</p>
         <p className="text-xs leading-tight text-muted-foreground">
           Production-grade workflow console
         </p>

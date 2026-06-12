@@ -43,11 +43,13 @@ export function RawMaterialsTable({
       {
         accessorKey: 'is_active',
         header: 'Active',
+        meta: { align: 'center' },
         cell: ({ row }) => <ActivePill active={row.original.is_active} />,
       },
       {
         accessorKey: 'created_at',
         header: 'Created',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="text-muted-foreground">{formatDate(row.original.created_at)}</span>
         ),

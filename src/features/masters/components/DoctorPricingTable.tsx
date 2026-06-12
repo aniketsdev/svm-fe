@@ -25,6 +25,7 @@ export function DoctorPricingTable({
       {
         accessorKey: 'price',
         header: 'Price',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">{formatCurrency(row.original.price)}</span>
         ),
@@ -32,11 +33,13 @@ export function DoctorPricingTable({
       {
         accessorKey: 'valid_from',
         header: 'Valid from',
+        meta: { align: 'center' },
         cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.valid_from)}</span>,
       },
       {
         accessorKey: 'valid_to',
         header: 'Valid to',
+        meta: { align: 'center' },
         cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.valid_to)}</span>,
       },
     ],

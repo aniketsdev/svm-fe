@@ -8,9 +8,13 @@ interface Props {
   orders: ManufacturingRow[];
   loading: boolean;
   onRowClick: (o: ManufacturingRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function ManufacturingTable({ orders, loading, onRowClick }: Props) {
+export function ManufacturingTable({ orders, loading, onRowClick, page, pageSize, total, onPaginationChange }: Props) {
   const columns = useMemo<ColumnDef<ManufacturingRow, unknown>[]>(
     () => [
       {
@@ -26,6 +30,7 @@ export function ManufacturingTable({ orders, loading, onRowClick }: Props) {
       {
         accessorKey: 'planned_output_qty',
         header: 'Planned',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">
             {row.original.planned_output_qty}
@@ -36,6 +41,7 @@ export function ManufacturingTable({ orders, loading, onRowClick }: Props) {
       {
         accessorKey: 'actual_output_qty',
         header: 'Produced',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">{row.original.actual_output_qty ?? '—'}</span>
         ),
@@ -43,6 +49,7 @@ export function ManufacturingTable({ orders, loading, onRowClick }: Props) {
       {
         accessorKey: 'yield',
         header: 'Yield',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-muted-foreground">{row.original.yield ?? '—'}</span>
         ),
@@ -50,11 +57,13 @@ export function ManufacturingTable({ orders, loading, onRowClick }: Props) {
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <ManufacturingStatusBadge status={row.original.status} />,
       },
       {
         accessorKey: 'created_at',
         header: 'Created',
+        meta: { align: 'center' },
         cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.created_at)}</span>,
       },
     ],
@@ -68,8 +77,12 @@ export function ManufacturingTable({ orders, loading, onRowClick }: Props) {
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={12}
-      getRowId={(row) => String(row.id)}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
+      getRowId={(row) => row.uuid}
       onRowClick={onRowClick}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">

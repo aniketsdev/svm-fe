@@ -29,14 +29,19 @@ interface MovementsTableProps {
   movements: MovementRow[];
   loading: boolean;
   onRowClick?: (movement: MovementRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function MovementsTable({ movements, loading, onRowClick }: MovementsTableProps) {
+export function MovementsTable({ movements, loading, onRowClick, page, pageSize, total, onPaginationChange }: MovementsTableProps) {
   const columns = useMemo<ColumnDef<MovementRow, unknown>[]>(
     () => [
       {
         id: 'when',
         header: 'When',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="whitespace-nowrap text-muted-foreground">
             {formatDateTime(row.original.created_at)}
@@ -71,6 +76,7 @@ export function MovementsTable({ movements, loading, onRowClick }: MovementsTabl
       {
         accessorKey: 'direction',
         header: 'Direction',
+        meta: { align: 'center' },
         cell: ({ row }) => <DirectionBadge direction={row.original.direction} />,
       },
       {
@@ -83,6 +89,7 @@ export function MovementsTable({ movements, loading, onRowClick }: MovementsTabl
       {
         accessorKey: 'quantity',
         header: 'Qty',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="font-medium tabular-nums text-foreground">
             {formatSignedInventoryQuantity(
@@ -118,7 +125,11 @@ export function MovementsTable({ movements, loading, onRowClick }: MovementsTabl
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={15}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
       getRowId={(row) => String(row.id)}
       onRowClick={onRowClick}
       emptyState={

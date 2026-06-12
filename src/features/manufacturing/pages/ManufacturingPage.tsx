@@ -17,22 +17,28 @@ const STATUS_ITEMS = [
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
+const PAGE_SIZE = 25;
+
 export function ManufacturingPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [selected, setSelected] = useState<ManufacturingRow | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState(ALL);
+  const [page, setPage] = useState(0);
 
   const params = useMemo<AdminListManufacturingOrdersParams>(
     () => ({
       search: search || undefined,
       status: status === ALL ? undefined : status,
-      limit: 100,
-      offset: 0,
+      limit: PAGE_SIZE,
+      offset: page * PAGE_SIZE,
     }),
-    [search, status],
+    [search, status, page],
   );
   const { orders, total, isLoading, refetch } = useManufacturingOrders(params);
+
+  const handleSearch = (val: string) => { setSearch(val); setPage(0); };
+  const handleStatus = (val: string) => { setStatus(val); setPage(0); };
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
@@ -60,12 +66,12 @@ export function ManufacturingPage() {
               placeholder="Status"
               value={status}
               items={STATUS_ITEMS}
-              onChange={(e) => setStatus(e.target.value)}
+              onChange={(e) => handleStatus(e.target.value)}
             />
           </div>
           <CustomSearch
             textData={{ placeholder: 'Search MO no. or product', btnTitle: 'Search' }}
-            onSearch={setSearch}
+            onSearch={handleSearch}
             hasStartSearchIcon
             width="22rem"
           />
@@ -73,7 +79,15 @@ export function ManufacturingPage() {
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <ManufacturingTable orders={orders} loading={isLoading} onRowClick={setSelected} />
+        <ManufacturingTable
+          orders={orders}
+          loading={isLoading}
+          onRowClick={setSelected}
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPaginationChange={({ pageIndex }) => setPage(pageIndex)}
+        />
       </div>
 
       <CreateManufacturingDrawer open={createOpen} onClose={() => setCreateOpen(false)} onCreated={refetch} />

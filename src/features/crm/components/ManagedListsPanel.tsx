@@ -3,7 +3,7 @@ import { CustomButton } from '../../../common/custom-buttons';
 import { RHFInput, RHFSelect } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
-import { errorMessage } from '../../../utils/api-messages';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import {
   useAdminCreateLeadSource,
   useAdminUpdateLeadSource,
@@ -36,8 +36,8 @@ export function ManagedListsPanel() {
 
   const createSource = useAdminCreateLeadSource({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Source added.' });
+      onSuccess: (res) => {
+        toast({ severity: 'success', message: successMessage(res, 'Source added.') });
         sourceForm.reset({ name: '' });
         sourcesQuery.refetch();
       },
@@ -62,8 +62,8 @@ export function ManagedListsPanel() {
 
   const createReason = useAdminCreateClosureReason({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Closure reason added.' });
+      onSuccess: (res) => {
+        toast({ severity: 'success', message: successMessage(res, 'Closure reason added.') });
         reasonForm.reset({ name: '', outcome: 'LOST' });
         reasonsQuery.refetch();
       },

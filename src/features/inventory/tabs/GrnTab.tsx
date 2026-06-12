@@ -9,6 +9,7 @@ import { CreateGrnDrawer } from '../components/CreateGrnDrawer';
 import { GrnDetailDrawer } from '../components/GrnDetailDrawer';
 import type { AdminListGrnsParams, GrnRow } from '../api/grn';
 
+const PAGE_SIZE = 25;
 const ALL = 'all';
 const STATUS_ITEMS = [
   { value: ALL, label: 'All statuses' },
@@ -22,17 +23,21 @@ export function GrnTab() {
   const [selected, setSelected] = useState<GrnRow | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState(ALL);
+  const [page, setPage] = useState(0);
 
   const params = useMemo<AdminListGrnsParams>(
     () => ({
       search: search || undefined,
       status: status === ALL ? undefined : status,
-      limit: 100,
-      offset: 0,
+      limit: PAGE_SIZE,
+      offset: page * PAGE_SIZE,
     }),
-    [search, status],
+    [search, status, page],
   );
   const { grns, total, isLoading, refetch } = useGrns(params);
+
+  const handleSearch = (val: string) => { setSearch(val); setPage(0); };
+  const handleStatus = (val: string) => { setStatus(val); setPage(0); };
 
   return (
     <div className="flex flex-col">
@@ -47,12 +52,12 @@ export function GrnTab() {
               placeholder="Status"
               value={status}
               items={STATUS_ITEMS}
-              onChange={(e) => setStatus(e.target.value)}
+              onChange={(e) => handleStatus(e.target.value)}
             />
           </div>
           <CustomSearch
             textData={{ placeholder: 'Search GRN no., supplier or store', btnTitle: 'Search' }}
-            onSearch={setSearch}
+            onSearch={handleSearch}
             hasStartSearchIcon
             width="20rem"
           />
@@ -63,7 +68,15 @@ export function GrnTab() {
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <GrnsTable grns={grns} loading={isLoading} onRowClick={setSelected} />
+        <GrnsTable
+          grns={grns}
+          loading={isLoading}
+          onRowClick={setSelected}
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPaginationChange={({ pageIndex }) => setPage(pageIndex)}
+        />
       </div>
 
       <CreateGrnDrawer open={createOpen} onClose={() => setCreateOpen(false)} onCreated={refetch} />

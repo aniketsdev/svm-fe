@@ -4,7 +4,7 @@ import { ProfileDetails } from '../ProfileDetails';
 import type { MeResponse } from '../../../../sdk/schemas';
 
 const baseUser: MeResponse = {
-  id: 1,
+  uuid: '11111111-1111-1111-1111-111111111111',
   email: 'jyoti.varade@example.com',
   role: 'admin',
   is_active: true,

@@ -39,7 +39,10 @@ const completeSchema = z.object({
     .string()
     .trim()
     .refine((v) => Number(v) > 0, 'Enter the produced quantity'),
-  expiry_date: z.string().trim().optional(),
+  expiry_date: z.string().trim().optional().refine(
+    (v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v),
+    'Enter a valid date',
+  ),
 });
 
 export type CompleteProcessingFormValues = z.infer<typeof completeSchema>;

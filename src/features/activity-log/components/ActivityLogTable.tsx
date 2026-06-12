@@ -33,6 +33,7 @@ export function ActivityLogTable({
       {
         id: 'when',
         header: 'When',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span
             className="whitespace-nowrap text-muted-foreground"

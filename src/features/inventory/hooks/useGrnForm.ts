@@ -15,15 +15,24 @@ const lineSchema = z.object({
     .string()
     .trim()
     .refine((v) => v !== '' && Number(v) >= 0, 'Enter a valid rate'),
-  expiry_date: z.string().trim().optional(),
+  expiry_date: z.string().trim().optional().refine(
+    (v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v),
+    'Enter a valid date',
+  ),
 });
 
 const grnSchema = z.object({
   supplier_code: z.string().trim().min(1, 'Supplier is required').max(100),
   store_code: z.string().min(1, 'Store is required'),
   vendor_invoice_no: z.string().trim().max(100).optional(),
-  vendor_invoice_date: z.string().trim().optional(),
-  received_date: z.string().trim().optional(),
+  vendor_invoice_date: z.string().trim().optional().refine(
+    (v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v),
+    'Enter a valid date',
+  ),
+  received_date: z.string().trim().optional().refine(
+    (v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v),
+    'Enter a valid date',
+  ),
   notes: z.string().trim().max(500).optional(),
   lines: z.array(lineSchema).min(1, 'Add at least one line'),
 });
