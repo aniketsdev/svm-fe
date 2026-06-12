@@ -4,7 +4,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
 import { CustomLabel } from '../../../common/custom-label';
-import { RHFDatePicker, RHFInput, RHFSelect, RHFTextarea } from '../../../common/rhf-wrappers';
+import { RHFInput, RHFSelect, RHFTextarea } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { errorMessage, successMessage } from '../../../utils/api-messages';

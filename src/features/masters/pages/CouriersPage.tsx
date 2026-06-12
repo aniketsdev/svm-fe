@@ -17,9 +17,29 @@ type DrawerState =
   | { open: true; courier: CourierRow | null; tab?: 'documents' };
 
 export function CouriersPage() {
-  const [search, setSearch] = useState('');
-  const [createOpen, setCreateOpen] = useState(false);
-  const { couriers, isLoading, refetch } = useCouriers(search);
+  const { toast } = useToast();
+  const list = useMastersListState(SORTABLE);
+  const [drawer, setDrawer] = useState<DrawerState>({ open: false });
+  const [statusTarget, setStatusTarget] = useState<CourierRow | null>(null);
+
+  const { couriers, count, isLoading, refetch } = useCouriers({
+    search: list.q,
+    page: list.page,
+    pageSize: list.pageSize,
+    sort: list.sort,
+    activeOnly: list.activeOnly,
+  });
+
+  const statusMutation = useAdminSetCourierPartnerStatus({
+    mutation: {
+      onSuccess: () => {
+        toast({ severity: 'success', message: 'Courier partner status updated.' });
+        setStatusTarget(null);
+        void refetch();
+      },
+      onError: (error) => toast({ severity: 'error', message: errorMessage(error) }),
+    },
+  });
 
   return (
     <MastersSectionLayout
@@ -48,14 +68,13 @@ export function CouriersPage() {
         onToggleStatus={setStatusTarget}
       />
 
-      <div className="mt-6 flex items-center justify-end gap-3">
-        <CustomSearch
-          textData={{ placeholder: 'Search by name or code', btnTitle: 'Search' }}
-          onSearch={setSearch}
-          hasStartSearchIcon
-          width="22rem"
-        />
-      </div>
+      <CourierDrawer
+        open={drawer.open}
+        courier={drawer.open ? drawer.courier : null}
+        initialTab={drawer.open ? drawer.tab : undefined}
+        onClose={() => setDrawer({ open: false })}
+        onSaved={() => void refetch()}
+      />
 
       <ConfirmationPopUp
         open={statusTarget !== null}
