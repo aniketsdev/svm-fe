@@ -1,0 +1,36 @@
+name: ci
+
+# Runs on every pull request (dev -> main -> production) so failures surface
+# as a red cross on the PR *before* merge — the deploy workflow on
+# `production` should then never fail its test/typecheck gate.
+
+on:
+  pull_request:
+  workflow_dispatch: {}
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      VITE_API_BASE_URL: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      - name: Tests
+        run: bun run test
+
+      - name: Typecheck
+        run: bunx tsc -b --noEmit
+
+      - name: Build
+        run: bun run build
