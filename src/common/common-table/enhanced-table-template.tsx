@@ -208,8 +208,8 @@ export function CommonTable<TRow>({
                   key={row.id}
                   onClick={onRowClick ? () => onRowClick(row.original) : undefined}
                   className={cn(
-                    'border-b border-border/60 last:border-b-0',
-                    onRowClick && 'cursor-pointer hover:bg-secondary/40',
+                    'border-b border-border/60 transition-colors last:border-b-0 hover:bg-secondary/40',
+                    onRowClick && 'cursor-pointer',
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (

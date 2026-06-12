@@ -61,60 +61,61 @@ export function CreateManufacturingDrawer({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <CustomDrawer anchor="right" title="New Manufacturing Order" open={open} onClose={handleClose} drawerWidth="40rem">
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-        <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Output — produced</p>
-          <RHFSelect<ManufacturingFormValues>
-            name="product_code"
-            control={control}
-            label="Product"
-            required
-            items={productItems}
-            placeholder={productItems.length ? 'Select product' : 'No products yet'}
-          />
-          <div className="grid grid-cols-2 gap-3">
+    <CustomDrawer anchor="right" title="New Manufacturing Order" open={open} onClose={handleClose} drawerWidth="34rem" drawerPadding="0px">
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+          <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Output — produced</p>
             <RHFSelect<ManufacturingFormValues>
-              name="bom_code"
+              name="product_code"
               control={control}
-              label="Bill of materials"
+              label="Product"
               required
-              items={bomItems}
-              placeholder={bomItems.length ? 'Select BOM' : 'No BOMs yet'}
+              items={productItems}
+              placeholder={productItems.length ? 'Select product' : 'No products yet'}
             />
-            <RHFInput<ManufacturingFormValues> name="planned_output_qty" control={control} label="Planned quantity" required placeholder="Enter quantity" />
+            <div className="grid grid-cols-2 gap-3">
+              <RHFSelect<ManufacturingFormValues>
+                name="bom_code"
+                control={control}
+                label="Bill of materials"
+                required
+                items={bomItems}
+                placeholder={bomItems.length ? 'Select BOM' : 'No BOMs yet'}
+              />
+              <RHFInput<ManufacturingFormValues> name="planned_output_qty" control={control} label="Planned quantity" required placeholder="Enter quantity" />
+            </div>
           </div>
-        </div>
 
-        <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stores</p>
-          <div className="grid grid-cols-2 gap-3">
-            <RHFSelect<ManufacturingFormValues>
-              name="from_store_code"
-              control={control}
-              label="From store (raw material)"
-              required
-              items={storeItems}
-              placeholder={storeItems.length ? 'Select store' : 'No stores yet'}
-            />
-            <RHFSelect<ManufacturingFormValues>
-              name="to_store_code"
-              control={control}
-              label="To store (finished goods)"
-              required
-              items={storeItems}
-              placeholder={storeItems.length ? 'Select store' : 'No stores yet'}
-            />
+          <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stores</p>
+            <div className="grid grid-cols-2 gap-3">
+              <RHFSelect<ManufacturingFormValues>
+                name="from_store_code"
+                control={control}
+                label="From store (raw material)"
+                required
+                items={storeItems}
+                placeholder={storeItems.length ? 'Select store' : 'No stores yet'}
+              />
+              <RHFSelect<ManufacturingFormValues>
+                name="to_store_code"
+                control={control}
+                label="To store (finished goods)"
+                required
+                items={storeItems}
+                placeholder={storeItems.length ? 'Select store' : 'No stores yet'}
+              />
+            </div>
           </div>
+
+          <RHFInput<ManufacturingFormValues> name="start_date" control={control} label="Start date" placeholder="YYYY-MM-DD" />
         </div>
-
-        <RHFInput<ManufacturingFormValues> name="start_date" control={control} label="Start date" placeholder="YYYY-MM-DD" />
-
-        <div className="flex justify-end gap-3">
-          <CustomButton type="button" variant="outline" onClick={handleClose}>
+        <div className="shrink-0 flex justify-end gap-3 border-t border-border bg-background px-6 py-4">
+          <CustomButton type="button" variant="outline" onClick={handleClose} size="md">
             Cancel
           </CustomButton>
-          <CustomButton type="submit" variant="primary" loading={createMutation.isPending}>
+          <CustomButton type="submit" variant="primary" loading={createMutation.isPending} size="md">
             Create order
           </CustomButton>
         </div>

@@ -22,7 +22,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="w-full px-4 py-5">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
       <div className="mb-4 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold text-foreground">My Profile</h1>
         <div className="flex flex-wrap gap-3">

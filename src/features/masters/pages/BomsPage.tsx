@@ -23,25 +23,7 @@ export function BomsPage() {
   const [drawer, setDrawer] = useState<DrawerState>({ open: false });
   const [statusTarget, setStatusTarget] = useState<BomRow | null>(null);
   const [selected, setSelected] = useState<BomRow | null>(null);
-
-  const { boms, count, isLoading, refetch } = useBoms({
-    search: list.q,
-    page: list.page,
-    pageSize: list.pageSize,
-    sort: list.sort,
-    activeOnly: list.activeOnly,
-  });
-
-  const statusMutation = useAdminSetBomStatus({
-    mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'BOM status updated.' });
-        setStatusTarget(null);
-        void refetch();
-      },
-      onError: (error) => toast({ severity: 'error', message: errorMessage(error) }),
-    },
-  });
+  const { boms, isLoading, refetch } = useBoms(search);
 
   return (
     <MastersSectionLayout
@@ -71,13 +53,14 @@ export function BomsPage() {
         onToggleStatus={setStatusTarget}
       />
 
-      <BomDrawer
-        open={drawer.open}
-        bom={drawer.open ? drawer.bom : null}
-        initialTab={drawer.open ? drawer.tab : undefined}
-        onClose={() => setDrawer({ open: false })}
-        onSaved={() => void refetch()}
-      />
+      <div className="mt-6 flex items-center justify-end gap-3">
+        <CustomSearch
+          textData={{ placeholder: 'Search by code or name', btnTitle: 'Search' }}
+          onSearch={setSearch}
+          hasStartSearchIcon
+          width="22rem"
+        />
+      </div>
 
       <BomDetailDialog bom={selected} onClose={() => setSelected(null)} />
 

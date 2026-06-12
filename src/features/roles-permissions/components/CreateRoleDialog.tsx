@@ -65,7 +65,7 @@ export function CreateRoleDialog({ open, onClose, onCreated }: CreateRoleDialogP
   };
 
   return (
-    <CustomDrawer anchor="right" title="Create role" open={open} onClose={handleClose} drawerWidth="38rem">
+    <CustomDrawer anchor="right" title="Create role" open={open} onClose={handleClose} drawerWidth="34rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col gap-4">
         <div className="flex flex-col gap-4">
           <RHFInput<CreateRoleFormValues>

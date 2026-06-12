@@ -70,7 +70,7 @@ export function AdjustmentDetailDrawer({ adjustment, onClose, onActed }: Props) 
       title={adjustment ? `Adjustment ${adjustment.adj_no}` : 'Adjustment'}
       open={adjustment !== null}
       onClose={onClose}
-      drawerWidth="40rem"
+      drawerWidth="34rem"
     >
       {query.isPending && adjustment && (
         <div className="flex flex-col gap-2">

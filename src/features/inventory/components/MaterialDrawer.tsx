@@ -83,20 +83,23 @@ export function MaterialDrawer({ open, editing, onClose, onSaved }: Props) {
       title={isEdit ? 'Edit material' : 'Add material'}
       open={open}
       onClose={handleClose}
-      drawerWidth="30rem"
+      drawerWidth="34rem"
+      drawerPadding="0px"
     >
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <RHFInput<MaterialFormValues> name="material_name" control={control} label="Name" required placeholder="Enter name" />
-        <div className="grid grid-cols-2 gap-3">
-          <RHFInput<MaterialFormValues> name="material_code" control={control} label="Code" required placeholder="Enter code" />
-          <RHFSelect<MaterialFormValues> name="material_type" control={control} label="Type" required items={TYPE_ITEMS} placeholder="Select type" />
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+          <RHFInput<MaterialFormValues> name="material_name" control={control} label="Name" required placeholder="Enter name" />
+          <div className="grid grid-cols-2 gap-3">
+            <RHFInput<MaterialFormValues> name="material_code" control={control} label="Code" required placeholder="Enter code" />
+            <RHFSelect<MaterialFormValues> name="material_type" control={control} label="Type" required items={TYPE_ITEMS} placeholder="Select type" />
+          </div>
+          <RHFSelect<MaterialFormValues> name="uom" control={control} label="Unit of measure" required items={UOM_ITEMS} placeholder="Select UOM" />
         </div>
-        <RHFSelect<MaterialFormValues> name="uom" control={control} label="Unit of measure" required items={UOM_ITEMS} placeholder="Select UOM" />
-        <div className="mt-2 flex justify-end gap-3">
-          <CustomButton type="button" variant="outline" onClick={handleClose}>
+        <div className="shrink-0 flex justify-end gap-3 border-t border-border bg-background px-6 py-4">
+          <CustomButton type="button" variant="outline" onClick={handleClose} size="md">
             Cancel
           </CustomButton>
-          <CustomButton type="submit" variant="primary" loading={create.isPending || update.isPending}>
+          <CustomButton type="submit" variant="primary" loading={create.isPending || update.isPending} size="md">
             {isEdit ? 'Save changes' : 'Add material'}
           </CustomButton>
         </div>

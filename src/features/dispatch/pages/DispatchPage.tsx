@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { cn } from '../../../lib/cn';
 import { CustomButton } from '../../../common/custom-buttons';
 import { CustomSearch } from '../../../common/custom-search';
+import { CustomSelect } from '../../../common/custom-select';
 import { useToast } from '../../../common/common-snackbar';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminUpdateInvoicePayment } from '../../../sdk/inventory';
@@ -16,6 +17,14 @@ import type { DispatchRow } from '../api/dispatch';
 
 type TabKey = 'dispatches' | 'invoices';
 const PAGE_SIZE = 25;
+const ALL = 'all';
+
+const PAYMENT_ITEMS = [
+  { value: ALL, label: 'All payments' },
+  { value: 'unpaid', label: 'Unpaid' },
+  { value: 'partial', label: 'Partial' },
+  { value: 'paid', label: 'Paid' },
+];
 
 export function DispatchPage() {
   const { toast } = useToast();
@@ -25,14 +34,21 @@ export function DispatchPage() {
   const [search, setSearch] = useState('');
   const [dispatchPage, setDispatchPage] = useState(0);
   const [invoicePage, setInvoicePage] = useState(0);
+  const [invoiceSearch, setInvoiceSearch] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState(ALL);
 
   const dispatchParams = useMemo(
     () => ({ search: search || undefined, limit: PAGE_SIZE, offset: dispatchPage * PAGE_SIZE }),
     [search, dispatchPage],
   );
   const invoiceParams = useMemo(
-    () => ({ limit: PAGE_SIZE, offset: invoicePage * PAGE_SIZE }),
-    [invoicePage],
+    () => ({
+      search: invoiceSearch || undefined,
+      payment_status: paymentStatus === ALL ? undefined : paymentStatus,
+      limit: PAGE_SIZE,
+      offset: invoicePage * PAGE_SIZE,
+    }),
+    [invoiceSearch, paymentStatus, invoicePage],
   );
 
   const { dispatches, total, isLoading, refetch } = useDispatches(dispatchParams);
@@ -73,7 +89,7 @@ export function DispatchPage() {
         </CustomButton>
       </div>
 
-      <div className="mt-5 border-b border-border">
+      <div className="mt-5 flex flex-wrap items-end justify-between gap-3 border-b border-border">
         <nav className="-mb-px flex gap-1">
           {tabs.map((t) => {
             const active = tab === t.key;
@@ -102,11 +118,8 @@ export function DispatchPage() {
             );
           })}
         </nav>
-      </div>
-
-      {tab === 'dispatches' && (
-        <div className="mt-5 flex flex-col">
-          <div className="flex items-center justify-end">
+        {tab === 'dispatches' && (
+          <div className="pb-2">
             <CustomSearch
               textData={{ placeholder: 'Search challan or customer', btnTitle: 'Search' }}
               onSearch={handleSearch}
@@ -114,7 +127,31 @@ export function DispatchPage() {
               width="22rem"
             />
           </div>
-          <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        )}
+        {tab === 'invoices' && (
+          <div className="flex flex-wrap items-center gap-3 pb-2">
+            <div className="w-44">
+              <CustomSelect
+                name="payment_status"
+                placeholder="Payment"
+                value={paymentStatus}
+                items={PAYMENT_ITEMS}
+                onChange={(e) => { setPaymentStatus(e.target.value); setInvoicePage(0); }}
+              />
+            </div>
+            <CustomSearch
+              textData={{ placeholder: 'Search invoice no.', btnTitle: 'Search' }}
+              onSearch={(val) => { setInvoiceSearch(val); setInvoicePage(0); }}
+              hasStartSearchIcon
+              width="22rem"
+            />
+          </div>
+        )}
+      </div>
+
+      {tab === 'dispatches' && (
+        <div className="mt-5 flex flex-col">
+          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
             <DispatchesTable
               dispatches={dispatches}
               loading={isLoading}
