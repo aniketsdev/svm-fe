@@ -10,7 +10,7 @@ import { CreateDoctorDialog } from '../components/CreateDoctorDialog';
 export function DoctorsPage() {
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
-  const { doctors, count, isLoading, refetch } = useDoctors(search);
+  const { doctors, isLoading, refetch } = useDoctors(search);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
@@ -32,10 +32,7 @@ export function DoctorsPage() {
         </CustomButton>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {count} {count === 1 ? 'record' : 'records'}
-        </span>
+      <div className="mt-6 flex items-center justify-end gap-3">
         <CustomSearch
           textData={{ placeholder: 'Search by name, code, clinic or city', btnTitle: 'Search' }}
           onSearch={setSearch}

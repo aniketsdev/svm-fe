@@ -41,15 +41,20 @@ export function ActivityLogPage() {
   };
 
   return (
-    <div className="w-full px-4 py-5">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
       {/* Header: title left, search right */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold text-foreground">Activity log</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Activity log</h1>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+            Who did what and when, across every module.
+          </p>
+        </div>
         <CustomSearch
           textData={{ placeholder: 'Search by user, action or entity', btnTitle: 'Search' }}
           onSearch={handleSearch}
           hasStartSearchIcon
-          width="28rem"
+          width="20rem"
         />
       </div>
 

@@ -49,7 +49,7 @@ export function AuditDetailDialog({ entry, onClose }: AuditDetailDialogProps) {
       title="Activity detail"
       open={entry !== null}
       onClose={onClose}
-      drawerWidth="40rem"
+      drawerWidth="34rem"
     >
       {entry && row && (
         <div className="flex flex-col gap-5 text-sm">

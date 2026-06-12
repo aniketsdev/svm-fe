@@ -79,7 +79,7 @@ export function CreateGrnDrawer({ open, onClose, onCreated }: Props) {
       title="New GRN — Goods Received"
       open={open}
       onClose={handleClose}
-      drawerWidth="52rem"
+      drawerWidth="48rem"
       drawerPadding="0px"
     >
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">

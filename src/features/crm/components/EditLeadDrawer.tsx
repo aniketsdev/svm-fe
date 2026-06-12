@@ -66,7 +66,7 @@ export function EditLeadDrawer({ lead, onClose, onUpdated }: EditLeadDrawerProps
       title="Edit lead"
       open={lead !== null}
       onClose={onClose}
-      drawerWidth="52rem"
+      drawerWidth="48rem"
       drawerPadding="0px"
     >
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">

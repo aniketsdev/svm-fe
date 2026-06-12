@@ -19,7 +19,7 @@ function PreviewField({ label, value }: { label: string; value: string }) {
 /** Read-only view of a single note's full details. */
 export function NotePreviewDrawer({ note, onClose }: NotePreviewDrawerProps) {
   return (
-    <CustomDrawer anchor="right" title="Note details" open={note !== null} onClose={onClose} drawerWidth="40rem">
+    <CustomDrawer anchor="right" title="Note details" open={note !== null} onClose={onClose} drawerWidth="34rem">
       {note ? (
         <dl className="flex flex-col gap-4">
           <PreviewField label="Date" value={formatDateTime(note.created_at)} />

@@ -10,7 +10,7 @@ import { CreateProductDialog } from '../components/CreateProductDialog';
 export function ProductsPage() {
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
-  const { products, count, isLoading, refetch } = useProducts(search);
+  const { products, isLoading, refetch } = useProducts(search);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
@@ -32,10 +32,7 @@ export function ProductsPage() {
         </CustomButton>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {count} {count === 1 ? 'record' : 'records'}
-        </span>
+      <div className="mt-6 flex items-center justify-end gap-3">
         <CustomSearch
           textData={{ placeholder: 'Search by name, code or HSN', btnTitle: 'Search' }}
           onSearch={setSearch}

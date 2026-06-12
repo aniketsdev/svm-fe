@@ -116,11 +116,14 @@ export function UsersPage() {
   });
 
   return (
-    <div className="w-full px-4 py-5">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
       {/* Header: title left, search right (Activity-Log parity) */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Users</h1>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+            Team accounts, roles and access status.
+          </p>
         </div>
          <CustomButton
             variant="primary"

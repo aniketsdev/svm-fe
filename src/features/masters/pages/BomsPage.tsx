@@ -13,7 +13,7 @@ export function BomsPage() {
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
   const [selected, setSelected] = useState<BomRow | null>(null);
-  const { boms, count, isLoading, refetch } = useBoms(search);
+  const { boms, isLoading, refetch } = useBoms(search);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
@@ -35,10 +35,7 @@ export function BomsPage() {
         </CustomButton>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {count} {count === 1 ? 'record' : 'records'}
-        </span>
+      <div className="mt-6 flex items-center justify-end gap-3">
         <CustomSearch
           textData={{ placeholder: 'Search by code or name', btnTitle: 'Search' }}
           onSearch={setSearch}

@@ -61,7 +61,7 @@ export function CreateManufacturingDrawer({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <CustomDrawer anchor="right" title="New Manufacturing Order" open={open} onClose={handleClose} drawerWidth="40rem" drawerPadding="0px">
+    <CustomDrawer anchor="right" title="New Manufacturing Order" open={open} onClose={handleClose} drawerWidth="34rem" drawerPadding="0px">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
           <div className="flex flex-col gap-3 rounded-lg border border-border p-3">

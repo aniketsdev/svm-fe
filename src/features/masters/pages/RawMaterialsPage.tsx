@@ -10,7 +10,7 @@ import { CreateRawMaterialDialog } from '../components/CreateRawMaterialDialog';
 export function RawMaterialsPage() {
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
-  const { materials, count, isLoading, refetch } = useRawMaterials(search);
+  const { materials, isLoading, refetch } = useRawMaterials(search);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
@@ -32,10 +32,7 @@ export function RawMaterialsPage() {
         </CustomButton>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {count} {count === 1 ? 'record' : 'records'}
-        </span>
+      <div className="mt-6 flex items-center justify-end gap-3">
         <CustomSearch
           textData={{ placeholder: 'Search by name or code', btnTitle: 'Search' }}
           onSearch={setSearch}

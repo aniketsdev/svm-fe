@@ -83,7 +83,7 @@ export function MaterialDrawer({ open, editing, onClose, onSaved }: Props) {
       title={isEdit ? 'Edit material' : 'Add material'}
       open={open}
       onClose={handleClose}
-      drawerWidth="40rem"
+      drawerWidth="34rem"
       drawerPadding="0px"
     >
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">

@@ -88,7 +88,7 @@ export function ProcessingDetailDrawer({ order, onClose, onActed }: Props) {
       title={order ? `Processing ${order.pr_no}` : 'Processing'}
       open={order !== null}
       onClose={onClose}
-      drawerWidth="52rem"
+      drawerWidth="48rem"
     >
       {query.isPending && order && (
         <div className="flex flex-col gap-2">

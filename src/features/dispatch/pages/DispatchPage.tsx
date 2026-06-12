@@ -73,7 +73,7 @@ export function DispatchPage() {
         </CustomButton>
       </div>
 
-      <div className="mt-5 border-b border-border">
+      <div className="mt-5 flex flex-wrap items-end justify-between gap-3 border-b border-border">
         <nav className="-mb-px flex gap-1">
           {tabs.map((t) => {
             const active = tab === t.key;
@@ -102,11 +102,8 @@ export function DispatchPage() {
             );
           })}
         </nav>
-      </div>
-
-      {tab === 'dispatches' && (
-        <div className="mt-5 flex flex-col">
-          <div className="flex items-center justify-end">
+        {tab === 'dispatches' && (
+          <div className="pb-2">
             <CustomSearch
               textData={{ placeholder: 'Search challan or customer', btnTitle: 'Search' }}
               onSearch={handleSearch}
@@ -114,7 +111,12 @@ export function DispatchPage() {
               width="22rem"
             />
           </div>
-          <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        )}
+      </div>
+
+      {tab === 'dispatches' && (
+        <div className="mt-5 flex flex-col">
+          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
             <DispatchesTable
               dispatches={dispatches}
               loading={isLoading}

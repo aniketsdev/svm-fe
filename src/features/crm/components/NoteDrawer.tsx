@@ -62,7 +62,7 @@ export function NoteDrawer({ leadUuid, note, open, onClose, onSaved }: NoteDrawe
       title={isEdit ? 'Edit note' : 'Add note'}
       open={open}
       onClose={onClose}
-      drawerWidth="40rem"
+      drawerWidth="34rem"
       drawerPadding="0px"
     >
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">

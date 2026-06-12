@@ -29,7 +29,7 @@ export function DispatchDetailDrawer({ dispatch, onClose }: Props) {
       title={dispatch ? `Dispatch ${dispatch.challan_no}` : 'Dispatch'}
       open={dispatch !== null}
       onClose={onClose}
-      drawerWidth="52rem"
+      drawerWidth="48rem"
     >
       {query.isPending && dispatch && (
         <div className="flex flex-col gap-2">

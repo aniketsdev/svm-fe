@@ -56,7 +56,7 @@ export function GrnDetailDrawer({ grn, onClose, onPosted }: Props) {
       title={grn ? `GRN ${grn.grn_no}` : 'GRN'}
       open={grn !== null}
       onClose={onClose}
-      drawerWidth="52rem"
+      drawerWidth="48rem"
     >
       {query.isPending && grn && (
         <div className="flex flex-col gap-2">

@@ -55,10 +55,7 @@ export function ProcessingPage() {
         </CustomButton>
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {total} {total === 1 ? 'record' : 'records'}
-        </span>
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex flex-wrap items-center gap-3 sm:justify-end">
           <div className="w-44">
             <CustomSelect

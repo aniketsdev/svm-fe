@@ -12,7 +12,7 @@ export function MaterialsPage() {
   const [search, setSearch] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editing, setEditing] = useState<MaterialOut | null>(null);
-  const { materials, total, isLoading, refetch } = useMaterials();
+  const { materials, isLoading, refetch } = useMaterials();
 
   const filtered = useMemo(() => {
     const t = search.trim().toLowerCase();
@@ -55,10 +55,7 @@ export function MaterialsPage() {
         </CustomButton>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {total} {total === 1 ? 'record' : 'records'}
-        </span>
+      <div className="mt-6 flex items-center justify-end gap-3">
         <CustomSearch
           textData={{ placeholder: 'Search by name or code', btnTitle: 'Search' }}
           onSearch={setSearch}

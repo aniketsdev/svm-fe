@@ -70,7 +70,7 @@ export function StockTransferDetailDrawer({ transfer, onClose, onActed }: Props)
       title={transfer ? `Transfer ${transfer.st_no}` : 'Transfer'}
       open={transfer !== null}
       onClose={onClose}
-      drawerWidth="52rem"
+      drawerWidth="48rem"
     >
       {query.isPending && transfer && (
         <div className="flex flex-col gap-2">

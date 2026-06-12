@@ -56,7 +56,7 @@ export function CreateVendorDialog({ open, onClose, onCreated }: CreateVendorDia
   };
 
   return (
-    <CustomDrawer anchor="right" title="Add vendor" open={open} onClose={handleClose} drawerWidth="40rem">
+    <CustomDrawer anchor="right" title="Add vendor" open={open} onClose={handleClose} drawerWidth="34rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <RHFInput<CreateVendorFormValues> name="name" control={control} label="Name" required placeholder="Enter name" />
         <div className="grid grid-cols-2 gap-3">

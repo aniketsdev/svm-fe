@@ -62,7 +62,7 @@ export function EditProfileDrawer({ user, open, onClose, onUpdated }: EditProfil
       title="Edit profile"
       open={open}
       onClose={onClose}
-      drawerWidth="40rem"
+      drawerWidth="34rem"
       drawerPadding="0rem"
     >
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col">

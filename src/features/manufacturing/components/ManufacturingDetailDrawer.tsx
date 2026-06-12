@@ -94,7 +94,7 @@ export function ManufacturingDetailDrawer({ order, onClose, onActed }: Props) {
       title={order ? `MO ${order.mo_no}` : 'Manufacturing'}
       open={order !== null}
       onClose={onClose}
-      drawerWidth="52rem"
+      drawerWidth="48rem"
     >
       {query.isPending && order && (
         <div className="flex flex-col gap-2">
