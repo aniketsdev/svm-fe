@@ -56,7 +56,15 @@ export function MediaDocumentsPanel({ owner, onChanged }: MediaDocumentsPanelPro
     try {
       const response = await adminGetMediaDownloadUrl(String(item.uuid));
       const url = (response.data as DownloadUrlResponse).url;
-      window.open(url, '_blank', 'noopener');
+      // Anchor click instead of window.open: popup blockers kill window.open
+      // once the user gesture has been consumed by the awaited fetch above.
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.rel = 'noopener';
+      anchor.download = item.file_name;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
     } catch (error) {
       toast({ severity: 'error', message: errorMessage(error, 'Could not get a download link.') });
     }
@@ -88,6 +96,11 @@ export function MediaDocumentsPanel({ owner, onChanged }: MediaDocumentsPanelPro
         helperText={`${ALLOWED_TYPES_LABEL} · up to ${formatBytes(20 * 1024 * 1024)}`}
         onFileAdd={(item) => {
           void upload(item.file);
+        }}
+        // Files the picker's accept filter rejects still get a visible error
+        // (upload() fails pre-flight with the allowed-types message).
+        onFileRejected={(file) => {
+          void upload(file);
         }}
       />
 

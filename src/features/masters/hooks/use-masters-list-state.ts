@@ -55,8 +55,13 @@ export function useMastersListState(sortableFields: readonly string[]): MastersL
   );
 
   const setSearch = useCallback(
-    (value: string) => update({ q: value || undefined, page: undefined }),
-    [update],
+    (value: string) => {
+      // The search box echoes its initial value on mount; resetting the page
+      // then would drop a page= restored from the URL.
+      if (value === q) return;
+      update({ q: value || undefined, page: undefined });
+    },
+    [q, update],
   );
 
   const setPagination = useCallback(

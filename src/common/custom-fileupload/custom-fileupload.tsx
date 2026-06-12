@@ -21,6 +21,8 @@ export interface CustomFileUploadProps {
   onFilesChange?: (files: FileItem[]) => void;
   onFileAdd?: (file: FileItem) => void;
   onFileRemove?: (fileId: string) => void;
+  /** Fires for files the dropzone's `accept` filter rejects — without this they are dropped silently. */
+  onFileRejected?: (file: File) => void;
   type?: FileUploadType;
   size?: FileUploadSize;
   disabled?: boolean;
@@ -62,6 +64,7 @@ export default function CustomFileUpload({
   onFilesChange,
   onFileAdd,
   onFileRemove,
+  onFileRejected,
   type = 'default',
   size = 'md',
   disabled = false,
@@ -81,8 +84,9 @@ export default function CustomFileUpload({
   icon,
 }: CustomFileUploadProps) {
   const onDrop = useCallback(
-    (accepted: File[]) => {
+    (accepted: File[], rejections: { file: File }[] = []) => {
       if (disabled) return;
+      rejections.forEach((rejection) => onFileRejected?.(rejection.file));
       if (files.length + accepted.length > maxFiles) return;
       const next: FileItem[] = accepted.map((f) => {
         let error: string | undefined;
@@ -104,7 +108,7 @@ export default function CustomFileUpload({
         if (!item.error) onFileAdd?.(item);
       });
     },
-    [files, disabled, maxFiles, maxFileSize, accept, onFilesChange, onFileAdd],
+    [files, disabled, maxFiles, maxFileSize, accept, onFilesChange, onFileAdd, onFileRejected],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
