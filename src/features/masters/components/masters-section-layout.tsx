@@ -42,7 +42,7 @@ export function MastersSectionLayout({
   children,
 }: MastersSectionLayoutProps) {
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
+    <div className="w-full px-4 py-6 sm:px-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <Link
