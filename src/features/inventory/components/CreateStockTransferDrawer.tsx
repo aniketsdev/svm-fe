@@ -78,7 +78,7 @@ export function CreateStockTransferDrawer({ open, onClose, onCreated }: Props) {
 
   return (
     <CustomDrawer anchor="right" title="New Stock Transfer" open={open} onClose={handleClose} drawerWidth="50rem">
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col gap-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <RHFSelect<TransferFormValues>
             name="from_store_code"
@@ -110,10 +110,10 @@ export function CreateStockTransferDrawer({ open, onClose, onCreated }: Props) {
             </button>
           </div>
           <div className={`mb-1 hidden gap-2 px-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground sm:grid ${LINE_GRID}`}>
-            <span>Type</span>
-            <span>Material</span>
-            <span>Source batch</span>
-            <span>Qty</span>
+            <span>Type <span className="text-destructive">*</span></span>
+            <span>Material <span className="text-destructive">*</span></span>
+            <span>Source batch <span className="text-destructive">*</span></span>
+            <span>Qty <span className="text-destructive">*</span></span>
             <span />
           </div>
           <div className="flex flex-col gap-2">
@@ -142,7 +142,7 @@ export function CreateStockTransferDrawer({ open, onClose, onCreated }: Props) {
 
         <RHFTextarea<TransferFormValues> name="notes" control={control} label="Notes" placeholder="Enter notes" minRow={2} />
 
-        <div className="mt-2 flex justify-end gap-3">
+        <div className="sticky bottom-0 z-10 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 py-4">
           <CustomButton type="button" variant="outline" onClick={handleClose}>
             Cancel
           </CustomButton>

@@ -1,9 +1,10 @@
 import { useFieldArray } from 'react-hook-form';
+import dayjs from 'dayjs';
 import { Plus, Trash2 } from 'lucide-react';
 import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
 import { CustomLabel } from '../../../common/custom-label';
-import { RHFInput, RHFSelect, RHFTextarea } from '../../../common/rhf-wrappers';
+import { RHFDatePicker, RHFInput, RHFSelect, RHFTextarea } from '../../../common/rhf-wrappers';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
 import { errorMessage, successMessage } from '../../../utils/api-messages';
@@ -58,8 +59,8 @@ export function CreateGrnDrawer({ open, onClose, onCreated }: Props) {
         supplier_code: d.supplier_code,
         store_code: d.store_code,
         vendor_invoice_no: d.vendor_invoice_no || null,
-        vendor_invoice_date: d.vendor_invoice_date || null,
-        received_date: d.received_date || null,
+        vendor_invoice_date: d.vendor_invoice_date ? dayjs(d.vendor_invoice_date).format('YYYY-MM-DD') : null,
+        received_date: d.received_date ? dayjs(d.received_date).format('YYYY-MM-DD') : null,
         notes: d.notes || null,
         lines: d.lines.map((l) => ({
           material_code: l.material_code,
@@ -67,7 +68,7 @@ export function CreateGrnDrawer({ open, onClose, onCreated }: Props) {
           vendor_batch: l.vendor_batch || null,
           quantity: l.quantity,
           rate: l.rate,
-          expiry_date: l.expiry_date || null,
+          expiry_date: l.expiry_date ? dayjs(l.expiry_date).format('YYYY-MM-DD') : null,
         })),
       },
     });
@@ -81,7 +82,7 @@ export function CreateGrnDrawer({ open, onClose, onCreated }: Props) {
       onClose={handleClose}
       drawerWidth="52rem"
     >
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col gap-4">
         {/* Document header */}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <RHFInput<GrnFormValues>
@@ -102,8 +103,26 @@ export function CreateGrnDrawer({ open, onClose, onCreated }: Props) {
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <RHFInput<GrnFormValues> name="vendor_invoice_no" control={control} label="Invoice no." placeholder="Enter invoice no." />
-          <RHFInput<GrnFormValues> name="vendor_invoice_date" control={control} label="Invoice date" placeholder="YYYY-MM-DD" />
-          <RHFInput<GrnFormValues> name="received_date" control={control} label="Received date" placeholder="YYYY-MM-DD" />
+          <div className="flex w-full flex-col">
+            <CustomLabel label="Invoice date" htmlFor="vendor_invoice_date" />
+            <RHFDatePicker<GrnFormValues>
+              name="vendor_invoice_date"
+              control={control}
+              label="Select date"
+              format="YYYY-MM-DD"
+              disableFuture
+            />
+          </div>
+          <div className="flex w-full flex-col">
+            <CustomLabel label="Received date" htmlFor="received_date" />
+            <RHFDatePicker<GrnFormValues>
+              name="received_date"
+              control={control}
+              label="Select date"
+              format="YYYY-MM-DD"
+              disableFuture
+            />
+          </div>
         </div>
 
         {/* Line items */}
@@ -119,10 +138,10 @@ export function CreateGrnDrawer({ open, onClose, onCreated }: Props) {
             </button>
           </div>
           <div className={`mb-1 hidden gap-2 px-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground sm:grid ${LINE_GRID}`}>
-            <span>Material</span>
-            <span>Batch no.</span>
-            <span>Qty</span>
-            <span>Rate</span>
+            <span>Material <span className="text-destructive">*</span></span>
+            <span>Batch no. <span className="text-destructive">*</span></span>
+            <span>Qty <span className="text-destructive">*</span></span>
+            <span>Rate <span className="text-destructive">*</span></span>
             <span>Expiry</span>
             <span />
           </div>
@@ -141,7 +160,13 @@ export function CreateGrnDrawer({ open, onClose, onCreated }: Props) {
                 <RHFInput<GrnFormValues> name={`lines.${i}.batch_no`} control={control} placeholder="Batch no." />
                 <RHFInput<GrnFormValues> name={`lines.${i}.quantity`} control={control} placeholder="Qty" />
                 <RHFInput<GrnFormValues> name={`lines.${i}.rate`} control={control} placeholder="Rate" />
-                <RHFInput<GrnFormValues> name={`lines.${i}.expiry_date`} control={control} placeholder="YYYY-MM-DD" />
+                <RHFDatePicker<GrnFormValues>
+                  name={`lines.${i}.expiry_date`}
+                  control={control}
+                  label="Expiry"
+                  format="YYYY-MM-DD"
+                  disablePast
+                />
                 <button
                   type="button"
                   onClick={() => remove(i)}
@@ -158,7 +183,7 @@ export function CreateGrnDrawer({ open, onClose, onCreated }: Props) {
 
         <RHFTextarea<GrnFormValues> name="notes" control={control} label="Notes" placeholder="Enter notes" minRow={2} />
 
-        <div className="mt-2 flex justify-end gap-3">
+        <div className="sticky bottom-0 z-10 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 py-4">
           <CustomButton type="button" variant="outline" onClick={handleClose}>
             Cancel
           </CustomButton>

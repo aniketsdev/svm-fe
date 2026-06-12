@@ -1,6 +1,4 @@
 import { useMemo, useState } from 'react';
-import { FilePlus2 } from 'lucide-react';
-import { CustomButton } from '../../../common/custom-buttons';
 import { CustomSearch } from '../../../common/custom-search';
 import { CustomSelect } from '../../../common/custom-select';
 import { useGrns } from '../hooks/useGrns';
@@ -18,8 +16,13 @@ const STATUS_ITEMS = [
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
-export function GrnTab() {
-  const [createOpen, setCreateOpen] = useState(false);
+type GrnTabProps = {
+  /** Create-GRN drawer open state, owned by InventoryPage so the action button can live in the tabs row. */
+  createOpen: boolean;
+  onCreateOpenChange: (open: boolean) => void;
+};
+
+export function GrnTab({ createOpen, onCreateOpenChange }: GrnTabProps) {
   const [selected, setSelected] = useState<GrnRow | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState(ALL);
@@ -41,10 +44,7 @@ export function GrnTab() {
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {total} {total === 1 ? 'GRN' : 'GRNs'}
-        </span>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex flex-wrap items-center gap-3 sm:justify-end">
           <div className="w-44">
             <CustomSelect
@@ -61,9 +61,6 @@ export function GrnTab() {
             hasStartSearchIcon
             width="20rem"
           />
-          <CustomButton variant="primary" icon={<FilePlus2 className="size-4" />} onClick={() => setCreateOpen(true)}>
-            New GRN
-          </CustomButton>
         </div>
       </div>
 
@@ -79,7 +76,7 @@ export function GrnTab() {
         />
       </div>
 
-      <CreateGrnDrawer open={createOpen} onClose={() => setCreateOpen(false)} onCreated={refetch} />
+      <CreateGrnDrawer open={createOpen} onClose={() => onCreateOpenChange(false)} onCreated={refetch} />
       <GrnDetailDrawer grn={selected} onClose={() => setSelected(null)} onPosted={refetch} />
     </div>
   );

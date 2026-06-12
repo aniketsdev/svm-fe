@@ -16,7 +16,7 @@ const lineSchema = z.object({
     .trim()
     .refine((v) => v !== '' && Number(v) >= 0, 'Enter a valid rate'),
   expiry_date: z.string().trim().optional().refine(
-    (v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v),
+    (v) => !v || !Number.isNaN(Date.parse(v)),
     'Enter a valid date',
   ),
 });
@@ -26,11 +26,11 @@ const grnSchema = z.object({
   store_code: z.string().min(1, 'Store is required'),
   vendor_invoice_no: z.string().trim().max(100).optional(),
   vendor_invoice_date: z.string().trim().optional().refine(
-    (v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v),
+    (v) => !v || !Number.isNaN(Date.parse(v)),
     'Enter a valid date',
   ),
   received_date: z.string().trim().optional().refine(
-    (v) => !v || /^\d{4}-\d{2}-\d{2}$/.test(v),
+    (v) => !v || !Number.isNaN(Date.parse(v)),
     'Enter a valid date',
   ),
   notes: z.string().trim().max(500).optional(),

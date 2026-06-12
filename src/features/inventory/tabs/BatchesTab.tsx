@@ -61,10 +61,7 @@ export function BatchesTab() {
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {total} {total === 1 ? 'batch' : 'batches'}
-        </span>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <div className="w-44">
             <CustomSelect name="store" placeholder="Store" value={store} items={storeItems} onChange={(e) => { setStore(e.target.value); resetPage(); }} />

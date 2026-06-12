@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { ArrowLeftRight, FilePlus2 } from 'lucide-react';
 import { cn } from '../../../lib/cn';
+import { CustomButton } from '../../../common/custom-buttons';
 import { useGrns } from '../hooks/useGrns';
 import { StockMovementsTab } from '../tabs/StockMovementsTab';
 import { BatchesTab } from '../tabs/BatchesTab';
@@ -11,6 +13,8 @@ type TabKey = 'stock' | 'batches' | 'grn' | 'transfers' | 'adjustments';
 
 export function InventoryPage() {
   const [tab, setTab] = useState<TabKey>('stock');
+  const [grnCreateOpen, setGrnCreateOpen] = useState(false);
+  const [transferCreateOpen, setTransferCreateOpen] = useState(false);
   // Cheap count for the GRN tab badge (the API returns total regardless of limit).
   const { total: grnTotal } = useGrns({ limit: 1 });
 
@@ -23,16 +27,13 @@ export function InventoryPage() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
+    <div className="w-full px-4 py-5">
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Inventory</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          Stock on hand, goods received, transfers and adjustments across your stores.
-        </p>
       </div>
 
       {/* Tabs (underline style, like the reference console) */}
-      <div className="mt-5 border-b border-border">
+      <div className="mt-4 flex items-end justify-between gap-3 border-b border-border">
         <nav className="-mb-px flex gap-1 overflow-x-auto">
           {tabs.map((t) => {
             const active = tab === t.key;
@@ -64,13 +65,37 @@ export function InventoryPage() {
             );
           })}
         </nav>
+        {tab === 'grn' && (
+          <CustomButton
+            variant="primary"
+            icon={<FilePlus2 className="size-4" />}
+            onClick={() => setGrnCreateOpen(true)}
+            className="mb-2 shrink-0"
+          >
+            New GRN
+          </CustomButton>
+        )}
+        {tab === 'transfers' && (
+          <CustomButton
+            variant="primary"
+            icon={<ArrowLeftRight className="size-4" />}
+            onClick={() => setTransferCreateOpen(true)}
+            className="mb-2 shrink-0"
+          >
+            New Transfer
+          </CustomButton>
+        )}
       </div>
 
-      <div className="mt-5">
+      <div className="mt-4">
         {tab === 'stock' && <StockMovementsTab />}
         {tab === 'batches' && <BatchesTab />}
-        {tab === 'grn' && <GrnTab />}
-        {tab === 'transfers' && <TransfersTab />}
+        {tab === 'grn' && (
+          <GrnTab createOpen={grnCreateOpen} onCreateOpenChange={setGrnCreateOpen} />
+        )}
+        {tab === 'transfers' && (
+          <TransfersTab createOpen={transferCreateOpen} onCreateOpenChange={setTransferCreateOpen} />
+        )}
         {tab === 'adjustments' && <AdjustmentsTab />}
       </div>
     </div>
