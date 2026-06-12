@@ -1,55 +1,105 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Plus } from 'lucide-react';
-import { CustomButton } from '../../../common/custom-buttons';
-import { CustomSearch } from '../../../common/custom-search';
+import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
+import { useToast } from '../../../common/common-snackbar';
+import { errorMessage } from '../../../utils/api-messages';
+import { useAdminSetCourierPartnerStatus } from '../../../sdk/inventory';
 import { useCouriers } from '../hooks/useCouriers';
+import { useMastersListState } from '../hooks/use-masters-list-state';
+import { MastersSectionLayout } from '../components/masters-section-layout';
 import { CouriersTable } from '../components/CouriersTable';
-import { CreateCourierDialog } from '../components/CreateCourierDialog';
+import { CourierDrawer } from '../components/CourierDrawer';
+import type { CourierRow } from '../api/couriers';
+
+const SORTABLE = ['name', 'code', 'created_at', 'is_active'] as const;
+
+type DrawerState =
+  | { open: false }
+  | { open: true; courier: CourierRow | null; tab?: 'documents' };
 
 export function CouriersPage() {
-  const [search, setSearch] = useState('');
-  const [createOpen, setCreateOpen] = useState(false);
-  const { couriers, count, isLoading, refetch } = useCouriers(search);
+  const { toast } = useToast();
+  const list = useMastersListState(SORTABLE);
+  const [drawer, setDrawer] = useState<DrawerState>({ open: false });
+  const [statusTarget, setStatusTarget] = useState<CourierRow | null>(null);
+
+  const { couriers, count, isLoading, refetch } = useCouriers({
+    search: list.q,
+    page: list.page,
+    pageSize: list.pageSize,
+    sort: list.sort,
+    activeOnly: list.activeOnly,
+  });
+
+  const statusMutation = useAdminSetCourierPartnerStatus({
+    mutation: {
+      onSuccess: () => {
+        toast({ severity: 'success', message: 'Courier partner status updated.' });
+        setStatusTarget(null);
+        void refetch();
+      },
+      onError: (error) => toast({ severity: 'error', message: errorMessage(error) }),
+    },
+  });
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <Link
-            to="/masters"
-            className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="size-3.5" /> Masters
-          </Link>
-          <h1 className="text-2xl font-semibold text-foreground">Courier Partners</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Delivery and logistics partners used for dispatch.
-          </p>
-        </div>
-        <CustomButton variant="primary" icon={<Plus className="size-4" />} onClick={() => setCreateOpen(true)}>
-          Add courier
-        </CustomButton>
-      </div>
+    <MastersSectionLayout
+      title="Courier Partners"
+      description="Delivery and logistics partners used for dispatch."
+      count={count}
+      searchPlaceholder="Search by name or code"
+      searchValue={list.q}
+      onSearch={list.setSearch}
+      addLabel="Add courier"
+      onAdd={() => setDrawer({ open: true, courier: null })}
+      activeOnly={list.activeOnly}
+      onActiveOnlyChange={list.setActiveOnly}
+    >
+      <CouriersTable
+        couriers={couriers}
+        loading={isLoading}
+        rowCount={count}
+        pageIndex={list.page}
+        pageSize={list.pageSize}
+        sorting={list.sorting}
+        onPaginationChange={list.setPagination}
+        onSortingChange={list.setSorting}
+        onEdit={(courier) => setDrawer({ open: true, courier })}
+        onDocuments={(courier) => setDrawer({ open: true, courier, tab: 'documents' })}
+        onToggleStatus={setStatusTarget}
+      />
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {count} {count === 1 ? 'record' : 'records'}
-        </span>
-        <CustomSearch
-          textData={{ placeholder: 'Search by name or code', btnTitle: 'Search' }}
-          onSearch={setSearch}
-          hasStartSearchIcon
-          width="22rem"
-        />
-      </div>
+      <CourierDrawer
+        open={drawer.open}
+        courier={drawer.open ? drawer.courier : null}
+        initialTab={drawer.open ? drawer.tab : undefined}
+        onClose={() => setDrawer({ open: false })}
+        onSaved={() => void refetch()}
+      />
 
-      <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <CouriersTable couriers={couriers} loading={isLoading} />
-      </div>
-
-      <CreateCourierDialog open={createOpen} onClose={() => setCreateOpen(false)} onCreated={() => refetch()} />
-    </div>
+      <ConfirmationPopUp
+        open={statusTarget !== null}
+        onClose={() => setStatusTarget(null)}
+        onConfirm={() =>
+          statusTarget &&
+          statusMutation.mutate({ courierId: statusTarget.id, data: { is_active: !statusTarget.is_active } })
+        }
+        title={statusTarget?.is_active ? 'Deactivate courier partner' : 'Activate courier partner'}
+        message={
+          statusTarget ? (
+            <>
+              {statusTarget.is_active ? 'Deactivate' : 'Activate'}{' '}
+              <span className="font-medium">{statusTarget.name}</span>?{' '}
+              {statusTarget.is_active
+                ? 'Existing references keep working; it will be hidden from “Active only” views.'
+                : 'It will be selectable again.'}
+            </>
+          ) : null
+        }
+        confirmLabel={statusTarget?.is_active ? 'Deactivate' : 'Activate'}
+        destructive={statusTarget?.is_active ?? false}
+        confirmDisabled={statusMutation.isPending}
+      />
+    </MastersSectionLayout>
   );
 }
 

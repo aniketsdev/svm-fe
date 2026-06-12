@@ -14,6 +14,7 @@ export interface ActivityLogListItem {
   action: string;
   entity_type?: string | null;
   record_id?: string | null;
+  record_name?: string | null;
   ip?: string | null;
   changed_fields?: string[] | null;
 }

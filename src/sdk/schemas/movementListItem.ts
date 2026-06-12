@@ -16,7 +16,7 @@ export interface MovementListItem {
   item_id: number | null;
   item_name: string;
   item_code: string;
-  store_id: number | null;
+  store_uuid: string | null;
   store_name: string;
   related_store_name: string | null;
   counterparty: string | null;

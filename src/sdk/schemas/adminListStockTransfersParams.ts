@@ -5,8 +5,8 @@
 
 export type AdminListStockTransfersParams = {
 status?: string | null;
-from_store_id?: number | null;
-to_store_id?: number | null;
+from_store_uuid?: string | null;
+to_store_uuid?: string | null;
 date_from?: string | null;
 date_to?: string | null;
 search?: string | null;

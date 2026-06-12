@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import type { MastersListQuery } from '../api/list-query';
 import { bomsQueryOptions, type BomRow, type BomListResponse } from '../api/boms';
 
 interface Envelope {
@@ -6,15 +7,15 @@ interface Envelope {
   status: number;
 }
 
-export function useBoms(search?: string) {
-  const query = useQuery(bomsQueryOptions(search));
-  const envelope = query.data as Envelope | undefined;
+export function useBoms(query: MastersListQuery) {
+  const result = useQuery({ ...bomsQueryOptions(query), placeholderData: (prev) => prev });
+  const envelope = result.data as Envelope | undefined;
   const boms: BomRow[] = envelope?.data.results ?? [];
 
   return {
     boms,
     count: envelope?.data.count ?? 0,
-    isLoading: query.isPending,
-    refetch: query.refetch,
+    isLoading: result.isPending,
+    refetch: result.refetch,
   };
 }

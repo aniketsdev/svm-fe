@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Mail, Pencil, Power, Trash2 } from 'lucide-react';
+import type { SortingState } from '@tanstack/react-table';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import { ActionMenu, type ActionMenuItem } from '../../../common/action-menu';
 import { fullName, formatDateTime } from '../../../utils/format';
@@ -10,6 +11,12 @@ import { StatusPill } from './StatusPill';
 interface UsersTableProps {
   users: UserRow[];
   loading: boolean;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
+  sorting: SortingState;
+  onSortingChange: (sorting: SortingState) => void;
   onEdit: (u: UserRow) => void;
   onToggleStatus: (u: UserRow) => void;
   onResend: (u: UserRow) => void;
@@ -19,6 +26,12 @@ interface UsersTableProps {
 export function UsersTable({
   users,
   loading,
+  page,
+  pageSize,
+  total,
+  onPaginationChange,
+  sorting,
+  onSortingChange,
   onEdit,
   onToggleStatus,
   onResend,
@@ -29,13 +42,17 @@ export function UsersTable({
       {
         accessorKey: 'email',
         header: 'Email',
-        cell: ({ row }) => <span className="font-medium text-foreground">{row.original.email}</span>,
+        enableSorting: false,
+        cell: ({ row }) => (
+          <span className="font-medium text-foreground">{row.original.email}</span>
+        ),
       },
       {
         id: 'name',
         header: 'Name',
+        // Server sorts this column (sort=name).
         cell: ({ row }) => (
-          <span className="text-foreground">
+          <span className="whitespace-nowrap text-foreground">
             {fullName(row.original.first_name, row.original.last_name)}
           </span>
         ),
@@ -43,24 +60,33 @@ export function UsersTable({
       {
         accessorKey: 'role',
         header: 'Role',
+        enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => <RoleBadge role={row.original.role} />,
       },
       {
         accessorKey: 'is_active',
         header: 'Active',
+        enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => <StatusPill active={row.original.is_active} />,
       },
       {
         id: 'last_login',
         header: 'Last login',
+        // Server sorts this column (sort=last_login).
+        meta: { align: 'center' },
         cell: ({ row }) => (
-          <span className="text-muted-foreground">{formatDateTime(row.original.last_login_at)}</span>
+          <span className="whitespace-nowrap text-muted-foreground">
+            {formatDateTime(row.original.last_login_at)}
+          </span>
         ),
       },
       {
         id: 'actions',
-        header: '',
+        header: 'Action',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => {
           const u = row.original;
           const items: ActionMenuItem[] = [
@@ -84,8 +110,10 @@ export function UsersTable({
             color: 'var(--color-destructive)',
             onClick: () => onDelete(u),
           });
+          // Stop propagation so opening the actions menu does not also trigger
+          // the row-click (which opens the Edit drawer).
           return (
-            <div className="flex justify-end">
+            <div className="flex justify-end" onClick={(e) => e.stopPropagation()}>
               <ActionMenu items={items} ariaLabel={`Actions for ${u.email}`} />
             </div>
           );
@@ -101,9 +129,19 @@ export function UsersTable({
       data={users}
       loading={loading}
       enableSorting
+      manualSorting
+      sorting={sorting}
+      onSortingChange={onSortingChange}
       enablePagination
-      pageSize={10}
-      getRowId={(row) => String(row.id)}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
+      stickyHeader
+      maxHeight="calc(100vh - 16rem)"
+      getRowId={(row) => row.uuid}
+      onRowClick={onEdit}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">No users found.</div>
       }

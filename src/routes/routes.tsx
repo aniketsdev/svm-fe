@@ -29,6 +29,9 @@ const SetNewPasswordPage = lazyWithPreload(() =>
 const UsersPage = lazyWithPreload(() =>
   import('../features/users/pages/UsersPage').then((m) => ({ default: m.UsersPage })),
 );
+const ProfilePage = lazyWithPreload(() =>
+  import('../features/profile/pages/ProfilePage').then((m) => ({ default: m.ProfilePage })),
+);
 const ActivityLogPage = lazyWithPreload(() =>
   import('../features/activity-log/pages/ActivityLogPage').then((m) => ({
     default: m.ActivityLogPage,
@@ -37,6 +40,11 @@ const ActivityLogPage = lazyWithPreload(() =>
 const RolesPermissionsPage = lazyWithPreload(() =>
   import('../features/roles-permissions/pages/RolesPermissionsPage').then((m) => ({
     default: m.RolesPermissionsPage,
+  })),
+);
+const RoleDetailPage = lazyWithPreload(() =>
+  import('../features/roles-permissions/pages/RoleDetailPage').then((m) => ({
+    default: m.RoleDetailPage,
   })),
 );
 const MastersPage = lazyWithPreload(() =>
@@ -82,9 +90,40 @@ const InventoryPage = lazyWithPreload(() =>
     default: m.InventoryPage,
   })),
 );
+const MaterialsPage = lazyWithPreload(() =>
+  import('../features/inventory/pages/MaterialsPage').then((m) => ({ default: m.MaterialsPage })),
+);
+const StoresPage = lazyWithPreload(() =>
+  import('../features/inventory/pages/StoresPage').then((m) => ({ default: m.StoresPage })),
+);
+const ProcessingPage = lazyWithPreload(() =>
+  import('../features/processing/pages/ProcessingPage').then((m) => ({ default: m.ProcessingPage })),
+);
+const ManufacturingPage = lazyWithPreload(() =>
+  import('../features/manufacturing/pages/ManufacturingPage').then((m) => ({
+    default: m.ManufacturingPage,
+  })),
+);
+const DashboardPage = lazyWithPreload(() =>
+  import('../features/dashboard/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
+);
+const DispatchPage = lazyWithPreload(() =>
+  import('../features/dispatch/pages/DispatchPage').then((m) => ({ default: m.DispatchPage })),
+);
+const CrmPage = lazyWithPreload(() =>
+  import('../features/crm/pages/CrmPage').then((m) => ({ default: m.CrmPage })),
+);
+const CrmLeadDetailPage = lazyWithPreload(() =>
+  import('../features/crm/pages/CrmLeadDetailPage').then((m) => ({ default: m.CrmLeadDetailPage })),
+);
+const MyFollowupsPage = lazyWithPreload(() =>
+  import('../features/crm/pages/MyFollowupsPage').then((m) => ({ default: m.MyFollowupsPage })),
+);
+const CrmSettingsPage = lazyWithPreload(() =>
+  import('../features/crm/pages/CrmSettingsPage').then((m) => ({ default: m.CrmSettingsPage })),
+);
 
 // ── Placeholder pages for routes whose features aren't built yet ────────────
-const DashboardPlaceholder = () => <PlaceholderPage title="Dashboard" />;
 const ClientsPlaceholder = () => <PlaceholderPage title="Clients" />;
 const ClientDetailPlaceholder = () => <PlaceholderPage title="Client Detail" />;
 const SchedulingPlaceholder = () => <PlaceholderPage title="Scheduling" />;
@@ -157,10 +196,15 @@ export default function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="dashboard" element={<DashboardPlaceholder />} />
+        <Route path="dashboard" element={<DashboardPage />} />
         <Route path="users" element={<UsersPage />} />
         <Route path="activity-log" element={<ActivityLogPage />} />
         <Route path="roles-permissions" element={<RolesPermissionsPage />} />
+        <Route path="roles-permissions/:roleUuid" element={<RoleDetailPage />} />
+        <Route path="crm" element={<CrmPage />} />
+        <Route path="crm/follow-ups" element={<MyFollowupsPage />} />
+        <Route path="crm/settings" element={<CrmSettingsPage />} />
+        <Route path="crm/:leadUuid" element={<CrmLeadDetailPage />} />
         <Route path="masters" element={<MastersPage />} />
         <Route path="masters/vendors" element={<VendorsPage />} />
         <Route path="masters/courier-partners" element={<CouriersPage />} />
@@ -171,7 +215,12 @@ export default function AppRoutes() {
         <Route path="masters/doctor-aliases" element={<DoctorAliasesPage />} />
         <Route path="masters/doctor-pricing" element={<DoctorPricingPage />} />
         <Route path="masters/boms" element={<BomsPage />} />
+        <Route path="masters/materials" element={<MaterialsPage />} />
+        <Route path="masters/stores" element={<StoresPage />} />
         <Route path="inventory" element={<InventoryPage />} />
+        <Route path="processing" element={<ProcessingPage />} />
+        <Route path="manufacturing" element={<ManufacturingPage />} />
+        <Route path="dispatch" element={<DispatchPage />} />
         <Route path="scheduling" element={<SchedulingPlaceholder />} />
         <Route path="clients" element={<ClientsPlaceholder />} />
         <Route path="clients/:clientUuid" element={<ClientDetailPlaceholder />} />
@@ -179,7 +228,14 @@ export default function AppRoutes() {
         <Route path="diagnostic-generator" element={<DiagnosticGeneratorPlaceholder />} />
         <Route path="settings" element={<SettingsPlaceholder />} />
         <Route path="settings/user/:uuid" element={<UserProfilePlaceholder />} />
-        <Route path="profile" element={<UserProfilePlaceholder />} />
+        <Route
+          path="profile"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <ProfilePage />
+            </Suspense>
+          }
+        />
       </Route>
 
       {/* Catch-all → dashboard (ProtectedRoute handles signed-out users). */}

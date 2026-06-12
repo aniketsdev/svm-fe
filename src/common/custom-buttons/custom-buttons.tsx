@@ -32,7 +32,7 @@ const buttonVariants = cva(
       },
       size: {
         sm: 'h-9 px-3 text-sm',
-        md: 'h-11 px-4 text-base', // ≥44 px tap target (constitution Principle V)
+        md: 'h-10 px-4 text-base', // ≥44 px tap target (constitution Principle V)
         lg: 'h-12 px-6 text-base',
       },
       fullWidth: {

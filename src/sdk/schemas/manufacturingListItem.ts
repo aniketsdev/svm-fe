@@ -4,7 +4,7 @@
  */
 
 export interface ManufacturingListItem {
-  id: number;
+  uuid: string;
   mo_no: string;
   status: string;
   product_code: string;

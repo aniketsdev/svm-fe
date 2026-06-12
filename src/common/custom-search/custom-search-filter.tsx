@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { CustomInput } from '../custom-input';
 import { cn } from '../../lib/cn';
 
@@ -10,6 +10,8 @@ export interface SearchFilterProps {
   };
   /** Fires (debounced) with the current input value. */
   onSearch?: (value: string) => void;
+  /** Seed the input on mount (e.g. restoring a search term from the URL). */
+  initialValue?: string;
   /** Wrapper width passthrough (Tailwind-friendly e.g. `"24rem"` or `"100%"`). */
   width?: string;
   /** Render a search icon on the left. */
@@ -26,19 +28,36 @@ export interface SearchFilterProps {
 const SearchFilter = ({
   textData,
   onSearch,
+  initialValue = '',
   width,
   hasStartSearchIcon,
   startSearchIconOnRight,
   debounceMs = 300,
   className,
 }: SearchFilterProps) => {
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(initialValue);
+
+  // Hold the latest onSearch in a ref so it is NOT an effect dependency.
+  // Callers often pass an inline handler (new identity every render); if that
+  // were a dependency, any unrelated parent re-render (e.g. paging) would
+  // re-run the debounce and fire a spurious search, resetting parent state.
+  const onSearchRef = useRef(onSearch);
+  // Keep the ref pointing at the latest handler without making it an effect
+  // dependency (assigning in an effect, not during render).
+  useEffect(() => {
+    onSearchRef.current = onSearch;
+  });
+  // Skip the initial mount so we don't emit an empty search on first render.
+  const mountedRef = useRef(false);
 
   useEffect(() => {
-    if (!onSearch) return;
-    const t = setTimeout(() => onSearch(inputValue), debounceMs);
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    const t = setTimeout(() => onSearchRef.current?.(inputValue), debounceMs);
     return () => clearTimeout(t);
-  }, [inputValue, onSearch, debounceMs]);
+  }, [inputValue, debounceMs]);
 
   return (
     <div className={cn('flex items-center', className)} style={width ? { width } : undefined}>

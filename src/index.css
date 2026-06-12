@@ -147,12 +147,28 @@ body,
 
 body {
   margin: 0;
-  /* Clean, modern light-gray canvas so white cards/inputs read crisply.
+  /* Pure white canvas across all pages.
      Brand green is confined to the sidebar + top header chrome. */
-  background-color: #F4F6F8;
+  background-color: #FFFFFF;
   color: var(--color-foreground);
   font-family: var(--font-sans);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Browsers (Chrome/WebKit) paint autofilled inputs with their own pale-yellow
+   background, overriding our transparent/white field styling. Mask it with a
+   large inset white box-shadow so autofilled fields stay pure white. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset;
+  box-shadow: 0 0 0 1000px #FFFFFF inset;
+  -webkit-text-fill-color: var(--color-foreground);
+  caret-color: var(--color-foreground);
+  transition: background-color 5000s ease-in-out 0s;
 }

@@ -6,6 +6,8 @@
 export interface PermissionOut {
   id: number;
   name: string;
+  feature: string;
+  action: string;
   category: string;
   description: string;
   created_at: string;

@@ -12,5 +12,6 @@ export interface ProductListItem {
   gst_rate?: number | null;
   pack_size?: string | null;
   is_active: boolean;
+  media_count?: number;
   created_at: string;
 }

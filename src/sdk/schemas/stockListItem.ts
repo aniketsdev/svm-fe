@@ -4,7 +4,7 @@
  */
 
 export interface StockListItem {
-  batch_id: number;
+  batch_uuid: string;
   kind: string;
   material_name: string;
   material_code: string;

@@ -11,5 +11,6 @@ export interface VendorListItem {
   state_code?: string | null;
   city?: string | null;
   is_active: boolean;
+  media_count?: number;
   created_at: string;
 }

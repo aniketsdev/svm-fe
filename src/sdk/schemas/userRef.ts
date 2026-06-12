@@ -4,6 +4,6 @@
  */
 
 export interface UserRef {
-  user_id: number;
+  uuid: string;
   email: string;
 }

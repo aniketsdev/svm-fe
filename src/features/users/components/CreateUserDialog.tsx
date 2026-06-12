@@ -80,7 +80,7 @@ export function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogP
   };
 
   return (
-    <CustomDrawer anchor="right" title="Create user" open={open} onClose={handleClose} drawerWidth="30rem">
+    <CustomDrawer anchor="right" title="Create user" open={open} onClose={handleClose} drawerWidth="34rem">
       {createdUrl ? (
         <div className="flex flex-col gap-4">
           <p className="text-sm text-foreground">
@@ -102,20 +102,20 @@ export function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogP
           </div>
         </div>
       ) : (
-        <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <RHFInput<CreateUserFormValues>
-            name="email"
-            control={control}
-            label="Email"
-            required
-            placeholder="Enter email"
-          />
-          <div className="grid grid-cols-2 gap-3">
-            <RHFInput<CreateUserFormValues> name="first_name" control={control} label="First name" placeholder="Enter first name" />
-            <RHFInput<CreateUserFormValues> name="last_name" control={control} label="Last name" placeholder="Enter last name" />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <RHFInput<CreateUserFormValues> name="phone" control={control} label="Phone" placeholder="Enter phone" />
+        <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col gap-4">
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-3">
+              <RHFInput<CreateUserFormValues> name="first_name" control={control} label="First name" required placeholder="Enter first name" />
+              <RHFInput<CreateUserFormValues> name="last_name" control={control} label="Last name" required placeholder="Enter last name" />
+            </div>
+            <RHFInput<CreateUserFormValues>
+              name="email"
+              control={control}
+              label="Email"
+              required
+              placeholder="Enter email"
+            />
+            <RHFInput<CreateUserFormValues> name="phone" control={control} label="Phone" phone placeholder="Enter phone" />
             <RHFSelect<CreateUserFormValues>
               name="role"
               control={control}
@@ -125,11 +125,11 @@ export function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogP
               items={ROLE_ITEMS}
             />
           </div>
-          <div className="mt-2 flex justify-end gap-3">
-            <CustomButton type="button" variant="outline" onClick={handleClose}>
+          <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pt-4">
+            <CustomButton type="button" variant="outline" onClick={handleClose} size="md">
               Cancel
             </CustomButton>
-            <CustomButton type="submit" variant="primary" loading={createMutation.isPending}>
+            <CustomButton type="submit" variant="primary" loading={createMutation.isPending} size="md">
               Create user
             </CustomButton>
           </div>

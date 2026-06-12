@@ -7,7 +7,7 @@
  * Full bootstrap payload for the FE AuthContext.
  */
 export interface MeResponse {
-  id: number;
+  uuid: string;
   email: string;
   role: string;
   is_active: boolean;

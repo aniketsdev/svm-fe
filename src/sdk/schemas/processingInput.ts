@@ -7,9 +7,9 @@ export interface ProcessingInput {
   material_id: number;
   material_code: string;
   material_name: string;
-  from_store_id: number;
+  from_store_id: string;
   from_store_name: string;
-  input_batch_id: number | null;
+  input_batch_id: string | null;
   input_batch_no: string | null;
   quantity_to_consume: string;
 }

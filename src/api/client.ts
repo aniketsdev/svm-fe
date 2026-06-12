@@ -72,12 +72,24 @@ function serializeBody(body: ApiRequest['body'], form: boolean | undefined): {
   return { body: JSON.stringify(body), contentType: 'application/json' };
 }
 
+// Path of the silent-refresh endpoint. The access cookie lives only ~15 min;
+// when it expires the server replies 401, and we transparently exchange the
+// long-lived refresh cookie for a fresh access cookie via this endpoint.
+const REFRESH_PATH = '/api/v1/auth/refresh';
+
+// 401s from these auth-flow endpoints are terminal — never try to refresh them
+// (a failed login/logout/refresh must surface as-is, not loop).
+const NO_REFRESH_PATHS = ['/auth/login', '/auth/logout', '/auth/refresh'];
+
+function shouldAttemptRefresh(path: string): boolean {
+  return !NO_REFRESH_PATHS.some((p) => path.includes(p));
+}
+
 /**
- * Lower-level request that returns the response envelope (`data`, `status`,
- * `headers`). Used by the SDK mutator (`./sdk-mutator.ts`) so that Orval's
- * generated discriminated-union return types are honoured at runtime.
+ * Single core request — no 401 handling. Returns the response envelope or
+ * throws `ApiError`. `apiFetchWithMeta` wraps this with the refresh retry.
  */
-export async function apiFetchWithMeta<T = unknown>(
+async function rawFetchWithMeta<T = unknown>(
   path: string,
   init: ApiRequest = {},
 ): Promise<ApiResponseEnvelope<T>> {
@@ -118,6 +130,74 @@ export async function apiFetchWithMeta<T = unknown>(
   }
 
   return { data: parsed as T, status: resp.status, headers: resp.headers };
+}
+
+// Single-flight guard: when many requests 401 at once (e.g. a dashboard firing
+// several queries after the access cookie expired), they all await ONE refresh
+// instead of stampeding the endpoint.
+let refreshPromise: Promise<boolean> | null = null;
+
+// Cross-tab lock name. The backend rotates the refresh token on every use and
+// treats reuse of a rotated token as theft (it revokes the whole session
+// chain). The module-level guard above only dedupes within one tab, so two
+// tabs hitting the 15-min expiry together would race /auth/refresh and the
+// loser would trigger that revocation. The Web Locks API serializes the
+// refresh across all tabs of the origin; where unavailable (non-secure
+// context, old browser), we fall back to the per-tab guard alone and rely on
+// the server's concurrent-refresh grace window.
+const REFRESH_LOCK_NAME = 'svm-auth-refresh';
+
+function withCrossTabLock<T>(fn: () => Promise<T>): Promise<T> {
+  const locks = typeof navigator !== 'undefined' ? navigator.locks : undefined;
+  if (locks?.request) {
+    return locks.request(REFRESH_LOCK_NAME, fn) as Promise<T>;
+  }
+  return fn();
+}
+
+function ensureRefreshed(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = withCrossTabLock(() =>
+      // By the time the lock is granted another tab may already have rotated
+      // the cookies; refreshing again with the (shared, now-current) cookie
+      // is still a valid rotation, so no staleness check is needed.
+      rawFetchWithMeta(REFRESH_PATH, { method: 'POST' })
+        .then(() => true)
+        .catch(() => false),
+    )
+      .catch(() => false)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
+/**
+ * Lower-level request that returns the response envelope (`data`, `status`,
+ * `headers`). Used by the SDK mutator (`./sdk-mutator.ts`) so that Orval's
+ * generated discriminated-union return types are honoured at runtime.
+ *
+ * On a 401 it transparently attempts ONE silent refresh and retries the
+ * original request, so a brand-new tab (or a session whose 15-min access token
+ * lapsed) heals itself instead of bouncing the user to /login.
+ */
+export async function apiFetchWithMeta<T = unknown>(
+  path: string,
+  init: ApiRequest = {},
+): Promise<ApiResponseEnvelope<T>> {
+  try {
+    return await rawFetchWithMeta<T>(path, init);
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 401 && shouldAttemptRefresh(path)) {
+      const refreshed = await ensureRefreshed();
+      if (refreshed) {
+        // Exactly one retry — rawFetch (not the wrapper) so this can't recurse.
+        return await rawFetchWithMeta<T>(path, init);
+      }
+    }
+    throw err;
+  }
 }
 
 /**

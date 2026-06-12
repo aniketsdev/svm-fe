@@ -35,7 +35,6 @@ const CustomDrawer = ({
   drawerWidth,
   drawermargin,
   drawerPadding,
-  headerPadding,
   onClose,
   headerStyle,
   titleStyle,
@@ -90,10 +89,10 @@ const CustomDrawer = ({
               className="flex items-center justify-between border-b border-border"
               style={{
                 marginTop: headerStyle,
-                paddingLeft: headerPadding ?? defaultPad,
-                paddingRight: headerPadding ?? defaultPad,
-                paddingTop: 10,
-                paddingBottom: 10,
+                paddingLeft: 10,
+                paddingRight: 10,
+                paddingTop: 15,
+                paddingBottom: 15,
               }}
             >
               <DialogPrimitive.Title

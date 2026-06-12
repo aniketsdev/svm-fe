@@ -4,7 +4,7 @@
  */
 
 export interface GrnListItem {
-  id: number;
+  uuid: string;
   grn_no: string;
   received_date: string | null;
   supplier_name: string | null;

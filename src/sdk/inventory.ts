@@ -31,10 +31,12 @@ import type {
   AdminGetBatchLedgerParams,
   AdminListBomsParams,
   AdminListCourierPartnersParams,
+  AdminListDispatchesParams,
   AdminListDoctorAliasesParams,
   AdminListDoctorPricingParams,
   AdminListDoctorsParams,
   AdminListGrnsParams,
+  AdminListInvoicesParams,
   AdminListProductsParams,
   AdminListRawMaterialsParams,
   AdminListRmCategoriesParams,
@@ -61,6 +63,9 @@ import type {
   CreateRawMaterialRequest,
   CreateRmCategoryRequest,
   CreateVendorRequest,
+  DispatchCreate,
+  DispatchDetail,
+  DispatchList,
   DispatchRequest,
   DoctorAliasListItem,
   DoctorAliasListResponse,
@@ -77,12 +82,15 @@ import type {
   HTTPValidationError,
   HoldRequest,
   InboundRequest,
+  InvoiceList,
+  InvoiceOut,
   LedgerList,
   MaterialCreate,
   MaterialList,
   MaterialOut,
   MaterialUpdate,
   MovementListResponse,
+  PaymentStatusUpdate,
   ProductListItem,
   ProductListResponse,
   RawMaterialListItem,
@@ -91,6 +99,7 @@ import type {
   ReturnRequest,
   RmCategoryListItem,
   RmCategoryListResponse,
+  SetStatusRequest,
   StCreate,
   StDetail,
   StList,
@@ -105,6 +114,15 @@ import type {
   StoreUpdate,
   TimelineList,
   TraceabilityOut,
+  UpdateBomRequest,
+  UpdateCourierPartnerRequest,
+  UpdateDoctorAliasRequest,
+  UpdateDoctorPricingRequest,
+  UpdateDoctorRequest,
+  UpdateProductRequest,
+  UpdateRawMaterialRequest,
+  UpdateRmCategoryRequest,
+  UpdateVendorRequest,
   VendorListItem,
   VendorListResponse
 } from './schemas';
@@ -927,20 +945,20 @@ export type adminGetBatchResponseError = (adminGetBatchResponse422) & {
 
 export type adminGetBatchResponse = (adminGetBatchResponseSuccess | adminGetBatchResponseError)
 
-export const getAdminGetBatchUrl = (batchId: number,) => {
+export const getAdminGetBatchUrl = (batchUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/batches/${batchId}`
+  return `/api/v1/admin/inventory/batches/${batchUuid}`
 }
 
 /**
  * @summary Get Batch
  */
-export const adminGetBatch = async (batchId: number, options?: RequestInit): Promise<adminGetBatchResponse> => {
+export const adminGetBatch = async (batchUuid: string, options?: RequestInit): Promise<adminGetBatchResponse> => {
 
-  return mutator<adminGetBatchResponse>(getAdminGetBatchUrl(batchId),
+  return mutator<adminGetBatchResponse>(getAdminGetBatchUrl(batchUuid),
   {
     ...options,
     method: 'GET'
@@ -953,29 +971,29 @@ export const adminGetBatch = async (batchId: number, options?: RequestInit): Pro
 
 
 
-export const getAdminGetBatchQueryKey = (batchId: number,) => {
+export const getAdminGetBatchQueryKey = (batchUuid: string,) => {
     return [
-    `/api/v1/admin/inventory/batches/${batchId}`
+    `/api/v1/admin/inventory/batches/${batchUuid}`
     ] as const;
     }
 
 
-export const getAdminGetBatchQueryOptions = <TData = Awaited<ReturnType<typeof adminGetBatch>>, TError = ErrorType<HTTPValidationError>>(batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData>>, }
+export const getAdminGetBatchQueryOptions = <TData = Awaited<ReturnType<typeof adminGetBatch>>, TError = ErrorType<HTTPValidationError>>(batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetBatchQueryKey(batchId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetBatchQueryKey(batchUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetBatch>>> = ({ signal }) => adminGetBatch(batchId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetBatch>>> = ({ signal }) => adminGetBatch(batchUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: batchId !== null && batchId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: batchUuid !== null && batchUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminGetBatchQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetBatch>>>
@@ -983,7 +1001,7 @@ export type AdminGetBatchQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminGetBatch<TData = Awaited<ReturnType<typeof adminGetBatch>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData>> & Pick<
+ batchUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetBatch>>,
           TError,
@@ -993,7 +1011,7 @@ export function useAdminGetBatch<TData = Awaited<ReturnType<typeof adminGetBatch
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetBatch<TData = Awaited<ReturnType<typeof adminGetBatch>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData>> & Pick<
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetBatch>>,
           TError,
@@ -1003,7 +1021,7 @@ export function useAdminGetBatch<TData = Awaited<ReturnType<typeof adminGetBatch
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetBatch<TData = Awaited<ReturnType<typeof adminGetBatch>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData>>, }
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1011,11 +1029,11 @@ export function useAdminGetBatch<TData = Awaited<ReturnType<typeof adminGetBatch
  */
 
 export function useAdminGetBatch<TData = Awaited<ReturnType<typeof adminGetBatch>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData>>, }
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatch>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetBatchQueryOptions(batchId,options)
+  const queryOptions = getAdminGetBatchQueryOptions(batchUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -1046,21 +1064,21 @@ export type adminUpdateBatchResponseError = (adminUpdateBatchResponse422) & {
 
 export type adminUpdateBatchResponse = (adminUpdateBatchResponseSuccess | adminUpdateBatchResponseError)
 
-export const getAdminUpdateBatchUrl = (batchId: number,) => {
+export const getAdminUpdateBatchUrl = (batchUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/batches/${batchId}`
+  return `/api/v1/admin/inventory/batches/${batchUuid}`
 }
 
 /**
  * @summary Update Batch
  */
-export const adminUpdateBatch = async (batchId: number,
+export const adminUpdateBatch = async (batchUuid: string,
     batchUpdate: BatchUpdate, options?: RequestInit): Promise<adminUpdateBatchResponse> => {
 
-  return mutator<adminUpdateBatchResponse>(getAdminUpdateBatchUrl(batchId),
+  return mutator<adminUpdateBatchResponse>(getAdminUpdateBatchUrl(batchUuid),
   {
     ...options,
     method: 'PATCH',
@@ -1073,8 +1091,8 @@ export const adminUpdateBatch = async (batchId: number,
 
 
 export const getAdminUpdateBatchMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBatch>>, TError,{batchId: number;data: BodyType<BatchUpdate>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBatch>>, TError,{batchId: number;data: BodyType<BatchUpdate>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBatch>>, TError,{batchUuid: string;data: BodyType<BatchUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBatch>>, TError,{batchUuid: string;data: BodyType<BatchUpdate>}, TContext> => {
 
 const mutationKey = ['adminUpdateBatch'];
 const {mutation: mutationOptions} = options ?
@@ -1086,10 +1104,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateBatch>>, {batchId: number;data: BodyType<BatchUpdate>}> = (props) => {
-          const {batchId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateBatch>>, {batchUuid: string;data: BodyType<BatchUpdate>}> = (props) => {
+          const {batchUuid,data} = props ?? {};
 
-          return  adminUpdateBatch(batchId,data,)
+          return  adminUpdateBatch(batchUuid,data,)
         }
 
 
@@ -1107,11 +1125,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Update Batch
  */
 export const useAdminUpdateBatch = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBatch>>, TError,{batchId: number;data: BodyType<BatchUpdate>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBatch>>, TError,{batchUuid: string;data: BodyType<BatchUpdate>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminUpdateBatch>>,
         TError,
-        {batchId: number;data: BodyType<BatchUpdate>},
+        {batchUuid: string;data: BodyType<BatchUpdate>},
         TContext
       > => {
       return useMutation(getAdminUpdateBatchMutationOptions(options), queryClient);
@@ -1135,7 +1153,7 @@ export type adminGetBatchLedgerResponseError = (adminGetBatchLedgerResponse422) 
 
 export type adminGetBatchLedgerResponse = (adminGetBatchLedgerResponseSuccess | adminGetBatchLedgerResponseError)
 
-export const getAdminGetBatchLedgerUrl = (batchId: number,
+export const getAdminGetBatchLedgerUrl = (batchUuid: string,
     params?: AdminGetBatchLedgerParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -1148,16 +1166,16 @@ export const getAdminGetBatchLedgerUrl = (batchId: number,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/v1/admin/inventory/batches/${batchId}/ledger?${stringifiedParams}` : `/api/v1/admin/inventory/batches/${batchId}/ledger`
+  return stringifiedParams.length > 0 ? `/api/v1/admin/inventory/batches/${batchUuid}/ledger?${stringifiedParams}` : `/api/v1/admin/inventory/batches/${batchUuid}/ledger`
 }
 
 /**
  * @summary Get Batch Ledger
  */
-export const adminGetBatchLedger = async (batchId: number,
+export const adminGetBatchLedger = async (batchUuid: string,
     params?: AdminGetBatchLedgerParams, options?: RequestInit): Promise<adminGetBatchLedgerResponse> => {
 
-  return mutator<adminGetBatchLedgerResponse>(getAdminGetBatchLedgerUrl(batchId,params),
+  return mutator<adminGetBatchLedgerResponse>(getAdminGetBatchLedgerUrl(batchUuid,params),
   {
     ...options,
     method: 'GET'
@@ -1170,31 +1188,31 @@ export const adminGetBatchLedger = async (batchId: number,
 
 
 
-export const getAdminGetBatchLedgerQueryKey = (batchId: number,
+export const getAdminGetBatchLedgerQueryKey = (batchUuid: string,
     params?: AdminGetBatchLedgerParams,) => {
     return [
-    `/api/v1/admin/inventory/batches/${batchId}/ledger`, ...(params ? [params] : [])
+    `/api/v1/admin/inventory/batches/${batchUuid}/ledger`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getAdminGetBatchLedgerQueryOptions = <TData = Awaited<ReturnType<typeof adminGetBatchLedger>>, TError = ErrorType<HTTPValidationError>>(batchId: number,
+export const getAdminGetBatchLedgerQueryOptions = <TData = Awaited<ReturnType<typeof adminGetBatchLedger>>, TError = ErrorType<HTTPValidationError>>(batchUuid: string,
     params?: AdminGetBatchLedgerParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLedger>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetBatchLedgerQueryKey(batchId,params);
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetBatchLedgerQueryKey(batchUuid,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetBatchLedger>>> = ({ signal }) => adminGetBatchLedger(batchId,params, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetBatchLedger>>> = ({ signal }) => adminGetBatchLedger(batchUuid,params, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: batchId !== null && batchId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLedger>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: batchUuid !== null && batchUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLedger>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminGetBatchLedgerQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetBatchLedger>>>
@@ -1202,7 +1220,7 @@ export type AdminGetBatchLedgerQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminGetBatchLedger<TData = Awaited<ReturnType<typeof adminGetBatchLedger>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number,
+ batchUuid: string,
     params: undefined |  AdminGetBatchLedgerParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLedger>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetBatchLedger>>,
@@ -1213,7 +1231,7 @@ export function useAdminGetBatchLedger<TData = Awaited<ReturnType<typeof adminGe
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetBatchLedger<TData = Awaited<ReturnType<typeof adminGetBatchLedger>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number,
+ batchUuid: string,
     params?: AdminGetBatchLedgerParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLedger>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetBatchLedger>>,
@@ -1224,7 +1242,7 @@ export function useAdminGetBatchLedger<TData = Awaited<ReturnType<typeof adminGe
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetBatchLedger<TData = Awaited<ReturnType<typeof adminGetBatchLedger>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number,
+ batchUuid: string,
     params?: AdminGetBatchLedgerParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLedger>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -1233,12 +1251,12 @@ export function useAdminGetBatchLedger<TData = Awaited<ReturnType<typeof adminGe
  */
 
 export function useAdminGetBatchLedger<TData = Awaited<ReturnType<typeof adminGetBatchLedger>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number,
+ batchUuid: string,
     params?: AdminGetBatchLedgerParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLedger>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetBatchLedgerQueryOptions(batchId,params,options)
+  const queryOptions = getAdminGetBatchLedgerQueryOptions(batchUuid,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -1269,20 +1287,20 @@ export type adminGetBatchTimelineResponseError = (adminGetBatchTimelineResponse4
 
 export type adminGetBatchTimelineResponse = (adminGetBatchTimelineResponseSuccess | adminGetBatchTimelineResponseError)
 
-export const getAdminGetBatchTimelineUrl = (batchId: number,) => {
+export const getAdminGetBatchTimelineUrl = (batchUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/batches/${batchId}/timeline`
+  return `/api/v1/admin/inventory/batches/${batchUuid}/timeline`
 }
 
 /**
  * @summary Get Batch Timeline
  */
-export const adminGetBatchTimeline = async (batchId: number, options?: RequestInit): Promise<adminGetBatchTimelineResponse> => {
+export const adminGetBatchTimeline = async (batchUuid: string, options?: RequestInit): Promise<adminGetBatchTimelineResponse> => {
 
-  return mutator<adminGetBatchTimelineResponse>(getAdminGetBatchTimelineUrl(batchId),
+  return mutator<adminGetBatchTimelineResponse>(getAdminGetBatchTimelineUrl(batchUuid),
   {
     ...options,
     method: 'GET'
@@ -1295,29 +1313,29 @@ export const adminGetBatchTimeline = async (batchId: number, options?: RequestIn
 
 
 
-export const getAdminGetBatchTimelineQueryKey = (batchId: number,) => {
+export const getAdminGetBatchTimelineQueryKey = (batchUuid: string,) => {
     return [
-    `/api/v1/admin/inventory/batches/${batchId}/timeline`
+    `/api/v1/admin/inventory/batches/${batchUuid}/timeline`
     ] as const;
     }
 
 
-export const getAdminGetBatchTimelineQueryOptions = <TData = Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError = ErrorType<HTTPValidationError>>(batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData>>, }
+export const getAdminGetBatchTimelineQueryOptions = <TData = Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError = ErrorType<HTTPValidationError>>(batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetBatchTimelineQueryKey(batchId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetBatchTimelineQueryKey(batchUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetBatchTimeline>>> = ({ signal }) => adminGetBatchTimeline(batchId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetBatchTimeline>>> = ({ signal }) => adminGetBatchTimeline(batchUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: batchId !== null && batchId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: batchUuid !== null && batchUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminGetBatchTimelineQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetBatchTimeline>>>
@@ -1325,7 +1343,7 @@ export type AdminGetBatchTimelineQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminGetBatchTimeline<TData = Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData>> & Pick<
+ batchUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetBatchTimeline>>,
           TError,
@@ -1335,7 +1353,7 @@ export function useAdminGetBatchTimeline<TData = Awaited<ReturnType<typeof admin
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetBatchTimeline<TData = Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData>> & Pick<
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetBatchTimeline>>,
           TError,
@@ -1345,7 +1363,7 @@ export function useAdminGetBatchTimeline<TData = Awaited<ReturnType<typeof admin
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetBatchTimeline<TData = Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData>>, }
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1353,11 +1371,11 @@ export function useAdminGetBatchTimeline<TData = Awaited<ReturnType<typeof admin
  */
 
 export function useAdminGetBatchTimeline<TData = Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData>>, }
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTimeline>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetBatchTimelineQueryOptions(batchId,options)
+  const queryOptions = getAdminGetBatchTimelineQueryOptions(batchUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -1388,20 +1406,20 @@ export type adminGetBatchTraceabilityResponseError = (adminGetBatchTraceabilityR
 
 export type adminGetBatchTraceabilityResponse = (adminGetBatchTraceabilityResponseSuccess | adminGetBatchTraceabilityResponseError)
 
-export const getAdminGetBatchTraceabilityUrl = (batchId: number,) => {
+export const getAdminGetBatchTraceabilityUrl = (batchUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/batches/${batchId}/traceability`
+  return `/api/v1/admin/inventory/batches/${batchUuid}/traceability`
 }
 
 /**
  * @summary Get Batch Traceability
  */
-export const adminGetBatchTraceability = async (batchId: number, options?: RequestInit): Promise<adminGetBatchTraceabilityResponse> => {
+export const adminGetBatchTraceability = async (batchUuid: string, options?: RequestInit): Promise<adminGetBatchTraceabilityResponse> => {
 
-  return mutator<adminGetBatchTraceabilityResponse>(getAdminGetBatchTraceabilityUrl(batchId),
+  return mutator<adminGetBatchTraceabilityResponse>(getAdminGetBatchTraceabilityUrl(batchUuid),
   {
     ...options,
     method: 'GET'
@@ -1414,29 +1432,29 @@ export const adminGetBatchTraceability = async (batchId: number, options?: Reque
 
 
 
-export const getAdminGetBatchTraceabilityQueryKey = (batchId: number,) => {
+export const getAdminGetBatchTraceabilityQueryKey = (batchUuid: string,) => {
     return [
-    `/api/v1/admin/inventory/batches/${batchId}/traceability`
+    `/api/v1/admin/inventory/batches/${batchUuid}/traceability`
     ] as const;
     }
 
 
-export const getAdminGetBatchTraceabilityQueryOptions = <TData = Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError = ErrorType<HTTPValidationError>>(batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData>>, }
+export const getAdminGetBatchTraceabilityQueryOptions = <TData = Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError = ErrorType<HTTPValidationError>>(batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetBatchTraceabilityQueryKey(batchId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetBatchTraceabilityQueryKey(batchUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetBatchTraceability>>> = ({ signal }) => adminGetBatchTraceability(batchId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetBatchTraceability>>> = ({ signal }) => adminGetBatchTraceability(batchUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: batchId !== null && batchId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: batchUuid !== null && batchUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminGetBatchTraceabilityQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetBatchTraceability>>>
@@ -1444,7 +1462,7 @@ export type AdminGetBatchTraceabilityQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminGetBatchTraceability<TData = Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData>> & Pick<
+ batchUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetBatchTraceability>>,
           TError,
@@ -1454,7 +1472,7 @@ export function useAdminGetBatchTraceability<TData = Awaited<ReturnType<typeof a
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetBatchTraceability<TData = Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData>> & Pick<
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetBatchTraceability>>,
           TError,
@@ -1464,7 +1482,7 @@ export function useAdminGetBatchTraceability<TData = Awaited<ReturnType<typeof a
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetBatchTraceability<TData = Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData>>, }
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1472,11 +1490,11 @@ export function useAdminGetBatchTraceability<TData = Awaited<ReturnType<typeof a
  */
 
 export function useAdminGetBatchTraceability<TData = Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData>>, }
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchTraceability>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetBatchTraceabilityQueryOptions(batchId,options)
+  const queryOptions = getAdminGetBatchTraceabilityQueryOptions(batchUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -1507,20 +1525,20 @@ export type adminGetBatchLabelResponseError = (adminGetBatchLabelResponse422) & 
 
 export type adminGetBatchLabelResponse = (adminGetBatchLabelResponseSuccess | adminGetBatchLabelResponseError)
 
-export const getAdminGetBatchLabelUrl = (batchId: number,) => {
+export const getAdminGetBatchLabelUrl = (batchUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/batches/${batchId}/label`
+  return `/api/v1/admin/inventory/batches/${batchUuid}/label`
 }
 
 /**
  * @summary Get Batch Label
  */
-export const adminGetBatchLabel = async (batchId: number, options?: RequestInit): Promise<adminGetBatchLabelResponse> => {
+export const adminGetBatchLabel = async (batchUuid: string, options?: RequestInit): Promise<adminGetBatchLabelResponse> => {
 
-  return mutator<adminGetBatchLabelResponse>(getAdminGetBatchLabelUrl(batchId),
+  return mutator<adminGetBatchLabelResponse>(getAdminGetBatchLabelUrl(batchUuid),
   {
     ...options,
     method: 'GET'
@@ -1533,29 +1551,29 @@ export const adminGetBatchLabel = async (batchId: number, options?: RequestInit)
 
 
 
-export const getAdminGetBatchLabelQueryKey = (batchId: number,) => {
+export const getAdminGetBatchLabelQueryKey = (batchUuid: string,) => {
     return [
-    `/api/v1/admin/inventory/batches/${batchId}/label`
+    `/api/v1/admin/inventory/batches/${batchUuid}/label`
     ] as const;
     }
 
 
-export const getAdminGetBatchLabelQueryOptions = <TData = Awaited<ReturnType<typeof adminGetBatchLabel>>, TError = ErrorType<HTTPValidationError>>(batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData>>, }
+export const getAdminGetBatchLabelQueryOptions = <TData = Awaited<ReturnType<typeof adminGetBatchLabel>>, TError = ErrorType<HTTPValidationError>>(batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetBatchLabelQueryKey(batchId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetBatchLabelQueryKey(batchUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetBatchLabel>>> = ({ signal }) => adminGetBatchLabel(batchId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetBatchLabel>>> = ({ signal }) => adminGetBatchLabel(batchUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: batchId !== null && batchId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: batchUuid !== null && batchUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminGetBatchLabelQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetBatchLabel>>>
@@ -1563,7 +1581,7 @@ export type AdminGetBatchLabelQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminGetBatchLabel<TData = Awaited<ReturnType<typeof adminGetBatchLabel>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData>> & Pick<
+ batchUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetBatchLabel>>,
           TError,
@@ -1573,7 +1591,7 @@ export function useAdminGetBatchLabel<TData = Awaited<ReturnType<typeof adminGet
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetBatchLabel<TData = Awaited<ReturnType<typeof adminGetBatchLabel>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData>> & Pick<
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetBatchLabel>>,
           TError,
@@ -1583,7 +1601,7 @@ export function useAdminGetBatchLabel<TData = Awaited<ReturnType<typeof adminGet
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetBatchLabel<TData = Awaited<ReturnType<typeof adminGetBatchLabel>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData>>, }
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -1591,11 +1609,11 @@ export function useAdminGetBatchLabel<TData = Awaited<ReturnType<typeof adminGet
  */
 
 export function useAdminGetBatchLabel<TData = Awaited<ReturnType<typeof adminGetBatchLabel>>, TError = ErrorType<HTTPValidationError>>(
- batchId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData>>, }
+ batchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetBatchLabel>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetBatchLabelQueryOptions(batchId,options)
+  const queryOptions = getAdminGetBatchLabelQueryOptions(batchUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -1626,21 +1644,21 @@ export type adminDispatchBatchResponseError = (adminDispatchBatchResponse422) & 
 
 export type adminDispatchBatchResponse = (adminDispatchBatchResponseSuccess | adminDispatchBatchResponseError)
 
-export const getAdminDispatchBatchUrl = (batchId: number,) => {
+export const getAdminDispatchBatchUrl = (batchUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/batches/${batchId}/dispatch`
+  return `/api/v1/admin/inventory/batches/${batchUuid}/dispatch`
 }
 
 /**
  * @summary Dispatch Batch
  */
-export const adminDispatchBatch = async (batchId: number,
+export const adminDispatchBatch = async (batchUuid: string,
     dispatchRequest: DispatchRequest, options?: RequestInit): Promise<adminDispatchBatchResponse> => {
 
-  return mutator<adminDispatchBatchResponse>(getAdminDispatchBatchUrl(batchId),
+  return mutator<adminDispatchBatchResponse>(getAdminDispatchBatchUrl(batchUuid),
   {
     ...options,
     method: 'POST',
@@ -1653,8 +1671,8 @@ export const adminDispatchBatch = async (batchId: number,
 
 
 export const getAdminDispatchBatchMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDispatchBatch>>, TError,{batchId: number;data: BodyType<DispatchRequest>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminDispatchBatch>>, TError,{batchId: number;data: BodyType<DispatchRequest>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDispatchBatch>>, TError,{batchUuid: string;data: BodyType<DispatchRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminDispatchBatch>>, TError,{batchUuid: string;data: BodyType<DispatchRequest>}, TContext> => {
 
 const mutationKey = ['adminDispatchBatch'];
 const {mutation: mutationOptions} = options ?
@@ -1666,10 +1684,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDispatchBatch>>, {batchId: number;data: BodyType<DispatchRequest>}> = (props) => {
-          const {batchId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDispatchBatch>>, {batchUuid: string;data: BodyType<DispatchRequest>}> = (props) => {
+          const {batchUuid,data} = props ?? {};
 
-          return  adminDispatchBatch(batchId,data,)
+          return  adminDispatchBatch(batchUuid,data,)
         }
 
 
@@ -1687,11 +1705,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Dispatch Batch
  */
 export const useAdminDispatchBatch = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDispatchBatch>>, TError,{batchId: number;data: BodyType<DispatchRequest>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDispatchBatch>>, TError,{batchUuid: string;data: BodyType<DispatchRequest>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminDispatchBatch>>,
         TError,
-        {batchId: number;data: BodyType<DispatchRequest>},
+        {batchUuid: string;data: BodyType<DispatchRequest>},
         TContext
       > => {
       return useMutation(getAdminDispatchBatchMutationOptions(options), queryClient);
@@ -1715,21 +1733,21 @@ export type adminReturnBatchResponseError = (adminReturnBatchResponse422) & {
 
 export type adminReturnBatchResponse = (adminReturnBatchResponseSuccess | adminReturnBatchResponseError)
 
-export const getAdminReturnBatchUrl = (batchId: number,) => {
+export const getAdminReturnBatchUrl = (batchUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/batches/${batchId}/return`
+  return `/api/v1/admin/inventory/batches/${batchUuid}/return`
 }
 
 /**
  * @summary Return Batch
  */
-export const adminReturnBatch = async (batchId: number,
+export const adminReturnBatch = async (batchUuid: string,
     returnRequest: ReturnRequest, options?: RequestInit): Promise<adminReturnBatchResponse> => {
 
-  return mutator<adminReturnBatchResponse>(getAdminReturnBatchUrl(batchId),
+  return mutator<adminReturnBatchResponse>(getAdminReturnBatchUrl(batchUuid),
   {
     ...options,
     method: 'POST',
@@ -1742,8 +1760,8 @@ export const adminReturnBatch = async (batchId: number,
 
 
 export const getAdminReturnBatchMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReturnBatch>>, TError,{batchId: number;data: BodyType<ReturnRequest>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminReturnBatch>>, TError,{batchId: number;data: BodyType<ReturnRequest>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReturnBatch>>, TError,{batchUuid: string;data: BodyType<ReturnRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminReturnBatch>>, TError,{batchUuid: string;data: BodyType<ReturnRequest>}, TContext> => {
 
 const mutationKey = ['adminReturnBatch'];
 const {mutation: mutationOptions} = options ?
@@ -1755,10 +1773,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminReturnBatch>>, {batchId: number;data: BodyType<ReturnRequest>}> = (props) => {
-          const {batchId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminReturnBatch>>, {batchUuid: string;data: BodyType<ReturnRequest>}> = (props) => {
+          const {batchUuid,data} = props ?? {};
 
-          return  adminReturnBatch(batchId,data,)
+          return  adminReturnBatch(batchUuid,data,)
         }
 
 
@@ -1776,11 +1794,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Return Batch
  */
 export const useAdminReturnBatch = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReturnBatch>>, TError,{batchId: number;data: BodyType<ReturnRequest>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReturnBatch>>, TError,{batchUuid: string;data: BodyType<ReturnRequest>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminReturnBatch>>,
         TError,
-        {batchId: number;data: BodyType<ReturnRequest>},
+        {batchUuid: string;data: BodyType<ReturnRequest>},
         TContext
       > => {
       return useMutation(getAdminReturnBatchMutationOptions(options), queryClient);
@@ -1804,21 +1822,21 @@ export type adminHoldBatchResponseError = (adminHoldBatchResponse422) & {
 
 export type adminHoldBatchResponse = (adminHoldBatchResponseSuccess | adminHoldBatchResponseError)
 
-export const getAdminHoldBatchUrl = (batchId: number,) => {
+export const getAdminHoldBatchUrl = (batchUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/batches/${batchId}/hold`
+  return `/api/v1/admin/inventory/batches/${batchUuid}/hold`
 }
 
 /**
  * @summary Hold Batch
  */
-export const adminHoldBatch = async (batchId: number,
+export const adminHoldBatch = async (batchUuid: string,
     holdRequest: HoldRequest, options?: RequestInit): Promise<adminHoldBatchResponse> => {
 
-  return mutator<adminHoldBatchResponse>(getAdminHoldBatchUrl(batchId),
+  return mutator<adminHoldBatchResponse>(getAdminHoldBatchUrl(batchUuid),
   {
     ...options,
     method: 'POST',
@@ -1831,8 +1849,8 @@ export const adminHoldBatch = async (batchId: number,
 
 
 export const getAdminHoldBatchMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminHoldBatch>>, TError,{batchId: number;data: BodyType<HoldRequest>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminHoldBatch>>, TError,{batchId: number;data: BodyType<HoldRequest>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminHoldBatch>>, TError,{batchUuid: string;data: BodyType<HoldRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminHoldBatch>>, TError,{batchUuid: string;data: BodyType<HoldRequest>}, TContext> => {
 
 const mutationKey = ['adminHoldBatch'];
 const {mutation: mutationOptions} = options ?
@@ -1844,10 +1862,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminHoldBatch>>, {batchId: number;data: BodyType<HoldRequest>}> = (props) => {
-          const {batchId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminHoldBatch>>, {batchUuid: string;data: BodyType<HoldRequest>}> = (props) => {
+          const {batchUuid,data} = props ?? {};
 
-          return  adminHoldBatch(batchId,data,)
+          return  adminHoldBatch(batchUuid,data,)
         }
 
 
@@ -1865,11 +1883,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Hold Batch
  */
 export const useAdminHoldBatch = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminHoldBatch>>, TError,{batchId: number;data: BodyType<HoldRequest>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminHoldBatch>>, TError,{batchUuid: string;data: BodyType<HoldRequest>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminHoldBatch>>,
         TError,
-        {batchId: number;data: BodyType<HoldRequest>},
+        {batchUuid: string;data: BodyType<HoldRequest>},
         TContext
       > => {
       return useMutation(getAdminHoldBatchMutationOptions(options), queryClient);
@@ -1893,21 +1911,21 @@ export type adminReleaseBatchResponseError = (adminReleaseBatchResponse422) & {
 
 export type adminReleaseBatchResponse = (adminReleaseBatchResponseSuccess | adminReleaseBatchResponseError)
 
-export const getAdminReleaseBatchUrl = (batchId: number,) => {
+export const getAdminReleaseBatchUrl = (batchUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/batches/${batchId}/release`
+  return `/api/v1/admin/inventory/batches/${batchUuid}/release`
 }
 
 /**
  * @summary Release Batch
  */
-export const adminReleaseBatch = async (batchId: number,
+export const adminReleaseBatch = async (batchUuid: string,
     releaseRequest: ReleaseRequest, options?: RequestInit): Promise<adminReleaseBatchResponse> => {
 
-  return mutator<adminReleaseBatchResponse>(getAdminReleaseBatchUrl(batchId),
+  return mutator<adminReleaseBatchResponse>(getAdminReleaseBatchUrl(batchUuid),
   {
     ...options,
     method: 'POST',
@@ -1920,8 +1938,8 @@ export const adminReleaseBatch = async (batchId: number,
 
 
 export const getAdminReleaseBatchMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReleaseBatch>>, TError,{batchId: number;data: BodyType<ReleaseRequest>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminReleaseBatch>>, TError,{batchId: number;data: BodyType<ReleaseRequest>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReleaseBatch>>, TError,{batchUuid: string;data: BodyType<ReleaseRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminReleaseBatch>>, TError,{batchUuid: string;data: BodyType<ReleaseRequest>}, TContext> => {
 
 const mutationKey = ['adminReleaseBatch'];
 const {mutation: mutationOptions} = options ?
@@ -1933,10 +1951,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminReleaseBatch>>, {batchId: number;data: BodyType<ReleaseRequest>}> = (props) => {
-          const {batchId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminReleaseBatch>>, {batchUuid: string;data: BodyType<ReleaseRequest>}> = (props) => {
+          const {batchUuid,data} = props ?? {};
 
-          return  adminReleaseBatch(batchId,data,)
+          return  adminReleaseBatch(batchUuid,data,)
         }
 
 
@@ -1954,11 +1972,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Release Batch
  */
 export const useAdminReleaseBatch = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReleaseBatch>>, TError,{batchId: number;data: BodyType<ReleaseRequest>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReleaseBatch>>, TError,{batchUuid: string;data: BodyType<ReleaseRequest>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminReleaseBatch>>,
         TError,
-        {batchId: number;data: BodyType<ReleaseRequest>},
+        {batchUuid: string;data: BodyType<ReleaseRequest>},
         TContext
       > => {
       return useMutation(getAdminReleaseBatchMutationOptions(options), queryClient);
@@ -1982,21 +2000,21 @@ export type adminUpdateStoreResponseError = (adminUpdateStoreResponse422) & {
 
 export type adminUpdateStoreResponse = (adminUpdateStoreResponseSuccess | adminUpdateStoreResponseError)
 
-export const getAdminUpdateStoreUrl = (storeId: number,) => {
+export const getAdminUpdateStoreUrl = (storeUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stores/${storeId}`
+  return `/api/v1/admin/inventory/stores/${storeUuid}`
 }
 
 /**
  * @summary Update Store
  */
-export const adminUpdateStore = async (storeId: number,
+export const adminUpdateStore = async (storeUuid: string,
     storeUpdate: StoreUpdate, options?: RequestInit): Promise<adminUpdateStoreResponse> => {
 
-  return mutator<adminUpdateStoreResponse>(getAdminUpdateStoreUrl(storeId),
+  return mutator<adminUpdateStoreResponse>(getAdminUpdateStoreUrl(storeUuid),
   {
     ...options,
     method: 'PATCH',
@@ -2009,8 +2027,8 @@ export const adminUpdateStore = async (storeId: number,
 
 
 export const getAdminUpdateStoreMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStore>>, TError,{storeId: number;data: BodyType<StoreUpdate>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStore>>, TError,{storeId: number;data: BodyType<StoreUpdate>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStore>>, TError,{storeUuid: string;data: BodyType<StoreUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStore>>, TError,{storeUuid: string;data: BodyType<StoreUpdate>}, TContext> => {
 
 const mutationKey = ['adminUpdateStore'];
 const {mutation: mutationOptions} = options ?
@@ -2022,10 +2040,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateStore>>, {storeId: number;data: BodyType<StoreUpdate>}> = (props) => {
-          const {storeId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateStore>>, {storeUuid: string;data: BodyType<StoreUpdate>}> = (props) => {
+          const {storeUuid,data} = props ?? {};
 
-          return  adminUpdateStore(storeId,data,)
+          return  adminUpdateStore(storeUuid,data,)
         }
 
 
@@ -2043,11 +2061,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Update Store
  */
 export const useAdminUpdateStore = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStore>>, TError,{storeId: number;data: BodyType<StoreUpdate>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStore>>, TError,{storeUuid: string;data: BodyType<StoreUpdate>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminUpdateStore>>,
         TError,
-        {storeId: number;data: BodyType<StoreUpdate>},
+        {storeUuid: string;data: BodyType<StoreUpdate>},
         TContext
       > => {
       return useMutation(getAdminUpdateStoreMutationOptions(options), queryClient);
@@ -2248,21 +2266,21 @@ export type adminRecordInboundResponseError = (adminRecordInboundResponse422) & 
 
 export type adminRecordInboundResponse = (adminRecordInboundResponseSuccess | adminRecordInboundResponseError)
 
-export const getAdminRecordInboundUrl = (batchId: number,) => {
+export const getAdminRecordInboundUrl = (batchUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/batches/${batchId}/inbound`
+  return `/api/v1/admin/inventory/batches/${batchUuid}/inbound`
 }
 
 /**
  * @summary Record Inbound
  */
-export const adminRecordInbound = async (batchId: number,
+export const adminRecordInbound = async (batchUuid: string,
     inboundRequest: InboundRequest, options?: RequestInit): Promise<adminRecordInboundResponse> => {
 
-  return mutator<adminRecordInboundResponse>(getAdminRecordInboundUrl(batchId),
+  return mutator<adminRecordInboundResponse>(getAdminRecordInboundUrl(batchUuid),
   {
     ...options,
     method: 'POST',
@@ -2275,8 +2293,8 @@ export const adminRecordInbound = async (batchId: number,
 
 
 export const getAdminRecordInboundMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRecordInbound>>, TError,{batchId: number;data: BodyType<InboundRequest>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminRecordInbound>>, TError,{batchId: number;data: BodyType<InboundRequest>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRecordInbound>>, TError,{batchUuid: string;data: BodyType<InboundRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminRecordInbound>>, TError,{batchUuid: string;data: BodyType<InboundRequest>}, TContext> => {
 
 const mutationKey = ['adminRecordInbound'];
 const {mutation: mutationOptions} = options ?
@@ -2288,10 +2306,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRecordInbound>>, {batchId: number;data: BodyType<InboundRequest>}> = (props) => {
-          const {batchId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminRecordInbound>>, {batchUuid: string;data: BodyType<InboundRequest>}> = (props) => {
+          const {batchUuid,data} = props ?? {};
 
-          return  adminRecordInbound(batchId,data,)
+          return  adminRecordInbound(batchUuid,data,)
         }
 
 
@@ -2309,11 +2327,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Record Inbound
  */
 export const useAdminRecordInbound = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRecordInbound>>, TError,{batchId: number;data: BodyType<InboundRequest>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminRecordInbound>>, TError,{batchUuid: string;data: BodyType<InboundRequest>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminRecordInbound>>,
         TError,
-        {batchId: number;data: BodyType<InboundRequest>},
+        {batchUuid: string;data: BodyType<InboundRequest>},
         TContext
       > => {
       return useMutation(getAdminRecordInboundMutationOptions(options), queryClient);
@@ -2551,20 +2569,20 @@ export type adminGetGrnResponseError = (adminGetGrnResponse422) & {
 
 export type adminGetGrnResponse = (adminGetGrnResponseSuccess | adminGetGrnResponseError)
 
-export const getAdminGetGrnUrl = (grnId: number,) => {
+export const getAdminGetGrnUrl = (grnUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/grns/${grnId}`
+  return `/api/v1/admin/inventory/grns/${grnUuid}`
 }
 
 /**
  * @summary Get Grn
  */
-export const adminGetGrn = async (grnId: number, options?: RequestInit): Promise<adminGetGrnResponse> => {
+export const adminGetGrn = async (grnUuid: string, options?: RequestInit): Promise<adminGetGrnResponse> => {
 
-  return mutator<adminGetGrnResponse>(getAdminGetGrnUrl(grnId),
+  return mutator<adminGetGrnResponse>(getAdminGetGrnUrl(grnUuid),
   {
     ...options,
     method: 'GET'
@@ -2577,29 +2595,29 @@ export const adminGetGrn = async (grnId: number, options?: RequestInit): Promise
 
 
 
-export const getAdminGetGrnQueryKey = (grnId: number,) => {
+export const getAdminGetGrnQueryKey = (grnUuid: string,) => {
     return [
-    `/api/v1/admin/inventory/grns/${grnId}`
+    `/api/v1/admin/inventory/grns/${grnUuid}`
     ] as const;
     }
 
 
-export const getAdminGetGrnQueryOptions = <TData = Awaited<ReturnType<typeof adminGetGrn>>, TError = ErrorType<HTTPValidationError>>(grnId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData>>, }
+export const getAdminGetGrnQueryOptions = <TData = Awaited<ReturnType<typeof adminGetGrn>>, TError = ErrorType<HTTPValidationError>>(grnUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetGrnQueryKey(grnId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetGrnQueryKey(grnUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetGrn>>> = ({ signal }) => adminGetGrn(grnId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetGrn>>> = ({ signal }) => adminGetGrn(grnUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: grnId !== null && grnId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: grnUuid !== null && grnUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminGetGrnQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetGrn>>>
@@ -2607,7 +2625,7 @@ export type AdminGetGrnQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminGetGrn<TData = Awaited<ReturnType<typeof adminGetGrn>>, TError = ErrorType<HTTPValidationError>>(
- grnId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData>> & Pick<
+ grnUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetGrn>>,
           TError,
@@ -2617,7 +2635,7 @@ export function useAdminGetGrn<TData = Awaited<ReturnType<typeof adminGetGrn>>, 
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetGrn<TData = Awaited<ReturnType<typeof adminGetGrn>>, TError = ErrorType<HTTPValidationError>>(
- grnId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData>> & Pick<
+ grnUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetGrn>>,
           TError,
@@ -2627,7 +2645,7 @@ export function useAdminGetGrn<TData = Awaited<ReturnType<typeof adminGetGrn>>, 
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetGrn<TData = Awaited<ReturnType<typeof adminGetGrn>>, TError = ErrorType<HTTPValidationError>>(
- grnId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData>>, }
+ grnUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2635,11 +2653,11 @@ export function useAdminGetGrn<TData = Awaited<ReturnType<typeof adminGetGrn>>, 
  */
 
 export function useAdminGetGrn<TData = Awaited<ReturnType<typeof adminGetGrn>>, TError = ErrorType<HTTPValidationError>>(
- grnId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData>>, }
+ grnUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetGrn>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetGrnQueryOptions(grnId,options)
+  const queryOptions = getAdminGetGrnQueryOptions(grnUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -2670,21 +2688,21 @@ export type adminUpdateGrnResponseError = (adminUpdateGrnResponse422) & {
 
 export type adminUpdateGrnResponse = (adminUpdateGrnResponseSuccess | adminUpdateGrnResponseError)
 
-export const getAdminUpdateGrnUrl = (grnId: number,) => {
+export const getAdminUpdateGrnUrl = (grnUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/grns/${grnId}`
+  return `/api/v1/admin/inventory/grns/${grnUuid}`
 }
 
 /**
  * @summary Update Grn
  */
-export const adminUpdateGrn = async (grnId: number,
+export const adminUpdateGrn = async (grnUuid: string,
     grnUpdate: GrnUpdate, options?: RequestInit): Promise<adminUpdateGrnResponse> => {
 
-  return mutator<adminUpdateGrnResponse>(getAdminUpdateGrnUrl(grnId),
+  return mutator<adminUpdateGrnResponse>(getAdminUpdateGrnUrl(grnUuid),
   {
     ...options,
     method: 'PATCH',
@@ -2697,8 +2715,8 @@ export const adminUpdateGrn = async (grnId: number,
 
 
 export const getAdminUpdateGrnMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateGrn>>, TError,{grnId: number;data: BodyType<GrnUpdate>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateGrn>>, TError,{grnId: number;data: BodyType<GrnUpdate>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateGrn>>, TError,{grnUuid: string;data: BodyType<GrnUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateGrn>>, TError,{grnUuid: string;data: BodyType<GrnUpdate>}, TContext> => {
 
 const mutationKey = ['adminUpdateGrn'];
 const {mutation: mutationOptions} = options ?
@@ -2710,10 +2728,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateGrn>>, {grnId: number;data: BodyType<GrnUpdate>}> = (props) => {
-          const {grnId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateGrn>>, {grnUuid: string;data: BodyType<GrnUpdate>}> = (props) => {
+          const {grnUuid,data} = props ?? {};
 
-          return  adminUpdateGrn(grnId,data,)
+          return  adminUpdateGrn(grnUuid,data,)
         }
 
 
@@ -2731,11 +2749,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Update Grn
  */
 export const useAdminUpdateGrn = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateGrn>>, TError,{grnId: number;data: BodyType<GrnUpdate>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateGrn>>, TError,{grnUuid: string;data: BodyType<GrnUpdate>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminUpdateGrn>>,
         TError,
-        {grnId: number;data: BodyType<GrnUpdate>},
+        {grnUuid: string;data: BodyType<GrnUpdate>},
         TContext
       > => {
       return useMutation(getAdminUpdateGrnMutationOptions(options), queryClient);
@@ -2759,20 +2777,20 @@ export type adminDeleteGrnResponseError = (adminDeleteGrnResponse422) & {
 
 export type adminDeleteGrnResponse = (adminDeleteGrnResponseSuccess | adminDeleteGrnResponseError)
 
-export const getAdminDeleteGrnUrl = (grnId: number,) => {
+export const getAdminDeleteGrnUrl = (grnUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/grns/${grnId}`
+  return `/api/v1/admin/inventory/grns/${grnUuid}`
 }
 
 /**
  * @summary Delete Grn
  */
-export const adminDeleteGrn = async (grnId: number, options?: RequestInit): Promise<adminDeleteGrnResponse> => {
+export const adminDeleteGrn = async (grnUuid: string, options?: RequestInit): Promise<adminDeleteGrnResponse> => {
 
-  return mutator<adminDeleteGrnResponse>(getAdminDeleteGrnUrl(grnId),
+  return mutator<adminDeleteGrnResponse>(getAdminDeleteGrnUrl(grnUuid),
   {
     ...options,
     method: 'DELETE'
@@ -2785,8 +2803,8 @@ export const adminDeleteGrn = async (grnId: number, options?: RequestInit): Prom
 
 
 export const getAdminDeleteGrnMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteGrn>>, TError,{grnId: number}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteGrn>>, TError,{grnId: number}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteGrn>>, TError,{grnUuid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteGrn>>, TError,{grnUuid: string}, TContext> => {
 
 const mutationKey = ['adminDeleteGrn'];
 const {mutation: mutationOptions} = options ?
@@ -2798,10 +2816,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteGrn>>, {grnId: number}> = (props) => {
-          const {grnId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteGrn>>, {grnUuid: string}> = (props) => {
+          const {grnUuid} = props ?? {};
 
-          return  adminDeleteGrn(grnId,)
+          return  adminDeleteGrn(grnUuid,)
         }
 
 
@@ -2819,11 +2837,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Delete Grn
  */
 export const useAdminDeleteGrn = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteGrn>>, TError,{grnId: number}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteGrn>>, TError,{grnUuid: string}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminDeleteGrn>>,
         TError,
-        {grnId: number},
+        {grnUuid: string},
         TContext
       > => {
       return useMutation(getAdminDeleteGrnMutationOptions(options), queryClient);
@@ -2847,20 +2865,20 @@ export type adminPreviewGrnResponseError = (adminPreviewGrnResponse422) & {
 
 export type adminPreviewGrnResponse = (adminPreviewGrnResponseSuccess | adminPreviewGrnResponseError)
 
-export const getAdminPreviewGrnUrl = (grnId: number,) => {
+export const getAdminPreviewGrnUrl = (grnUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/grns/${grnId}/preview`
+  return `/api/v1/admin/inventory/grns/${grnUuid}/preview`
 }
 
 /**
  * @summary Preview Grn
  */
-export const adminPreviewGrn = async (grnId: number, options?: RequestInit): Promise<adminPreviewGrnResponse> => {
+export const adminPreviewGrn = async (grnUuid: string, options?: RequestInit): Promise<adminPreviewGrnResponse> => {
 
-  return mutator<adminPreviewGrnResponse>(getAdminPreviewGrnUrl(grnId),
+  return mutator<adminPreviewGrnResponse>(getAdminPreviewGrnUrl(grnUuid),
   {
     ...options,
     method: 'GET'
@@ -2873,29 +2891,29 @@ export const adminPreviewGrn = async (grnId: number, options?: RequestInit): Pro
 
 
 
-export const getAdminPreviewGrnQueryKey = (grnId: number,) => {
+export const getAdminPreviewGrnQueryKey = (grnUuid: string,) => {
     return [
-    `/api/v1/admin/inventory/grns/${grnId}/preview`
+    `/api/v1/admin/inventory/grns/${grnUuid}/preview`
     ] as const;
     }
 
 
-export const getAdminPreviewGrnQueryOptions = <TData = Awaited<ReturnType<typeof adminPreviewGrn>>, TError = ErrorType<HTTPValidationError>>(grnId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData>>, }
+export const getAdminPreviewGrnQueryOptions = <TData = Awaited<ReturnType<typeof adminPreviewGrn>>, TError = ErrorType<HTTPValidationError>>(grnUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminPreviewGrnQueryKey(grnId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminPreviewGrnQueryKey(grnUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminPreviewGrn>>> = ({ signal }) => adminPreviewGrn(grnId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminPreviewGrn>>> = ({ signal }) => adminPreviewGrn(grnUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: grnId !== null && grnId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: grnUuid !== null && grnUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminPreviewGrnQueryResult = NonNullable<Awaited<ReturnType<typeof adminPreviewGrn>>>
@@ -2903,7 +2921,7 @@ export type AdminPreviewGrnQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminPreviewGrn<TData = Awaited<ReturnType<typeof adminPreviewGrn>>, TError = ErrorType<HTTPValidationError>>(
- grnId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData>> & Pick<
+ grnUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminPreviewGrn>>,
           TError,
@@ -2913,7 +2931,7 @@ export function useAdminPreviewGrn<TData = Awaited<ReturnType<typeof adminPrevie
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminPreviewGrn<TData = Awaited<ReturnType<typeof adminPreviewGrn>>, TError = ErrorType<HTTPValidationError>>(
- grnId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData>> & Pick<
+ grnUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminPreviewGrn>>,
           TError,
@@ -2923,7 +2941,7 @@ export function useAdminPreviewGrn<TData = Awaited<ReturnType<typeof adminPrevie
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminPreviewGrn<TData = Awaited<ReturnType<typeof adminPreviewGrn>>, TError = ErrorType<HTTPValidationError>>(
- grnId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData>>, }
+ grnUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -2931,11 +2949,11 @@ export function useAdminPreviewGrn<TData = Awaited<ReturnType<typeof adminPrevie
  */
 
 export function useAdminPreviewGrn<TData = Awaited<ReturnType<typeof adminPreviewGrn>>, TError = ErrorType<HTTPValidationError>>(
- grnId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData>>, }
+ grnUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewGrn>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminPreviewGrnQueryOptions(grnId,options)
+  const queryOptions = getAdminPreviewGrnQueryOptions(grnUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -2966,21 +2984,21 @@ export type adminPostGrnResponseError = (adminPostGrnResponse422) & {
 
 export type adminPostGrnResponse = (adminPostGrnResponseSuccess | adminPostGrnResponseError)
 
-export const getAdminPostGrnUrl = (grnId: number,) => {
+export const getAdminPostGrnUrl = (grnUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/grns/${grnId}/post`
+  return `/api/v1/admin/inventory/grns/${grnUuid}/post`
 }
 
 /**
  * @summary Post Grn
  */
-export const adminPostGrn = async (grnId: number,
+export const adminPostGrn = async (grnUuid: string,
     grnPostRequestNull?: GrnPostRequest | null, options?: RequestInit): Promise<adminPostGrnResponse> => {
 
-  return mutator<adminPostGrnResponse>(getAdminPostGrnUrl(grnId),
+  return mutator<adminPostGrnResponse>(getAdminPostGrnUrl(grnUuid),
   {
     ...options,
     method: 'POST',
@@ -2993,8 +3011,8 @@ export const adminPostGrn = async (grnId: number,
 
 
 export const getAdminPostGrnMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminPostGrn>>, TError,{grnId: number;data?: BodyType<GrnPostRequest | null>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminPostGrn>>, TError,{grnId: number;data?: BodyType<GrnPostRequest | null>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminPostGrn>>, TError,{grnUuid: string;data?: BodyType<GrnPostRequest | null>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminPostGrn>>, TError,{grnUuid: string;data?: BodyType<GrnPostRequest | null>}, TContext> => {
 
 const mutationKey = ['adminPostGrn'];
 const {mutation: mutationOptions} = options ?
@@ -3006,10 +3024,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminPostGrn>>, {grnId: number;data?: BodyType<GrnPostRequest | null>}> = (props) => {
-          const {grnId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminPostGrn>>, {grnUuid: string;data?: BodyType<GrnPostRequest | null>}> = (props) => {
+          const {grnUuid,data} = props ?? {};
 
-          return  adminPostGrn(grnId,data,)
+          return  adminPostGrn(grnUuid,data,)
         }
 
 
@@ -3027,14 +3045,562 @@ const {mutation: mutationOptions} = options ?
  * @summary Post Grn
  */
 export const useAdminPostGrn = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminPostGrn>>, TError,{grnId: number;data?: BodyType<GrnPostRequest | null>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminPostGrn>>, TError,{grnUuid: string;data?: BodyType<GrnPostRequest | null>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminPostGrn>>,
         TError,
-        {grnId: number;data?: BodyType<GrnPostRequest | null>},
+        {grnUuid: string;data?: BodyType<GrnPostRequest | null>},
         TContext
       > => {
       return useMutation(getAdminPostGrnMutationOptions(options), queryClient);
+    }
+    export type adminListDispatchesResponse200 = {
+  data: DispatchList
+  status: 200
+}
+
+export type adminListDispatchesResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminListDispatchesResponseSuccess = (adminListDispatchesResponse200) & {
+  headers: Headers;
+};
+export type adminListDispatchesResponseError = (adminListDispatchesResponse422) & {
+  headers: Headers;
+};
+
+export type adminListDispatchesResponse = (adminListDispatchesResponseSuccess | adminListDispatchesResponseError)
+
+export const getAdminListDispatchesUrl = (params?: AdminListDispatchesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/admin/inventory/dispatches?${stringifiedParams}` : `/api/v1/admin/inventory/dispatches`
+}
+
+/**
+ * @summary List Dispatches
+ */
+export const adminListDispatches = async (params?: AdminListDispatchesParams, options?: RequestInit): Promise<adminListDispatchesResponse> => {
+
+  return mutator<adminListDispatchesResponse>(getAdminListDispatchesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListDispatchesQueryKey = (params?: AdminListDispatchesParams,) => {
+    return [
+    `/api/v1/admin/inventory/dispatches`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdminListDispatchesQueryOptions = <TData = Awaited<ReturnType<typeof adminListDispatches>>, TError = ErrorType<HTTPValidationError>>(params?: AdminListDispatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListDispatches>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListDispatchesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListDispatches>>> = ({ signal }) => adminListDispatches(params, { signal });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListDispatches>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminListDispatchesQueryResult = NonNullable<Awaited<ReturnType<typeof adminListDispatches>>>
+export type AdminListDispatchesQueryError = ErrorType<HTTPValidationError>
+
+
+export function useAdminListDispatches<TData = Awaited<ReturnType<typeof adminListDispatches>>, TError = ErrorType<HTTPValidationError>>(
+ params: undefined |  AdminListDispatchesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListDispatches>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListDispatches>>,
+          TError,
+          Awaited<ReturnType<typeof adminListDispatches>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListDispatches<TData = Awaited<ReturnType<typeof adminListDispatches>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListDispatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListDispatches>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListDispatches>>,
+          TError,
+          Awaited<ReturnType<typeof adminListDispatches>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListDispatches<TData = Awaited<ReturnType<typeof adminListDispatches>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListDispatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListDispatches>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List Dispatches
+ */
+
+export function useAdminListDispatches<TData = Awaited<ReturnType<typeof adminListDispatches>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListDispatchesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListDispatches>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminListDispatchesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminCreateDispatchResponse201 = {
+  data: DispatchDetail
+  status: 201
+}
+
+export type adminCreateDispatchResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminCreateDispatchResponseSuccess = (adminCreateDispatchResponse201) & {
+  headers: Headers;
+};
+export type adminCreateDispatchResponseError = (adminCreateDispatchResponse422) & {
+  headers: Headers;
+};
+
+export type adminCreateDispatchResponse = (adminCreateDispatchResponseSuccess | adminCreateDispatchResponseError)
+
+export const getAdminCreateDispatchUrl = () => {
+
+
+
+
+  return `/api/v1/admin/inventory/dispatches`
+}
+
+/**
+ * @summary Create Dispatch
+ */
+export const adminCreateDispatch = async (dispatchCreate: DispatchCreate, options?: RequestInit): Promise<adminCreateDispatchResponse> => {
+
+  return mutator<adminCreateDispatchResponse>(getAdminCreateDispatchUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(dispatchCreate)
+  }
+);}
+
+
+
+
+export const getAdminCreateDispatchMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateDispatch>>, TError,{data: BodyType<DispatchCreate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminCreateDispatch>>, TError,{data: BodyType<DispatchCreate>}, TContext> => {
+
+const mutationKey = ['adminCreateDispatch'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCreateDispatch>>, {data: BodyType<DispatchCreate>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  adminCreateDispatch(data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminCreateDispatchMutationResult = NonNullable<Awaited<ReturnType<typeof adminCreateDispatch>>>
+    export type AdminCreateDispatchMutationBody = BodyType<DispatchCreate>
+    export type AdminCreateDispatchMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Create Dispatch
+ */
+export const useAdminCreateDispatch = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCreateDispatch>>, TError,{data: BodyType<DispatchCreate>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminCreateDispatch>>,
+        TError,
+        {data: BodyType<DispatchCreate>},
+        TContext
+      > => {
+      return useMutation(getAdminCreateDispatchMutationOptions(options), queryClient);
+    }
+    export type adminGetDispatchResponse200 = {
+  data: DispatchDetail
+  status: 200
+}
+
+export type adminGetDispatchResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminGetDispatchResponseSuccess = (adminGetDispatchResponse200) & {
+  headers: Headers;
+};
+export type adminGetDispatchResponseError = (adminGetDispatchResponse422) & {
+  headers: Headers;
+};
+
+export type adminGetDispatchResponse = (adminGetDispatchResponseSuccess | adminGetDispatchResponseError)
+
+export const getAdminGetDispatchUrl = (dispatchUuid: string,) => {
+
+
+
+
+  return `/api/v1/admin/inventory/dispatches/${dispatchUuid}`
+}
+
+/**
+ * @summary Get Dispatch
+ */
+export const adminGetDispatch = async (dispatchUuid: string, options?: RequestInit): Promise<adminGetDispatchResponse> => {
+
+  return mutator<adminGetDispatchResponse>(getAdminGetDispatchUrl(dispatchUuid),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminGetDispatchQueryKey = (dispatchUuid: string,) => {
+    return [
+    `/api/v1/admin/inventory/dispatches/${dispatchUuid}`
+    ] as const;
+    }
+
+
+export const getAdminGetDispatchQueryOptions = <TData = Awaited<ReturnType<typeof adminGetDispatch>>, TError = ErrorType<HTTPValidationError>>(dispatchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDispatch>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetDispatchQueryKey(dispatchUuid);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetDispatch>>> = ({ signal }) => adminGetDispatch(dispatchUuid, { signal });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: dispatchUuid !== null && dispatchUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetDispatch>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminGetDispatchQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetDispatch>>>
+export type AdminGetDispatchQueryError = ErrorType<HTTPValidationError>
+
+
+export function useAdminGetDispatch<TData = Awaited<ReturnType<typeof adminGetDispatch>>, TError = ErrorType<HTTPValidationError>>(
+ dispatchUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDispatch>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetDispatch>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetDispatch>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetDispatch<TData = Awaited<ReturnType<typeof adminGetDispatch>>, TError = ErrorType<HTTPValidationError>>(
+ dispatchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDispatch>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminGetDispatch>>,
+          TError,
+          Awaited<ReturnType<typeof adminGetDispatch>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminGetDispatch<TData = Awaited<ReturnType<typeof adminGetDispatch>>, TError = ErrorType<HTTPValidationError>>(
+ dispatchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDispatch>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get Dispatch
+ */
+
+export function useAdminGetDispatch<TData = Awaited<ReturnType<typeof adminGetDispatch>>, TError = ErrorType<HTTPValidationError>>(
+ dispatchUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetDispatch>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminGetDispatchQueryOptions(dispatchUuid,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminListInvoicesResponse200 = {
+  data: InvoiceList
+  status: 200
+}
+
+export type adminListInvoicesResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminListInvoicesResponseSuccess = (adminListInvoicesResponse200) & {
+  headers: Headers;
+};
+export type adminListInvoicesResponseError = (adminListInvoicesResponse422) & {
+  headers: Headers;
+};
+
+export type adminListInvoicesResponse = (adminListInvoicesResponseSuccess | adminListInvoicesResponseError)
+
+export const getAdminListInvoicesUrl = (params?: AdminListInvoicesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/admin/inventory/invoices?${stringifiedParams}` : `/api/v1/admin/inventory/invoices`
+}
+
+/**
+ * @summary List Invoices
+ */
+export const adminListInvoices = async (params?: AdminListInvoicesParams, options?: RequestInit): Promise<adminListInvoicesResponse> => {
+
+  return mutator<adminListInvoicesResponse>(getAdminListInvoicesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getAdminListInvoicesQueryKey = (params?: AdminListInvoicesParams,) => {
+    return [
+    `/api/v1/admin/inventory/invoices`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getAdminListInvoicesQueryOptions = <TData = Awaited<ReturnType<typeof adminListInvoices>>, TError = ErrorType<HTTPValidationError>>(params?: AdminListInvoicesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListInvoices>>, TError, TData>>, }
+) => {
+
+const {query: queryOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAdminListInvoicesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminListInvoices>>> = ({ signal }) => adminListInvoices(params, { signal });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminListInvoices>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AdminListInvoicesQueryResult = NonNullable<Awaited<ReturnType<typeof adminListInvoices>>>
+export type AdminListInvoicesQueryError = ErrorType<HTTPValidationError>
+
+
+export function useAdminListInvoices<TData = Awaited<ReturnType<typeof adminListInvoices>>, TError = ErrorType<HTTPValidationError>>(
+ params: undefined |  AdminListInvoicesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListInvoices>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListInvoices>>,
+          TError,
+          Awaited<ReturnType<typeof adminListInvoices>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListInvoices<TData = Awaited<ReturnType<typeof adminListInvoices>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListInvoicesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListInvoices>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof adminListInvoices>>,
+          TError,
+          Awaited<ReturnType<typeof adminListInvoices>>
+        > , 'initialData'
+      >, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAdminListInvoices<TData = Awaited<ReturnType<typeof adminListInvoices>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListInvoicesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListInvoices>>, TError, TData>>, }
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List Invoices
+ */
+
+export function useAdminListInvoices<TData = Awaited<ReturnType<typeof adminListInvoices>>, TError = ErrorType<HTTPValidationError>>(
+ params?: AdminListInvoicesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminListInvoices>>, TError, TData>>, }
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAdminListInvoicesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export type adminUpdateInvoicePaymentResponse200 = {
+  data: InvoiceOut
+  status: 200
+}
+
+export type adminUpdateInvoicePaymentResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateInvoicePaymentResponseSuccess = (adminUpdateInvoicePaymentResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateInvoicePaymentResponseError = (adminUpdateInvoicePaymentResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateInvoicePaymentResponse = (adminUpdateInvoicePaymentResponseSuccess | adminUpdateInvoicePaymentResponseError)
+
+export const getAdminUpdateInvoicePaymentUrl = (invoiceUuid: string,) => {
+
+
+
+
+  return `/api/v1/admin/inventory/invoices/${invoiceUuid}`
+}
+
+/**
+ * @summary Update Invoice Payment
+ */
+export const adminUpdateInvoicePayment = async (invoiceUuid: string,
+    paymentStatusUpdate: PaymentStatusUpdate, options?: RequestInit): Promise<adminUpdateInvoicePaymentResponse> => {
+
+  return mutator<adminUpdateInvoicePaymentResponse>(getAdminUpdateInvoicePaymentUrl(invoiceUuid),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(paymentStatusUpdate)
+  }
+);}
+
+
+
+
+export const getAdminUpdateInvoicePaymentMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateInvoicePayment>>, TError,{invoiceUuid: string;data: BodyType<PaymentStatusUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateInvoicePayment>>, TError,{invoiceUuid: string;data: BodyType<PaymentStatusUpdate>}, TContext> => {
+
+const mutationKey = ['adminUpdateInvoicePayment'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateInvoicePayment>>, {invoiceUuid: string;data: BodyType<PaymentStatusUpdate>}> = (props) => {
+          const {invoiceUuid,data} = props ?? {};
+
+          return  adminUpdateInvoicePayment(invoiceUuid,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateInvoicePaymentMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateInvoicePayment>>>
+    export type AdminUpdateInvoicePaymentMutationBody = BodyType<PaymentStatusUpdate>
+    export type AdminUpdateInvoicePaymentMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Invoice Payment
+ */
+export const useAdminUpdateInvoicePayment = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateInvoicePayment>>, TError,{invoiceUuid: string;data: BodyType<PaymentStatusUpdate>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateInvoicePayment>>,
+        TError,
+        {invoiceUuid: string;data: BodyType<PaymentStatusUpdate>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateInvoicePaymentMutationOptions(options), queryClient);
     }
     export type adminListStockTransfersResponse200 = {
   data: StList
@@ -3269,20 +3835,20 @@ export type adminGetStockTransferResponseError = (adminGetStockTransferResponse4
 
 export type adminGetStockTransferResponse = (adminGetStockTransferResponseSuccess | adminGetStockTransferResponseError)
 
-export const getAdminGetStockTransferUrl = (stId: number,) => {
+export const getAdminGetStockTransferUrl = (stUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-transfers/${stId}`
+  return `/api/v1/admin/inventory/stock-transfers/${stUuid}`
 }
 
 /**
  * @summary Get Transfer
  */
-export const adminGetStockTransfer = async (stId: number, options?: RequestInit): Promise<adminGetStockTransferResponse> => {
+export const adminGetStockTransfer = async (stUuid: string, options?: RequestInit): Promise<adminGetStockTransferResponse> => {
 
-  return mutator<adminGetStockTransferResponse>(getAdminGetStockTransferUrl(stId),
+  return mutator<adminGetStockTransferResponse>(getAdminGetStockTransferUrl(stUuid),
   {
     ...options,
     method: 'GET'
@@ -3295,29 +3861,29 @@ export const adminGetStockTransfer = async (stId: number, options?: RequestInit)
 
 
 
-export const getAdminGetStockTransferQueryKey = (stId: number,) => {
+export const getAdminGetStockTransferQueryKey = (stUuid: string,) => {
     return [
-    `/api/v1/admin/inventory/stock-transfers/${stId}`
+    `/api/v1/admin/inventory/stock-transfers/${stUuid}`
     ] as const;
     }
 
 
-export const getAdminGetStockTransferQueryOptions = <TData = Awaited<ReturnType<typeof adminGetStockTransfer>>, TError = ErrorType<HTTPValidationError>>(stId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData>>, }
+export const getAdminGetStockTransferQueryOptions = <TData = Awaited<ReturnType<typeof adminGetStockTransfer>>, TError = ErrorType<HTTPValidationError>>(stUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetStockTransferQueryKey(stId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetStockTransferQueryKey(stUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetStockTransfer>>> = ({ signal }) => adminGetStockTransfer(stId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetStockTransfer>>> = ({ signal }) => adminGetStockTransfer(stUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: stId !== null && stId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: stUuid !== null && stUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminGetStockTransferQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetStockTransfer>>>
@@ -3325,7 +3891,7 @@ export type AdminGetStockTransferQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminGetStockTransfer<TData = Awaited<ReturnType<typeof adminGetStockTransfer>>, TError = ErrorType<HTTPValidationError>>(
- stId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData>> & Pick<
+ stUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetStockTransfer>>,
           TError,
@@ -3335,7 +3901,7 @@ export function useAdminGetStockTransfer<TData = Awaited<ReturnType<typeof admin
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetStockTransfer<TData = Awaited<ReturnType<typeof adminGetStockTransfer>>, TError = ErrorType<HTTPValidationError>>(
- stId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData>> & Pick<
+ stUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetStockTransfer>>,
           TError,
@@ -3345,7 +3911,7 @@ export function useAdminGetStockTransfer<TData = Awaited<ReturnType<typeof admin
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetStockTransfer<TData = Awaited<ReturnType<typeof adminGetStockTransfer>>, TError = ErrorType<HTTPValidationError>>(
- stId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData>>, }
+ stUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -3353,11 +3919,11 @@ export function useAdminGetStockTransfer<TData = Awaited<ReturnType<typeof admin
  */
 
 export function useAdminGetStockTransfer<TData = Awaited<ReturnType<typeof adminGetStockTransfer>>, TError = ErrorType<HTTPValidationError>>(
- stId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData>>, }
+ stUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockTransfer>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetStockTransferQueryOptions(stId,options)
+  const queryOptions = getAdminGetStockTransferQueryOptions(stUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -3388,21 +3954,21 @@ export type adminUpdateStockTransferResponseError = (adminUpdateStockTransferRes
 
 export type adminUpdateStockTransferResponse = (adminUpdateStockTransferResponseSuccess | adminUpdateStockTransferResponseError)
 
-export const getAdminUpdateStockTransferUrl = (stId: number,) => {
+export const getAdminUpdateStockTransferUrl = (stUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-transfers/${stId}`
+  return `/api/v1/admin/inventory/stock-transfers/${stUuid}`
 }
 
 /**
  * @summary Update Transfer
  */
-export const adminUpdateStockTransfer = async (stId: number,
+export const adminUpdateStockTransfer = async (stUuid: string,
     stUpdate: StUpdate, options?: RequestInit): Promise<adminUpdateStockTransferResponse> => {
 
-  return mutator<adminUpdateStockTransferResponse>(getAdminUpdateStockTransferUrl(stId),
+  return mutator<adminUpdateStockTransferResponse>(getAdminUpdateStockTransferUrl(stUuid),
   {
     ...options,
     method: 'PATCH',
@@ -3415,8 +3981,8 @@ export const adminUpdateStockTransfer = async (stId: number,
 
 
 export const getAdminUpdateStockTransferMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockTransfer>>, TError,{stId: number;data: BodyType<StUpdate>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockTransfer>>, TError,{stId: number;data: BodyType<StUpdate>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockTransfer>>, TError,{stUuid: string;data: BodyType<StUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockTransfer>>, TError,{stUuid: string;data: BodyType<StUpdate>}, TContext> => {
 
 const mutationKey = ['adminUpdateStockTransfer'];
 const {mutation: mutationOptions} = options ?
@@ -3428,10 +3994,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateStockTransfer>>, {stId: number;data: BodyType<StUpdate>}> = (props) => {
-          const {stId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateStockTransfer>>, {stUuid: string;data: BodyType<StUpdate>}> = (props) => {
+          const {stUuid,data} = props ?? {};
 
-          return  adminUpdateStockTransfer(stId,data,)
+          return  adminUpdateStockTransfer(stUuid,data,)
         }
 
 
@@ -3449,11 +4015,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Update Transfer
  */
 export const useAdminUpdateStockTransfer = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockTransfer>>, TError,{stId: number;data: BodyType<StUpdate>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockTransfer>>, TError,{stUuid: string;data: BodyType<StUpdate>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminUpdateStockTransfer>>,
         TError,
-        {stId: number;data: BodyType<StUpdate>},
+        {stUuid: string;data: BodyType<StUpdate>},
         TContext
       > => {
       return useMutation(getAdminUpdateStockTransferMutationOptions(options), queryClient);
@@ -3477,20 +4043,20 @@ export type adminPreviewStockTransferResponseError = (adminPreviewStockTransferR
 
 export type adminPreviewStockTransferResponse = (adminPreviewStockTransferResponseSuccess | adminPreviewStockTransferResponseError)
 
-export const getAdminPreviewStockTransferUrl = (stId: number,) => {
+export const getAdminPreviewStockTransferUrl = (stUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-transfers/${stId}/preview`
+  return `/api/v1/admin/inventory/stock-transfers/${stUuid}/preview`
 }
 
 /**
  * @summary Preview Transfer
  */
-export const adminPreviewStockTransfer = async (stId: number, options?: RequestInit): Promise<adminPreviewStockTransferResponse> => {
+export const adminPreviewStockTransfer = async (stUuid: string, options?: RequestInit): Promise<adminPreviewStockTransferResponse> => {
 
-  return mutator<adminPreviewStockTransferResponse>(getAdminPreviewStockTransferUrl(stId),
+  return mutator<adminPreviewStockTransferResponse>(getAdminPreviewStockTransferUrl(stUuid),
   {
     ...options,
     method: 'GET'
@@ -3503,29 +4069,29 @@ export const adminPreviewStockTransfer = async (stId: number, options?: RequestI
 
 
 
-export const getAdminPreviewStockTransferQueryKey = (stId: number,) => {
+export const getAdminPreviewStockTransferQueryKey = (stUuid: string,) => {
     return [
-    `/api/v1/admin/inventory/stock-transfers/${stId}/preview`
+    `/api/v1/admin/inventory/stock-transfers/${stUuid}/preview`
     ] as const;
     }
 
 
-export const getAdminPreviewStockTransferQueryOptions = <TData = Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError = ErrorType<HTTPValidationError>>(stId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData>>, }
+export const getAdminPreviewStockTransferQueryOptions = <TData = Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError = ErrorType<HTTPValidationError>>(stUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminPreviewStockTransferQueryKey(stId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminPreviewStockTransferQueryKey(stUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminPreviewStockTransfer>>> = ({ signal }) => adminPreviewStockTransfer(stId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminPreviewStockTransfer>>> = ({ signal }) => adminPreviewStockTransfer(stUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: stId !== null && stId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: stUuid !== null && stUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminPreviewStockTransferQueryResult = NonNullable<Awaited<ReturnType<typeof adminPreviewStockTransfer>>>
@@ -3533,7 +4099,7 @@ export type AdminPreviewStockTransferQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminPreviewStockTransfer<TData = Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError = ErrorType<HTTPValidationError>>(
- stId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData>> & Pick<
+ stUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminPreviewStockTransfer>>,
           TError,
@@ -3543,7 +4109,7 @@ export function useAdminPreviewStockTransfer<TData = Awaited<ReturnType<typeof a
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminPreviewStockTransfer<TData = Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError = ErrorType<HTTPValidationError>>(
- stId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData>> & Pick<
+ stUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminPreviewStockTransfer>>,
           TError,
@@ -3553,7 +4119,7 @@ export function useAdminPreviewStockTransfer<TData = Awaited<ReturnType<typeof a
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminPreviewStockTransfer<TData = Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError = ErrorType<HTTPValidationError>>(
- stId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData>>, }
+ stUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -3561,11 +4127,11 @@ export function useAdminPreviewStockTransfer<TData = Awaited<ReturnType<typeof a
  */
 
 export function useAdminPreviewStockTransfer<TData = Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError = ErrorType<HTTPValidationError>>(
- stId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData>>, }
+ stUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockTransfer>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminPreviewStockTransferQueryOptions(stId,options)
+  const queryOptions = getAdminPreviewStockTransferQueryOptions(stUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -3596,21 +4162,21 @@ export type adminCancelStockTransferResponseError = (adminCancelStockTransferRes
 
 export type adminCancelStockTransferResponse = (adminCancelStockTransferResponseSuccess | adminCancelStockTransferResponseError)
 
-export const getAdminCancelStockTransferUrl = (stId: number,) => {
+export const getAdminCancelStockTransferUrl = (stUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-transfers/${stId}/cancel`
+  return `/api/v1/admin/inventory/stock-transfers/${stUuid}/cancel`
 }
 
 /**
  * @summary Cancel Transfer
  */
-export const adminCancelStockTransfer = async (stId: number,
+export const adminCancelStockTransfer = async (stUuid: string,
     stStepRequestNull?: StStepRequest | null, options?: RequestInit): Promise<adminCancelStockTransferResponse> => {
 
-  return mutator<adminCancelStockTransferResponse>(getAdminCancelStockTransferUrl(stId),
+  return mutator<adminCancelStockTransferResponse>(getAdminCancelStockTransferUrl(stUuid),
   {
     ...options,
     method: 'POST',
@@ -3623,8 +4189,8 @@ export const adminCancelStockTransfer = async (stId: number,
 
 
 export const getAdminCancelStockTransferMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminCancelStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminCancelStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext> => {
 
 const mutationKey = ['adminCancelStockTransfer'];
 const {mutation: mutationOptions} = options ?
@@ -3636,10 +4202,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCancelStockTransfer>>, {stId: number;data?: BodyType<StStepRequest | null>}> = (props) => {
-          const {stId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminCancelStockTransfer>>, {stUuid: string;data?: BodyType<StStepRequest | null>}> = (props) => {
+          const {stUuid,data} = props ?? {};
 
-          return  adminCancelStockTransfer(stId,data,)
+          return  adminCancelStockTransfer(stUuid,data,)
         }
 
 
@@ -3657,11 +4223,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Cancel Transfer
  */
 export const useAdminCancelStockTransfer = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminCancelStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminCancelStockTransfer>>,
         TError,
-        {stId: number;data?: BodyType<StStepRequest | null>},
+        {stUuid: string;data?: BodyType<StStepRequest | null>},
         TContext
       > => {
       return useMutation(getAdminCancelStockTransferMutationOptions(options), queryClient);
@@ -3685,21 +4251,21 @@ export type adminDispatchStockTransferResponseError = (adminDispatchStockTransfe
 
 export type adminDispatchStockTransferResponse = (adminDispatchStockTransferResponseSuccess | adminDispatchStockTransferResponseError)
 
-export const getAdminDispatchStockTransferUrl = (stId: number,) => {
+export const getAdminDispatchStockTransferUrl = (stUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-transfers/${stId}/dispatch`
+  return `/api/v1/admin/inventory/stock-transfers/${stUuid}/dispatch`
 }
 
 /**
  * @summary Dispatch Transfer
  */
-export const adminDispatchStockTransfer = async (stId: number,
+export const adminDispatchStockTransfer = async (stUuid: string,
     stStepRequestNull?: StStepRequest | null, options?: RequestInit): Promise<adminDispatchStockTransferResponse> => {
 
-  return mutator<adminDispatchStockTransferResponse>(getAdminDispatchStockTransferUrl(stId),
+  return mutator<adminDispatchStockTransferResponse>(getAdminDispatchStockTransferUrl(stUuid),
   {
     ...options,
     method: 'POST',
@@ -3712,8 +4278,8 @@ export const adminDispatchStockTransfer = async (stId: number,
 
 
 export const getAdminDispatchStockTransferMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDispatchStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminDispatchStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDispatchStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminDispatchStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext> => {
 
 const mutationKey = ['adminDispatchStockTransfer'];
 const {mutation: mutationOptions} = options ?
@@ -3725,10 +4291,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDispatchStockTransfer>>, {stId: number;data?: BodyType<StStepRequest | null>}> = (props) => {
-          const {stId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDispatchStockTransfer>>, {stUuid: string;data?: BodyType<StStepRequest | null>}> = (props) => {
+          const {stUuid,data} = props ?? {};
 
-          return  adminDispatchStockTransfer(stId,data,)
+          return  adminDispatchStockTransfer(stUuid,data,)
         }
 
 
@@ -3746,11 +4312,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Dispatch Transfer
  */
 export const useAdminDispatchStockTransfer = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDispatchStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDispatchStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminDispatchStockTransfer>>,
         TError,
-        {stId: number;data?: BodyType<StStepRequest | null>},
+        {stUuid: string;data?: BodyType<StStepRequest | null>},
         TContext
       > => {
       return useMutation(getAdminDispatchStockTransferMutationOptions(options), queryClient);
@@ -3774,21 +4340,21 @@ export type adminReceiveStockTransferResponseError = (adminReceiveStockTransferR
 
 export type adminReceiveStockTransferResponse = (adminReceiveStockTransferResponseSuccess | adminReceiveStockTransferResponseError)
 
-export const getAdminReceiveStockTransferUrl = (stId: number,) => {
+export const getAdminReceiveStockTransferUrl = (stUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-transfers/${stId}/receive`
+  return `/api/v1/admin/inventory/stock-transfers/${stUuid}/receive`
 }
 
 /**
  * @summary Receive Transfer
  */
-export const adminReceiveStockTransfer = async (stId: number,
+export const adminReceiveStockTransfer = async (stUuid: string,
     stStepRequestNull?: StStepRequest | null, options?: RequestInit): Promise<adminReceiveStockTransferResponse> => {
 
-  return mutator<adminReceiveStockTransferResponse>(getAdminReceiveStockTransferUrl(stId),
+  return mutator<adminReceiveStockTransferResponse>(getAdminReceiveStockTransferUrl(stUuid),
   {
     ...options,
     method: 'POST',
@@ -3801,8 +4367,8 @@ export const adminReceiveStockTransfer = async (stId: number,
 
 
 export const getAdminReceiveStockTransferMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReceiveStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminReceiveStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReceiveStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminReceiveStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext> => {
 
 const mutationKey = ['adminReceiveStockTransfer'];
 const {mutation: mutationOptions} = options ?
@@ -3814,10 +4380,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminReceiveStockTransfer>>, {stId: number;data?: BodyType<StStepRequest | null>}> = (props) => {
-          const {stId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminReceiveStockTransfer>>, {stUuid: string;data?: BodyType<StStepRequest | null>}> = (props) => {
+          const {stUuid,data} = props ?? {};
 
-          return  adminReceiveStockTransfer(stId,data,)
+          return  adminReceiveStockTransfer(stUuid,data,)
         }
 
 
@@ -3835,11 +4401,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Receive Transfer
  */
 export const useAdminReceiveStockTransfer = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReceiveStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminReceiveStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminReceiveStockTransfer>>,
         TError,
-        {stId: number;data?: BodyType<StStepRequest | null>},
+        {stUuid: string;data?: BodyType<StStepRequest | null>},
         TContext
       > => {
       return useMutation(getAdminReceiveStockTransferMutationOptions(options), queryClient);
@@ -3863,21 +4429,21 @@ export type adminApproveStockTransferResponseError = (adminApproveStockTransferR
 
 export type adminApproveStockTransferResponse = (adminApproveStockTransferResponseSuccess | adminApproveStockTransferResponseError)
 
-export const getAdminApproveStockTransferUrl = (stId: number,) => {
+export const getAdminApproveStockTransferUrl = (stUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-transfers/${stId}/approve`
+  return `/api/v1/admin/inventory/stock-transfers/${stUuid}/approve`
 }
 
 /**
  * @summary Approve Transfer
  */
-export const adminApproveStockTransfer = async (stId: number,
+export const adminApproveStockTransfer = async (stUuid: string,
     stStepRequestNull?: StStepRequest | null, options?: RequestInit): Promise<adminApproveStockTransferResponse> => {
 
-  return mutator<adminApproveStockTransferResponse>(getAdminApproveStockTransferUrl(stId),
+  return mutator<adminApproveStockTransferResponse>(getAdminApproveStockTransferUrl(stUuid),
   {
     ...options,
     method: 'POST',
@@ -3890,8 +4456,8 @@ export const adminApproveStockTransfer = async (stId: number,
 
 
 export const getAdminApproveStockTransferMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext> => {
 
 const mutationKey = ['adminApproveStockTransfer'];
 const {mutation: mutationOptions} = options ?
@@ -3903,10 +4469,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminApproveStockTransfer>>, {stId: number;data?: BodyType<StStepRequest | null>}> = (props) => {
-          const {stId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminApproveStockTransfer>>, {stUuid: string;data?: BodyType<StStepRequest | null>}> = (props) => {
+          const {stUuid,data} = props ?? {};
 
-          return  adminApproveStockTransfer(stId,data,)
+          return  adminApproveStockTransfer(stUuid,data,)
         }
 
 
@@ -3924,11 +4490,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Approve Transfer
  */
 export const useAdminApproveStockTransfer = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockTransfer>>, TError,{stId: number;data?: BodyType<StStepRequest | null>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockTransfer>>, TError,{stUuid: string;data?: BodyType<StStepRequest | null>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminApproveStockTransfer>>,
         TError,
-        {stId: number;data?: BodyType<StStepRequest | null>},
+        {stUuid: string;data?: BodyType<StStepRequest | null>},
         TContext
       > => {
       return useMutation(getAdminApproveStockTransferMutationOptions(options), queryClient);
@@ -4166,20 +4732,20 @@ export type adminGetStockAdjustmentResponseError = (adminGetStockAdjustmentRespo
 
 export type adminGetStockAdjustmentResponse = (adminGetStockAdjustmentResponseSuccess | adminGetStockAdjustmentResponseError)
 
-export const getAdminGetStockAdjustmentUrl = (adjId: number,) => {
+export const getAdminGetStockAdjustmentUrl = (adjUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-adjustments/${adjId}`
+  return `/api/v1/admin/inventory/stock-adjustments/${adjUuid}`
 }
 
 /**
  * @summary Get Adjustment
  */
-export const adminGetStockAdjustment = async (adjId: number, options?: RequestInit): Promise<adminGetStockAdjustmentResponse> => {
+export const adminGetStockAdjustment = async (adjUuid: string, options?: RequestInit): Promise<adminGetStockAdjustmentResponse> => {
 
-  return mutator<adminGetStockAdjustmentResponse>(getAdminGetStockAdjustmentUrl(adjId),
+  return mutator<adminGetStockAdjustmentResponse>(getAdminGetStockAdjustmentUrl(adjUuid),
   {
     ...options,
     method: 'GET'
@@ -4192,29 +4758,29 @@ export const adminGetStockAdjustment = async (adjId: number, options?: RequestIn
 
 
 
-export const getAdminGetStockAdjustmentQueryKey = (adjId: number,) => {
+export const getAdminGetStockAdjustmentQueryKey = (adjUuid: string,) => {
     return [
-    `/api/v1/admin/inventory/stock-adjustments/${adjId}`
+    `/api/v1/admin/inventory/stock-adjustments/${adjUuid}`
     ] as const;
     }
 
 
-export const getAdminGetStockAdjustmentQueryOptions = <TData = Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(adjId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData>>, }
+export const getAdminGetStockAdjustmentQueryOptions = <TData = Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(adjUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminGetStockAdjustmentQueryKey(adjId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminGetStockAdjustmentQueryKey(adjUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetStockAdjustment>>> = ({ signal }) => adminGetStockAdjustment(adjId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminGetStockAdjustment>>> = ({ signal }) => adminGetStockAdjustment(adjUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: adjId !== null && adjId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: adjUuid !== null && adjUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminGetStockAdjustmentQueryResult = NonNullable<Awaited<ReturnType<typeof adminGetStockAdjustment>>>
@@ -4222,7 +4788,7 @@ export type AdminGetStockAdjustmentQueryError = ErrorType<HTTPValidationError>
 
 
 export function useAdminGetStockAdjustment<TData = Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(
- adjId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData>> & Pick<
+ adjUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetStockAdjustment>>,
           TError,
@@ -4232,7 +4798,7 @@ export function useAdminGetStockAdjustment<TData = Awaited<ReturnType<typeof adm
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetStockAdjustment<TData = Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(
- adjId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData>> & Pick<
+ adjUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminGetStockAdjustment>>,
           TError,
@@ -4242,7 +4808,7 @@ export function useAdminGetStockAdjustment<TData = Awaited<ReturnType<typeof adm
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminGetStockAdjustment<TData = Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(
- adjId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData>>, }
+ adjUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -4250,11 +4816,11 @@ export function useAdminGetStockAdjustment<TData = Awaited<ReturnType<typeof adm
  */
 
 export function useAdminGetStockAdjustment<TData = Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(
- adjId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData>>, }
+ adjUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminGetStockAdjustment>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminGetStockAdjustmentQueryOptions(adjId,options)
+  const queryOptions = getAdminGetStockAdjustmentQueryOptions(adjUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -4285,21 +4851,21 @@ export type adminUpdateStockAdjustmentResponseError = (adminUpdateStockAdjustmen
 
 export type adminUpdateStockAdjustmentResponse = (adminUpdateStockAdjustmentResponseSuccess | adminUpdateStockAdjustmentResponseError)
 
-export const getAdminUpdateStockAdjustmentUrl = (adjId: number,) => {
+export const getAdminUpdateStockAdjustmentUrl = (adjUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-adjustments/${adjId}`
+  return `/api/v1/admin/inventory/stock-adjustments/${adjUuid}`
 }
 
 /**
  * @summary Update Adjustment
  */
-export const adminUpdateStockAdjustment = async (adjId: number,
+export const adminUpdateStockAdjustment = async (adjUuid: string,
     adjUpdate: AdjUpdate, options?: RequestInit): Promise<adminUpdateStockAdjustmentResponse> => {
 
-  return mutator<adminUpdateStockAdjustmentResponse>(getAdminUpdateStockAdjustmentUrl(adjId),
+  return mutator<adminUpdateStockAdjustmentResponse>(getAdminUpdateStockAdjustmentUrl(adjUuid),
   {
     ...options,
     method: 'PATCH',
@@ -4312,8 +4878,8 @@ export const adminUpdateStockAdjustment = async (adjId: number,
 
 
 export const getAdminUpdateStockAdjustmentMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockAdjustment>>, TError,{adjId: number;data: BodyType<AdjUpdate>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockAdjustment>>, TError,{adjId: number;data: BodyType<AdjUpdate>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockAdjustment>>, TError,{adjUuid: string;data: BodyType<AdjUpdate>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockAdjustment>>, TError,{adjUuid: string;data: BodyType<AdjUpdate>}, TContext> => {
 
 const mutationKey = ['adminUpdateStockAdjustment'];
 const {mutation: mutationOptions} = options ?
@@ -4325,10 +4891,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateStockAdjustment>>, {adjId: number;data: BodyType<AdjUpdate>}> = (props) => {
-          const {adjId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateStockAdjustment>>, {adjUuid: string;data: BodyType<AdjUpdate>}> = (props) => {
+          const {adjUuid,data} = props ?? {};
 
-          return  adminUpdateStockAdjustment(adjId,data,)
+          return  adminUpdateStockAdjustment(adjUuid,data,)
         }
 
 
@@ -4346,11 +4912,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Update Adjustment
  */
 export const useAdminUpdateStockAdjustment = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockAdjustment>>, TError,{adjId: number;data: BodyType<AdjUpdate>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateStockAdjustment>>, TError,{adjUuid: string;data: BodyType<AdjUpdate>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminUpdateStockAdjustment>>,
         TError,
-        {adjId: number;data: BodyType<AdjUpdate>},
+        {adjUuid: string;data: BodyType<AdjUpdate>},
         TContext
       > => {
       return useMutation(getAdminUpdateStockAdjustmentMutationOptions(options), queryClient);
@@ -4374,20 +4940,20 @@ export type adminDeleteStockAdjustmentResponseError = (adminDeleteStockAdjustmen
 
 export type adminDeleteStockAdjustmentResponse = (adminDeleteStockAdjustmentResponseSuccess | adminDeleteStockAdjustmentResponseError)
 
-export const getAdminDeleteStockAdjustmentUrl = (adjId: number,) => {
+export const getAdminDeleteStockAdjustmentUrl = (adjUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-adjustments/${adjId}`
+  return `/api/v1/admin/inventory/stock-adjustments/${adjUuid}`
 }
 
 /**
  * @summary Delete Adjustment
  */
-export const adminDeleteStockAdjustment = async (adjId: number, options?: RequestInit): Promise<adminDeleteStockAdjustmentResponse> => {
+export const adminDeleteStockAdjustment = async (adjUuid: string, options?: RequestInit): Promise<adminDeleteStockAdjustmentResponse> => {
 
-  return mutator<adminDeleteStockAdjustmentResponse>(getAdminDeleteStockAdjustmentUrl(adjId),
+  return mutator<adminDeleteStockAdjustmentResponse>(getAdminDeleteStockAdjustmentUrl(adjUuid),
   {
     ...options,
     method: 'DELETE'
@@ -4400,8 +4966,8 @@ export const adminDeleteStockAdjustment = async (adjId: number, options?: Reques
 
 
 export const getAdminDeleteStockAdjustmentMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteStockAdjustment>>, TError,{adjId: number}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteStockAdjustment>>, TError,{adjId: number}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteStockAdjustment>>, TError,{adjUuid: string}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminDeleteStockAdjustment>>, TError,{adjUuid: string}, TContext> => {
 
 const mutationKey = ['adminDeleteStockAdjustment'];
 const {mutation: mutationOptions} = options ?
@@ -4413,10 +4979,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteStockAdjustment>>, {adjId: number}> = (props) => {
-          const {adjId} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminDeleteStockAdjustment>>, {adjUuid: string}> = (props) => {
+          const {adjUuid} = props ?? {};
 
-          return  adminDeleteStockAdjustment(adjId,)
+          return  adminDeleteStockAdjustment(adjUuid,)
         }
 
 
@@ -4434,11 +5000,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Delete Adjustment
  */
 export const useAdminDeleteStockAdjustment = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteStockAdjustment>>, TError,{adjId: number}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminDeleteStockAdjustment>>, TError,{adjUuid: string}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminDeleteStockAdjustment>>,
         TError,
-        {adjId: number},
+        {adjUuid: string},
         TContext
       > => {
       return useMutation(getAdminDeleteStockAdjustmentMutationOptions(options), queryClient);
@@ -4462,20 +5028,20 @@ export type adminPreviewStockAdjustmentResponseError = (adminPreviewStockAdjustm
 
 export type adminPreviewStockAdjustmentResponse = (adminPreviewStockAdjustmentResponseSuccess | adminPreviewStockAdjustmentResponseError)
 
-export const getAdminPreviewStockAdjustmentUrl = (adjId: number,) => {
+export const getAdminPreviewStockAdjustmentUrl = (adjUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-adjustments/${adjId}/preview`
+  return `/api/v1/admin/inventory/stock-adjustments/${adjUuid}/preview`
 }
 
 /**
  * @summary Preview Adjustment
  */
-export const adminPreviewStockAdjustment = async (adjId: number, options?: RequestInit): Promise<adminPreviewStockAdjustmentResponse> => {
+export const adminPreviewStockAdjustment = async (adjUuid: string, options?: RequestInit): Promise<adminPreviewStockAdjustmentResponse> => {
 
-  return mutator<adminPreviewStockAdjustmentResponse>(getAdminPreviewStockAdjustmentUrl(adjId),
+  return mutator<adminPreviewStockAdjustmentResponse>(getAdminPreviewStockAdjustmentUrl(adjUuid),
   {
     ...options,
     method: 'GET'
@@ -4488,29 +5054,29 @@ export const adminPreviewStockAdjustment = async (adjId: number, options?: Reque
 
 
 
-export const getAdminPreviewStockAdjustmentQueryKey = (adjId: number,) => {
+export const getAdminPreviewStockAdjustmentQueryKey = (adjUuid: string,) => {
     return [
-    `/api/v1/admin/inventory/stock-adjustments/${adjId}/preview`
+    `/api/v1/admin/inventory/stock-adjustments/${adjUuid}/preview`
     ] as const;
     }
 
 
-export const getAdminPreviewStockAdjustmentQueryOptions = <TData = Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(adjId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData>>, }
+export const getAdminPreviewStockAdjustmentQueryOptions = <TData = Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(adjUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData>>, }
 ) => {
 
 const {query: queryOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getAdminPreviewStockAdjustmentQueryKey(adjId);
+  const queryKey =  queryOptions?.queryKey ?? getAdminPreviewStockAdjustmentQueryKey(adjUuid);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>> = ({ signal }) => adminPreviewStockAdjustment(adjId, { signal });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>> = ({ signal }) => adminPreviewStockAdjustment(adjUuid, { signal });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: adjId !== null && adjId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: adjUuid !== null && adjUuid !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type AdminPreviewStockAdjustmentQueryResult = NonNullable<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>>
@@ -4518,7 +5084,7 @@ export type AdminPreviewStockAdjustmentQueryError = ErrorType<HTTPValidationErro
 
 
 export function useAdminPreviewStockAdjustment<TData = Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(
- adjId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData>> & Pick<
+ adjUuid: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminPreviewStockAdjustment>>,
           TError,
@@ -4528,7 +5094,7 @@ export function useAdminPreviewStockAdjustment<TData = Awaited<ReturnType<typeof
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminPreviewStockAdjustment<TData = Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(
- adjId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData>> & Pick<
+ adjUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof adminPreviewStockAdjustment>>,
           TError,
@@ -4538,7 +5104,7 @@ export function useAdminPreviewStockAdjustment<TData = Awaited<ReturnType<typeof
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useAdminPreviewStockAdjustment<TData = Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(
- adjId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData>>, }
+ adjUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData>>, }
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
@@ -4546,11 +5112,11 @@ export function useAdminPreviewStockAdjustment<TData = Awaited<ReturnType<typeof
  */
 
 export function useAdminPreviewStockAdjustment<TData = Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError = ErrorType<HTTPValidationError>>(
- adjId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData>>, }
+ adjUuid: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof adminPreviewStockAdjustment>>, TError, TData>>, }
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getAdminPreviewStockAdjustmentQueryOptions(adjId,options)
+  const queryOptions = getAdminPreviewStockAdjustmentQueryOptions(adjUuid,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -4581,21 +5147,21 @@ export type adminApproveStockAdjustmentResponseError = (adminApproveStockAdjustm
 
 export type adminApproveStockAdjustmentResponse = (adminApproveStockAdjustmentResponseSuccess | adminApproveStockAdjustmentResponseError)
 
-export const getAdminApproveStockAdjustmentUrl = (adjId: number,) => {
+export const getAdminApproveStockAdjustmentUrl = (adjUuid: string,) => {
 
 
 
 
-  return `/api/v1/admin/inventory/stock-adjustments/${adjId}/approve`
+  return `/api/v1/admin/inventory/stock-adjustments/${adjUuid}/approve`
 }
 
 /**
  * @summary Approve Adjustment
  */
-export const adminApproveStockAdjustment = async (adjId: number,
+export const adminApproveStockAdjustment = async (adjUuid: string,
     adjStepRequestNull?: AdjStepRequest | null, options?: RequestInit): Promise<adminApproveStockAdjustmentResponse> => {
 
-  return mutator<adminApproveStockAdjustmentResponse>(getAdminApproveStockAdjustmentUrl(adjId),
+  return mutator<adminApproveStockAdjustmentResponse>(getAdminApproveStockAdjustmentUrl(adjUuid),
   {
     ...options,
     method: 'POST',
@@ -4608,8 +5174,8 @@ export const adminApproveStockAdjustment = async (adjId: number,
 
 
 export const getAdminApproveStockAdjustmentMutationOptions = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockAdjustment>>, TError,{adjId: number;data?: BodyType<AdjStepRequest | null>}, TContext>, }
-): UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockAdjustment>>, TError,{adjId: number;data?: BodyType<AdjStepRequest | null>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockAdjustment>>, TError,{adjUuid: string;data?: BodyType<AdjStepRequest | null>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockAdjustment>>, TError,{adjUuid: string;data?: BodyType<AdjStepRequest | null>}, TContext> => {
 
 const mutationKey = ['adminApproveStockAdjustment'];
 const {mutation: mutationOptions} = options ?
@@ -4621,10 +5187,10 @@ const {mutation: mutationOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminApproveStockAdjustment>>, {adjId: number;data?: BodyType<AdjStepRequest | null>}> = (props) => {
-          const {adjId,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminApproveStockAdjustment>>, {adjUuid: string;data?: BodyType<AdjStepRequest | null>}> = (props) => {
+          const {adjUuid,data} = props ?? {};
 
-          return  adminApproveStockAdjustment(adjId,data,)
+          return  adminApproveStockAdjustment(adjUuid,data,)
         }
 
 
@@ -4642,11 +5208,11 @@ const {mutation: mutationOptions} = options ?
  * @summary Approve Adjustment
  */
 export const useAdminApproveStockAdjustment = <TError = ErrorType<HTTPValidationError>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockAdjustment>>, TError,{adjId: number;data?: BodyType<AdjStepRequest | null>}, TContext>, }
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminApproveStockAdjustment>>, TError,{adjUuid: string;data?: BodyType<AdjStepRequest | null>}, TContext>, }
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof adminApproveStockAdjustment>>,
         TError,
-        {adjId: number;data?: BodyType<AdjStepRequest | null>},
+        {adjUuid: string;data?: BodyType<AdjStepRequest | null>},
         TContext
       > => {
       return useMutation(getAdminApproveStockAdjustmentMutationOptions(options), queryClient);
@@ -4865,6 +5431,184 @@ export const useAdminCreateVendor = <TError = ErrorType<HTTPValidationError>,
       > => {
       return useMutation(getAdminCreateVendorMutationOptions(options), queryClient);
     }
+    export type adminUpdateVendorResponse200 = {
+  data: VendorListItem
+  status: 200
+}
+
+export type adminUpdateVendorResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateVendorResponseSuccess = (adminUpdateVendorResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateVendorResponseError = (adminUpdateVendorResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateVendorResponse = (adminUpdateVendorResponseSuccess | adminUpdateVendorResponseError)
+
+export const getAdminUpdateVendorUrl = (vendorId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/vendors/${vendorId}`
+}
+
+/**
+ * @summary Update Vendor
+ */
+export const adminUpdateVendor = async (vendorId: number,
+    updateVendorRequest: UpdateVendorRequest, options?: RequestInit): Promise<adminUpdateVendorResponse> => {
+
+  return mutator<adminUpdateVendorResponse>(getAdminUpdateVendorUrl(vendorId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateVendorRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateVendorMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateVendor>>, TError,{vendorId: number;data: BodyType<UpdateVendorRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateVendor>>, TError,{vendorId: number;data: BodyType<UpdateVendorRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateVendor'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateVendor>>, {vendorId: number;data: BodyType<UpdateVendorRequest>}> = (props) => {
+          const {vendorId,data} = props ?? {};
+
+          return  adminUpdateVendor(vendorId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateVendorMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateVendor>>>
+    export type AdminUpdateVendorMutationBody = BodyType<UpdateVendorRequest>
+    export type AdminUpdateVendorMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Vendor
+ */
+export const useAdminUpdateVendor = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateVendor>>, TError,{vendorId: number;data: BodyType<UpdateVendorRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateVendor>>,
+        TError,
+        {vendorId: number;data: BodyType<UpdateVendorRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateVendorMutationOptions(options), queryClient);
+    }
+    export type adminSetVendorStatusResponse200 = {
+  data: VendorListItem
+  status: 200
+}
+
+export type adminSetVendorStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetVendorStatusResponseSuccess = (adminSetVendorStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetVendorStatusResponseError = (adminSetVendorStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetVendorStatusResponse = (adminSetVendorStatusResponseSuccess | adminSetVendorStatusResponseError)
+
+export const getAdminSetVendorStatusUrl = (vendorId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/vendors/${vendorId}/status`
+}
+
+/**
+ * @summary Set Vendor Status
+ */
+export const adminSetVendorStatus = async (vendorId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetVendorStatusResponse> => {
+
+  return mutator<adminSetVendorStatusResponse>(getAdminSetVendorStatusUrl(vendorId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetVendorStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetVendorStatus>>, TError,{vendorId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetVendorStatus>>, TError,{vendorId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetVendorStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetVendorStatus>>, {vendorId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {vendorId,data} = props ?? {};
+
+          return  adminSetVendorStatus(vendorId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetVendorStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetVendorStatus>>>
+    export type AdminSetVendorStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetVendorStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Vendor Status
+ */
+export const useAdminSetVendorStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetVendorStatus>>, TError,{vendorId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetVendorStatus>>,
+        TError,
+        {vendorId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetVendorStatusMutationOptions(options), queryClient);
+    }
     export type adminListDoctorsResponse200 = {
   data: DoctorListResponse
   status: 200
@@ -5078,6 +5822,184 @@ export const useAdminCreateDoctor = <TError = ErrorType<HTTPValidationError>,
         TContext
       > => {
       return useMutation(getAdminCreateDoctorMutationOptions(options), queryClient);
+    }
+    export type adminUpdateDoctorResponse200 = {
+  data: DoctorListItem
+  status: 200
+}
+
+export type adminUpdateDoctorResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateDoctorResponseSuccess = (adminUpdateDoctorResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateDoctorResponseError = (adminUpdateDoctorResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateDoctorResponse = (adminUpdateDoctorResponseSuccess | adminUpdateDoctorResponseError)
+
+export const getAdminUpdateDoctorUrl = (doctorId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctors/${doctorId}`
+}
+
+/**
+ * @summary Update Doctor
+ */
+export const adminUpdateDoctor = async (doctorId: number,
+    updateDoctorRequest: UpdateDoctorRequest, options?: RequestInit): Promise<adminUpdateDoctorResponse> => {
+
+  return mutator<adminUpdateDoctorResponse>(getAdminUpdateDoctorUrl(doctorId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateDoctorRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateDoctorMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctor>>, TError,{doctorId: number;data: BodyType<UpdateDoctorRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctor>>, TError,{doctorId: number;data: BodyType<UpdateDoctorRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateDoctor'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateDoctor>>, {doctorId: number;data: BodyType<UpdateDoctorRequest>}> = (props) => {
+          const {doctorId,data} = props ?? {};
+
+          return  adminUpdateDoctor(doctorId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateDoctorMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateDoctor>>>
+    export type AdminUpdateDoctorMutationBody = BodyType<UpdateDoctorRequest>
+    export type AdminUpdateDoctorMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Doctor
+ */
+export const useAdminUpdateDoctor = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctor>>, TError,{doctorId: number;data: BodyType<UpdateDoctorRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateDoctor>>,
+        TError,
+        {doctorId: number;data: BodyType<UpdateDoctorRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateDoctorMutationOptions(options), queryClient);
+    }
+    export type adminSetDoctorStatusResponse200 = {
+  data: DoctorListItem
+  status: 200
+}
+
+export type adminSetDoctorStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetDoctorStatusResponseSuccess = (adminSetDoctorStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetDoctorStatusResponseError = (adminSetDoctorStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetDoctorStatusResponse = (adminSetDoctorStatusResponseSuccess | adminSetDoctorStatusResponseError)
+
+export const getAdminSetDoctorStatusUrl = (doctorId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctors/${doctorId}/status`
+}
+
+/**
+ * @summary Set Doctor Status
+ */
+export const adminSetDoctorStatus = async (doctorId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetDoctorStatusResponse> => {
+
+  return mutator<adminSetDoctorStatusResponse>(getAdminSetDoctorStatusUrl(doctorId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetDoctorStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorStatus>>, TError,{doctorId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorStatus>>, TError,{doctorId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetDoctorStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetDoctorStatus>>, {doctorId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {doctorId,data} = props ?? {};
+
+          return  adminSetDoctorStatus(doctorId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetDoctorStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetDoctorStatus>>>
+    export type AdminSetDoctorStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetDoctorStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Doctor Status
+ */
+export const useAdminSetDoctorStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorStatus>>, TError,{doctorId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetDoctorStatus>>,
+        TError,
+        {doctorId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetDoctorStatusMutationOptions(options), queryClient);
     }
     export type adminListDoctorAliasesResponse200 = {
   data: DoctorAliasListResponse
@@ -5293,6 +6215,184 @@ export const useAdminCreateDoctorAlias = <TError = ErrorType<HTTPValidationError
       > => {
       return useMutation(getAdminCreateDoctorAliasMutationOptions(options), queryClient);
     }
+    export type adminUpdateDoctorAliasResponse200 = {
+  data: DoctorAliasListItem
+  status: 200
+}
+
+export type adminUpdateDoctorAliasResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateDoctorAliasResponseSuccess = (adminUpdateDoctorAliasResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateDoctorAliasResponseError = (adminUpdateDoctorAliasResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateDoctorAliasResponse = (adminUpdateDoctorAliasResponseSuccess | adminUpdateDoctorAliasResponseError)
+
+export const getAdminUpdateDoctorAliasUrl = (aliasId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctor-aliases/${aliasId}`
+}
+
+/**
+ * @summary Update Doctor Alias
+ */
+export const adminUpdateDoctorAlias = async (aliasId: number,
+    updateDoctorAliasRequest: UpdateDoctorAliasRequest, options?: RequestInit): Promise<adminUpdateDoctorAliasResponse> => {
+
+  return mutator<adminUpdateDoctorAliasResponse>(getAdminUpdateDoctorAliasUrl(aliasId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateDoctorAliasRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateDoctorAliasMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorAlias>>, TError,{aliasId: number;data: BodyType<UpdateDoctorAliasRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorAlias>>, TError,{aliasId: number;data: BodyType<UpdateDoctorAliasRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateDoctorAlias'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateDoctorAlias>>, {aliasId: number;data: BodyType<UpdateDoctorAliasRequest>}> = (props) => {
+          const {aliasId,data} = props ?? {};
+
+          return  adminUpdateDoctorAlias(aliasId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateDoctorAliasMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateDoctorAlias>>>
+    export type AdminUpdateDoctorAliasMutationBody = BodyType<UpdateDoctorAliasRequest>
+    export type AdminUpdateDoctorAliasMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Doctor Alias
+ */
+export const useAdminUpdateDoctorAlias = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorAlias>>, TError,{aliasId: number;data: BodyType<UpdateDoctorAliasRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateDoctorAlias>>,
+        TError,
+        {aliasId: number;data: BodyType<UpdateDoctorAliasRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateDoctorAliasMutationOptions(options), queryClient);
+    }
+    export type adminSetDoctorAliasStatusResponse200 = {
+  data: DoctorAliasListItem
+  status: 200
+}
+
+export type adminSetDoctorAliasStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetDoctorAliasStatusResponseSuccess = (adminSetDoctorAliasStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetDoctorAliasStatusResponseError = (adminSetDoctorAliasStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetDoctorAliasStatusResponse = (adminSetDoctorAliasStatusResponseSuccess | adminSetDoctorAliasStatusResponseError)
+
+export const getAdminSetDoctorAliasStatusUrl = (aliasId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctor-aliases/${aliasId}/status`
+}
+
+/**
+ * @summary Set Doctor Alias Status
+ */
+export const adminSetDoctorAliasStatus = async (aliasId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetDoctorAliasStatusResponse> => {
+
+  return mutator<adminSetDoctorAliasStatusResponse>(getAdminSetDoctorAliasStatusUrl(aliasId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetDoctorAliasStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>, TError,{aliasId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>, TError,{aliasId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetDoctorAliasStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>, {aliasId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {aliasId,data} = props ?? {};
+
+          return  adminSetDoctorAliasStatus(aliasId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetDoctorAliasStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>>
+    export type AdminSetDoctorAliasStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetDoctorAliasStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Doctor Alias Status
+ */
+export const useAdminSetDoctorAliasStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>, TError,{aliasId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>,
+        TError,
+        {aliasId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetDoctorAliasStatusMutationOptions(options), queryClient);
+    }
     export type adminListDoctorPricingResponse200 = {
   data: DoctorPricingListResponse
   status: 200
@@ -5506,6 +6606,184 @@ export const useAdminCreateDoctorPricing = <TError = ErrorType<HTTPValidationErr
         TContext
       > => {
       return useMutation(getAdminCreateDoctorPricingMutationOptions(options), queryClient);
+    }
+    export type adminUpdateDoctorPricingResponse200 = {
+  data: DoctorPricingListItem
+  status: 200
+}
+
+export type adminUpdateDoctorPricingResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateDoctorPricingResponseSuccess = (adminUpdateDoctorPricingResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateDoctorPricingResponseError = (adminUpdateDoctorPricingResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateDoctorPricingResponse = (adminUpdateDoctorPricingResponseSuccess | adminUpdateDoctorPricingResponseError)
+
+export const getAdminUpdateDoctorPricingUrl = (pricingId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctor-pricing/${pricingId}`
+}
+
+/**
+ * @summary Update Doctor Pricing
+ */
+export const adminUpdateDoctorPricing = async (pricingId: number,
+    updateDoctorPricingRequest: UpdateDoctorPricingRequest, options?: RequestInit): Promise<adminUpdateDoctorPricingResponse> => {
+
+  return mutator<adminUpdateDoctorPricingResponse>(getAdminUpdateDoctorPricingUrl(pricingId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateDoctorPricingRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateDoctorPricingMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorPricing>>, TError,{pricingId: number;data: BodyType<UpdateDoctorPricingRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorPricing>>, TError,{pricingId: number;data: BodyType<UpdateDoctorPricingRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateDoctorPricing'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateDoctorPricing>>, {pricingId: number;data: BodyType<UpdateDoctorPricingRequest>}> = (props) => {
+          const {pricingId,data} = props ?? {};
+
+          return  adminUpdateDoctorPricing(pricingId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateDoctorPricingMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateDoctorPricing>>>
+    export type AdminUpdateDoctorPricingMutationBody = BodyType<UpdateDoctorPricingRequest>
+    export type AdminUpdateDoctorPricingMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Doctor Pricing
+ */
+export const useAdminUpdateDoctorPricing = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorPricing>>, TError,{pricingId: number;data: BodyType<UpdateDoctorPricingRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateDoctorPricing>>,
+        TError,
+        {pricingId: number;data: BodyType<UpdateDoctorPricingRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateDoctorPricingMutationOptions(options), queryClient);
+    }
+    export type adminSetDoctorPricingStatusResponse200 = {
+  data: DoctorPricingListItem
+  status: 200
+}
+
+export type adminSetDoctorPricingStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetDoctorPricingStatusResponseSuccess = (adminSetDoctorPricingStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetDoctorPricingStatusResponseError = (adminSetDoctorPricingStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetDoctorPricingStatusResponse = (adminSetDoctorPricingStatusResponseSuccess | adminSetDoctorPricingStatusResponseError)
+
+export const getAdminSetDoctorPricingStatusUrl = (pricingId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctor-pricing/${pricingId}/status`
+}
+
+/**
+ * @summary Set Doctor Pricing Status
+ */
+export const adminSetDoctorPricingStatus = async (pricingId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetDoctorPricingStatusResponse> => {
+
+  return mutator<adminSetDoctorPricingStatusResponse>(getAdminSetDoctorPricingStatusUrl(pricingId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetDoctorPricingStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>, TError,{pricingId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>, TError,{pricingId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetDoctorPricingStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>, {pricingId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {pricingId,data} = props ?? {};
+
+          return  adminSetDoctorPricingStatus(pricingId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetDoctorPricingStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>>
+    export type AdminSetDoctorPricingStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetDoctorPricingStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Doctor Pricing Status
+ */
+export const useAdminSetDoctorPricingStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>, TError,{pricingId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>,
+        TError,
+        {pricingId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetDoctorPricingStatusMutationOptions(options), queryClient);
     }
     export type adminListProductsResponse200 = {
   data: ProductListResponse
@@ -5721,6 +6999,184 @@ export const useAdminCreateProduct = <TError = ErrorType<HTTPValidationError>,
       > => {
       return useMutation(getAdminCreateProductMutationOptions(options), queryClient);
     }
+    export type adminUpdateProductResponse200 = {
+  data: ProductListItem
+  status: 200
+}
+
+export type adminUpdateProductResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateProductResponseSuccess = (adminUpdateProductResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateProductResponseError = (adminUpdateProductResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateProductResponse = (adminUpdateProductResponseSuccess | adminUpdateProductResponseError)
+
+export const getAdminUpdateProductUrl = (productId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/products/${productId}`
+}
+
+/**
+ * @summary Update Product
+ */
+export const adminUpdateProduct = async (productId: number,
+    updateProductRequest: UpdateProductRequest, options?: RequestInit): Promise<adminUpdateProductResponse> => {
+
+  return mutator<adminUpdateProductResponse>(getAdminUpdateProductUrl(productId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateProductRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateProductMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProduct>>, TError,{productId: number;data: BodyType<UpdateProductRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProduct>>, TError,{productId: number;data: BodyType<UpdateProductRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateProduct'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateProduct>>, {productId: number;data: BodyType<UpdateProductRequest>}> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  adminUpdateProduct(productId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateProductMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateProduct>>>
+    export type AdminUpdateProductMutationBody = BodyType<UpdateProductRequest>
+    export type AdminUpdateProductMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Product
+ */
+export const useAdminUpdateProduct = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProduct>>, TError,{productId: number;data: BodyType<UpdateProductRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateProduct>>,
+        TError,
+        {productId: number;data: BodyType<UpdateProductRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateProductMutationOptions(options), queryClient);
+    }
+    export type adminSetProductStatusResponse200 = {
+  data: ProductListItem
+  status: 200
+}
+
+export type adminSetProductStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetProductStatusResponseSuccess = (adminSetProductStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetProductStatusResponseError = (adminSetProductStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetProductStatusResponse = (adminSetProductStatusResponseSuccess | adminSetProductStatusResponseError)
+
+export const getAdminSetProductStatusUrl = (productId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/products/${productId}/status`
+}
+
+/**
+ * @summary Set Product Status
+ */
+export const adminSetProductStatus = async (productId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetProductStatusResponse> => {
+
+  return mutator<adminSetProductStatusResponse>(getAdminSetProductStatusUrl(productId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetProductStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetProductStatus>>, TError,{productId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetProductStatus>>, TError,{productId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetProductStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetProductStatus>>, {productId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  adminSetProductStatus(productId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetProductStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetProductStatus>>>
+    export type AdminSetProductStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetProductStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Product Status
+ */
+export const useAdminSetProductStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetProductStatus>>, TError,{productId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetProductStatus>>,
+        TError,
+        {productId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetProductStatusMutationOptions(options), queryClient);
+    }
     export type adminListRawMaterialsResponse200 = {
   data: RawMaterialListResponse
   status: 200
@@ -5934,6 +7390,184 @@ export const useAdminCreateRawMaterial = <TError = ErrorType<HTTPValidationError
         TContext
       > => {
       return useMutation(getAdminCreateRawMaterialMutationOptions(options), queryClient);
+    }
+    export type adminUpdateRawMaterialResponse200 = {
+  data: RawMaterialListItem
+  status: 200
+}
+
+export type adminUpdateRawMaterialResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateRawMaterialResponseSuccess = (adminUpdateRawMaterialResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateRawMaterialResponseError = (adminUpdateRawMaterialResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateRawMaterialResponse = (adminUpdateRawMaterialResponseSuccess | adminUpdateRawMaterialResponseError)
+
+export const getAdminUpdateRawMaterialUrl = (materialId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/raw-materials/${materialId}`
+}
+
+/**
+ * @summary Update Raw Material
+ */
+export const adminUpdateRawMaterial = async (materialId: number,
+    updateRawMaterialRequest: UpdateRawMaterialRequest, options?: RequestInit): Promise<adminUpdateRawMaterialResponse> => {
+
+  return mutator<adminUpdateRawMaterialResponse>(getAdminUpdateRawMaterialUrl(materialId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateRawMaterialRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateRawMaterialMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRawMaterial>>, TError,{materialId: number;data: BodyType<UpdateRawMaterialRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRawMaterial>>, TError,{materialId: number;data: BodyType<UpdateRawMaterialRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateRawMaterial'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateRawMaterial>>, {materialId: number;data: BodyType<UpdateRawMaterialRequest>}> = (props) => {
+          const {materialId,data} = props ?? {};
+
+          return  adminUpdateRawMaterial(materialId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateRawMaterialMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateRawMaterial>>>
+    export type AdminUpdateRawMaterialMutationBody = BodyType<UpdateRawMaterialRequest>
+    export type AdminUpdateRawMaterialMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Raw Material
+ */
+export const useAdminUpdateRawMaterial = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRawMaterial>>, TError,{materialId: number;data: BodyType<UpdateRawMaterialRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateRawMaterial>>,
+        TError,
+        {materialId: number;data: BodyType<UpdateRawMaterialRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateRawMaterialMutationOptions(options), queryClient);
+    }
+    export type adminSetRawMaterialStatusResponse200 = {
+  data: RawMaterialListItem
+  status: 200
+}
+
+export type adminSetRawMaterialStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetRawMaterialStatusResponseSuccess = (adminSetRawMaterialStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetRawMaterialStatusResponseError = (adminSetRawMaterialStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetRawMaterialStatusResponse = (adminSetRawMaterialStatusResponseSuccess | adminSetRawMaterialStatusResponseError)
+
+export const getAdminSetRawMaterialStatusUrl = (materialId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/raw-materials/${materialId}/status`
+}
+
+/**
+ * @summary Set Raw Material Status
+ */
+export const adminSetRawMaterialStatus = async (materialId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetRawMaterialStatusResponse> => {
+
+  return mutator<adminSetRawMaterialStatusResponse>(getAdminSetRawMaterialStatusUrl(materialId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetRawMaterialStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRawMaterialStatus>>, TError,{materialId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetRawMaterialStatus>>, TError,{materialId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetRawMaterialStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetRawMaterialStatus>>, {materialId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {materialId,data} = props ?? {};
+
+          return  adminSetRawMaterialStatus(materialId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetRawMaterialStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetRawMaterialStatus>>>
+    export type AdminSetRawMaterialStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetRawMaterialStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Raw Material Status
+ */
+export const useAdminSetRawMaterialStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRawMaterialStatus>>, TError,{materialId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetRawMaterialStatus>>,
+        TError,
+        {materialId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetRawMaterialStatusMutationOptions(options), queryClient);
     }
     export type adminListRmCategoriesResponse200 = {
   data: RmCategoryListResponse
@@ -6149,6 +7783,184 @@ export const useAdminCreateRmCategory = <TError = ErrorType<HTTPValidationError>
       > => {
       return useMutation(getAdminCreateRmCategoryMutationOptions(options), queryClient);
     }
+    export type adminUpdateRmCategoryResponse200 = {
+  data: RmCategoryListItem
+  status: 200
+}
+
+export type adminUpdateRmCategoryResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateRmCategoryResponseSuccess = (adminUpdateRmCategoryResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateRmCategoryResponseError = (adminUpdateRmCategoryResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateRmCategoryResponse = (adminUpdateRmCategoryResponseSuccess | adminUpdateRmCategoryResponseError)
+
+export const getAdminUpdateRmCategoryUrl = (categoryId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/rm-categories/${categoryId}`
+}
+
+/**
+ * @summary Update Rm Category
+ */
+export const adminUpdateRmCategory = async (categoryId: number,
+    updateRmCategoryRequest: UpdateRmCategoryRequest, options?: RequestInit): Promise<adminUpdateRmCategoryResponse> => {
+
+  return mutator<adminUpdateRmCategoryResponse>(getAdminUpdateRmCategoryUrl(categoryId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateRmCategoryRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateRmCategoryMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRmCategory>>, TError,{categoryId: number;data: BodyType<UpdateRmCategoryRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRmCategory>>, TError,{categoryId: number;data: BodyType<UpdateRmCategoryRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateRmCategory'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateRmCategory>>, {categoryId: number;data: BodyType<UpdateRmCategoryRequest>}> = (props) => {
+          const {categoryId,data} = props ?? {};
+
+          return  adminUpdateRmCategory(categoryId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateRmCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateRmCategory>>>
+    export type AdminUpdateRmCategoryMutationBody = BodyType<UpdateRmCategoryRequest>
+    export type AdminUpdateRmCategoryMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Rm Category
+ */
+export const useAdminUpdateRmCategory = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRmCategory>>, TError,{categoryId: number;data: BodyType<UpdateRmCategoryRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateRmCategory>>,
+        TError,
+        {categoryId: number;data: BodyType<UpdateRmCategoryRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateRmCategoryMutationOptions(options), queryClient);
+    }
+    export type adminSetRmCategoryStatusResponse200 = {
+  data: RmCategoryListItem
+  status: 200
+}
+
+export type adminSetRmCategoryStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetRmCategoryStatusResponseSuccess = (adminSetRmCategoryStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetRmCategoryStatusResponseError = (adminSetRmCategoryStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetRmCategoryStatusResponse = (adminSetRmCategoryStatusResponseSuccess | adminSetRmCategoryStatusResponseError)
+
+export const getAdminSetRmCategoryStatusUrl = (categoryId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/rm-categories/${categoryId}/status`
+}
+
+/**
+ * @summary Set Rm Category Status
+ */
+export const adminSetRmCategoryStatus = async (categoryId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetRmCategoryStatusResponse> => {
+
+  return mutator<adminSetRmCategoryStatusResponse>(getAdminSetRmCategoryStatusUrl(categoryId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetRmCategoryStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRmCategoryStatus>>, TError,{categoryId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetRmCategoryStatus>>, TError,{categoryId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetRmCategoryStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetRmCategoryStatus>>, {categoryId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {categoryId,data} = props ?? {};
+
+          return  adminSetRmCategoryStatus(categoryId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetRmCategoryStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetRmCategoryStatus>>>
+    export type AdminSetRmCategoryStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetRmCategoryStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Rm Category Status
+ */
+export const useAdminSetRmCategoryStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRmCategoryStatus>>, TError,{categoryId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetRmCategoryStatus>>,
+        TError,
+        {categoryId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetRmCategoryStatusMutationOptions(options), queryClient);
+    }
     export type adminListBomsResponse200 = {
   data: BomListResponse
   status: 200
@@ -6363,6 +8175,184 @@ export const useAdminCreateBom = <TError = ErrorType<HTTPValidationError>,
       > => {
       return useMutation(getAdminCreateBomMutationOptions(options), queryClient);
     }
+    export type adminUpdateBomResponse200 = {
+  data: BomListItem
+  status: 200
+}
+
+export type adminUpdateBomResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateBomResponseSuccess = (adminUpdateBomResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateBomResponseError = (adminUpdateBomResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateBomResponse = (adminUpdateBomResponseSuccess | adminUpdateBomResponseError)
+
+export const getAdminUpdateBomUrl = (bomId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/boms/${bomId}`
+}
+
+/**
+ * @summary Update Bom
+ */
+export const adminUpdateBom = async (bomId: number,
+    updateBomRequest: UpdateBomRequest, options?: RequestInit): Promise<adminUpdateBomResponse> => {
+
+  return mutator<adminUpdateBomResponse>(getAdminUpdateBomUrl(bomId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateBomRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateBomMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBom>>, TError,{bomId: number;data: BodyType<UpdateBomRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBom>>, TError,{bomId: number;data: BodyType<UpdateBomRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateBom'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateBom>>, {bomId: number;data: BodyType<UpdateBomRequest>}> = (props) => {
+          const {bomId,data} = props ?? {};
+
+          return  adminUpdateBom(bomId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateBomMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateBom>>>
+    export type AdminUpdateBomMutationBody = BodyType<UpdateBomRequest>
+    export type AdminUpdateBomMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Bom
+ */
+export const useAdminUpdateBom = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBom>>, TError,{bomId: number;data: BodyType<UpdateBomRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateBom>>,
+        TError,
+        {bomId: number;data: BodyType<UpdateBomRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateBomMutationOptions(options), queryClient);
+    }
+    export type adminSetBomStatusResponse200 = {
+  data: BomListItem
+  status: 200
+}
+
+export type adminSetBomStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetBomStatusResponseSuccess = (adminSetBomStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetBomStatusResponseError = (adminSetBomStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetBomStatusResponse = (adminSetBomStatusResponseSuccess | adminSetBomStatusResponseError)
+
+export const getAdminSetBomStatusUrl = (bomId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/boms/${bomId}/status`
+}
+
+/**
+ * @summary Set Bom Status
+ */
+export const adminSetBomStatus = async (bomId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetBomStatusResponse> => {
+
+  return mutator<adminSetBomStatusResponse>(getAdminSetBomStatusUrl(bomId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetBomStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetBomStatus>>, TError,{bomId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetBomStatus>>, TError,{bomId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetBomStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetBomStatus>>, {bomId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {bomId,data} = props ?? {};
+
+          return  adminSetBomStatus(bomId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetBomStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetBomStatus>>>
+    export type AdminSetBomStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetBomStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Bom Status
+ */
+export const useAdminSetBomStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetBomStatus>>, TError,{bomId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetBomStatus>>,
+        TError,
+        {bomId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetBomStatusMutationOptions(options), queryClient);
+    }
     export type adminListCourierPartnersResponse200 = {
   data: CourierPartnerListResponse
   status: 200
@@ -6576,4 +8566,182 @@ export const useAdminCreateCourierPartner = <TError = ErrorType<HTTPValidationEr
         TContext
       > => {
       return useMutation(getAdminCreateCourierPartnerMutationOptions(options), queryClient);
+    }
+    export type adminUpdateCourierPartnerResponse200 = {
+  data: CourierPartnerListItem
+  status: 200
+}
+
+export type adminUpdateCourierPartnerResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateCourierPartnerResponseSuccess = (adminUpdateCourierPartnerResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateCourierPartnerResponseError = (adminUpdateCourierPartnerResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateCourierPartnerResponse = (adminUpdateCourierPartnerResponseSuccess | adminUpdateCourierPartnerResponseError)
+
+export const getAdminUpdateCourierPartnerUrl = (courierId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/courier-partners/${courierId}`
+}
+
+/**
+ * @summary Update Courier Partner
+ */
+export const adminUpdateCourierPartner = async (courierId: number,
+    updateCourierPartnerRequest: UpdateCourierPartnerRequest, options?: RequestInit): Promise<adminUpdateCourierPartnerResponse> => {
+
+  return mutator<adminUpdateCourierPartnerResponse>(getAdminUpdateCourierPartnerUrl(courierId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateCourierPartnerRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateCourierPartnerMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateCourierPartner>>, TError,{courierId: number;data: BodyType<UpdateCourierPartnerRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateCourierPartner>>, TError,{courierId: number;data: BodyType<UpdateCourierPartnerRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateCourierPartner'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateCourierPartner>>, {courierId: number;data: BodyType<UpdateCourierPartnerRequest>}> = (props) => {
+          const {courierId,data} = props ?? {};
+
+          return  adminUpdateCourierPartner(courierId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateCourierPartnerMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateCourierPartner>>>
+    export type AdminUpdateCourierPartnerMutationBody = BodyType<UpdateCourierPartnerRequest>
+    export type AdminUpdateCourierPartnerMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Courier Partner
+ */
+export const useAdminUpdateCourierPartner = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateCourierPartner>>, TError,{courierId: number;data: BodyType<UpdateCourierPartnerRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateCourierPartner>>,
+        TError,
+        {courierId: number;data: BodyType<UpdateCourierPartnerRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateCourierPartnerMutationOptions(options), queryClient);
+    }
+    export type adminSetCourierPartnerStatusResponse200 = {
+  data: CourierPartnerListItem
+  status: 200
+}
+
+export type adminSetCourierPartnerStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetCourierPartnerStatusResponseSuccess = (adminSetCourierPartnerStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetCourierPartnerStatusResponseError = (adminSetCourierPartnerStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetCourierPartnerStatusResponse = (adminSetCourierPartnerStatusResponseSuccess | adminSetCourierPartnerStatusResponseError)
+
+export const getAdminSetCourierPartnerStatusUrl = (courierId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/courier-partners/${courierId}/status`
+}
+
+/**
+ * @summary Set Courier Partner Status
+ */
+export const adminSetCourierPartnerStatus = async (courierId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetCourierPartnerStatusResponse> => {
+
+  return mutator<adminSetCourierPartnerStatusResponse>(getAdminSetCourierPartnerStatusUrl(courierId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetCourierPartnerStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>, TError,{courierId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>, TError,{courierId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetCourierPartnerStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>, {courierId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {courierId,data} = props ?? {};
+
+          return  adminSetCourierPartnerStatus(courierId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetCourierPartnerStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>>
+    export type AdminSetCourierPartnerStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetCourierPartnerStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Courier Partner Status
+ */
+export const useAdminSetCourierPartnerStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>, TError,{courierId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>,
+        TError,
+        {courierId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetCourierPartnerStatusMutationOptions(options), queryClient);
     }

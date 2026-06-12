@@ -7,7 +7,7 @@ import type { StockBalanceItemItemType } from './stockBalanceItemItemType';
 export interface StockBalanceItem {
   item_id: number;
   item_type: StockBalanceItemItemType;
-  store_id: number;
+  store_uuid: string;
   quantity: number;
   item_name: string;
   item_code: string;

@@ -4,7 +4,7 @@
  */
 
 export interface StoreOut {
-  id: number;
+  uuid: string;
   store_code: string;
   store_name: string;
   store_type: string;

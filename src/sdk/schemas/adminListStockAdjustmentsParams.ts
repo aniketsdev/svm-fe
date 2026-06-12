@@ -5,7 +5,7 @@
 
 export type AdminListStockAdjustmentsParams = {
 status?: string | null;
-store_id?: number | null;
+store_uuid?: string | null;
 material_id?: number | null;
 reason?: string | null;
 search?: string | null;

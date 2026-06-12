@@ -5,7 +5,7 @@
 import type { AdminListStockStrategy } from './adminListStockStrategy';
 
 export type AdminListStockParams = {
-store_id?: number | null;
+store_uuid?: string | null;
 material_type?: 'rm' | 'fg' | null;
 strategy?: AdminListStockStrategy;
 search?: string | null;
