@@ -76,7 +76,7 @@ export function EditUserDialog({ user, onClose, onUpdated }: EditUserDialogProps
   };
 
   return (
-    <CustomDrawer anchor="right" title="Edit user" open={user !== null} onClose={onClose} drawerWidth="38rem">
+    <CustomDrawer anchor="right" title="Edit user" open={user !== null} onClose={onClose} drawerWidth="34rem">
       {user && (
         <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col gap-4">
           <div className="flex flex-col gap-4">

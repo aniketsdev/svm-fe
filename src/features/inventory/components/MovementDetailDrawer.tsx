@@ -35,7 +35,7 @@ export function MovementDetailDrawer({ movement, onClose }: MovementDetailDrawer
       title="Movement detail"
       open={movement !== null}
       onClose={onClose}
-      drawerWidth="36rem"
+      drawerWidth="34rem"
     >
       {movement && (
         <div className="flex flex-col gap-5">

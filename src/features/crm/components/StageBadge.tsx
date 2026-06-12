@@ -25,9 +25,8 @@ const STAGE_TONE: Record<Stage, string> = {
 export function StageBadge({ stage }: StageBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${STAGE_TONE[stage]}`}
+      className={`inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${STAGE_TONE[stage]}`}
     >
-      <span className="size-1.5 rounded-full bg-current" aria-hidden />
       {STAGE_LABEL[stage]}
     </span>
   );

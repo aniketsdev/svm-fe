@@ -3,12 +3,13 @@ import { Search } from 'lucide-react';
 import { memo, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserAvatar } from '../../../common/user-avatar';
-import { listClientsOptions } from '../../clients/api/clients-stubs';
+import { leadsQueryOptions, type Envelope, type LeadList } from '../../crm/api/crm';
+import { StageBadge } from '../../crm/components/StageBadge';
 
 /**
  * Light-styled, always-visible header search (matches the reference console's
- * top-right box). Reuses the clients stub data source — same as the legacy
- * dark-bar GlobalSearch — without touching that component's styling.
+ * top-right box). Searches CRM leads server-side (contact, clinic or phone)
+ * via the same query options as the CRM list page.
  */
 export const HeaderSearch = memo(function HeaderSearch() {
   const navigate = useNavigate();
@@ -31,11 +32,17 @@ export const HeaderSearch = memo(function HeaderSearch() {
   }, []);
 
   const { data, isLoading } = useQuery({
-    ...listClientsOptions({ query: { search: debounced, page_size: 5 } }),
-    enabled: debounced.length >= 1,
+    ...leadsQueryOptions({ page: 0, pageSize: 5, q: debounced }),
+    enabled: debounced.trim().length >= 1,
   });
-  const results = data?.results ?? [];
+  const results = (data as Envelope<LeadList> | undefined)?.data.items ?? [];
   const showDropdown = open && term.length >= 1;
+
+  /** Split a full contact name into first/last for the avatar initials. */
+  const nameParts = (name: string): [string, string] => {
+    const words = name.trim().split(/\s+/);
+    return [words[0] ?? '', words.length > 1 ? words[words.length - 1] : ''];
+  };
 
   return (
     <div ref={containerRef} className="relative hidden w-56 sm:block md:w-72" data-slot="header-search">
@@ -51,8 +58,8 @@ export const HeaderSearch = memo(function HeaderSearch() {
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
-        placeholder="Search clients…"
-        aria-label="Search clients"
+        placeholder="Search leads…"
+        aria-label="Search leads"
         className="h-9 w-full rounded-md border border-border bg-white pl-9 pr-3 text-sm text-foreground shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       />
 
@@ -64,37 +71,40 @@ export const HeaderSearch = memo(function HeaderSearch() {
           {isLoading ? (
             <p className="p-4 text-center text-sm text-muted-foreground">Searching…</p>
           ) : results.length === 0 ? (
-            <p className="p-4 text-center text-sm text-muted-foreground">No clients found</p>
+            <p className="p-4 text-center text-sm text-muted-foreground">No leads found</p>
           ) : (
             <div>
-              {results.map((client) => (
-                <button
-                  key={client.uuid}
-                  type="button"
-                  role="option"
-                  aria-selected={false}
-                  onClick={() => {
-                    setOpen(false);
-                    navigate(`/clients/${client.uuid}`);
-                  }}
-                  className="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-secondary"
-                >
-                  <UserAvatar firstName={client.first_name} lastName={client.last_name} size={32} />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-foreground">
-                      {client.first_name} {client.last_name}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      MRN: {client.mrn ?? '—'}
-                    </p>
-                  </div>
-                </button>
-              ))}
+              {results.map((lead) => {
+                const [first, last] = nameParts(lead.contact_name);
+                return (
+                  <button
+                    key={lead.uuid}
+                    type="button"
+                    role="option"
+                    aria-selected={false}
+                    onClick={() => {
+                      setOpen(false);
+                      navigate(`/crm/${lead.uuid}`);
+                    }}
+                    className="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-secondary"
+                  >
+                    <UserAvatar firstName={first} lastName={last} size={32} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-foreground">{lead.contact_name}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {lead.clinic_name}
+                        {lead.city ? ` · ${lead.city}` : ''}
+                      </p>
+                    </div>
+                    <StageBadge stage={lead.stage} />
+                  </button>
+                );
+              })}
               <button
                 type="button"
                 onClick={() => {
                   setOpen(false);
-                  navigate(`/clients?search=${encodeURIComponent(term)}`);
+                  navigate(`/crm?q=${encodeURIComponent(term)}`);
                 }}
                 className="block w-full border-t border-border px-4 py-3 text-center text-sm font-medium text-primary hover:bg-secondary"
               >

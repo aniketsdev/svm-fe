@@ -74,7 +74,7 @@ export function EditRoleDialog({ role, onClose, onUpdated }: EditRoleDialogProps
   };
 
   return (
-    <CustomDrawer anchor="right" title="Edit role" open={role !== null} onClose={onClose} drawerWidth="38rem">
+    <CustomDrawer anchor="right" title="Edit role" open={role !== null} onClose={onClose} drawerWidth="34rem">
       {role && (
         <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col gap-4">
           <div className="flex flex-col gap-4">

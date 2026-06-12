@@ -79,9 +79,14 @@ export function CrmPage() {
 
   return (
     <CrmGuard>
-      <div className="w-full px-4 py-5">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <h1 className="text-2xl font-semibold text-foreground">CRM</h1>
+          <div>
+            <h1 className="text-2xl font-semibold text-foreground">CRM</h1>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              Doctor and clinic leads from first contact to closure.
+            </p>
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             {canUpdate ? (
               <Link to="/crm/settings">

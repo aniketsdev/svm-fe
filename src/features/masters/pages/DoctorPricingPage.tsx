@@ -10,7 +10,7 @@ import { CreateDoctorPricingDialog } from '../components/CreateDoctorPricingDial
 export function DoctorPricingPage() {
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
-  const { pricing, count, isLoading, refetch } = useDoctorPricing(search);
+  const { pricing, isLoading, refetch } = useDoctorPricing(search);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
@@ -32,10 +32,7 @@ export function DoctorPricingPage() {
         </CustomButton>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {count} {count === 1 ? 'record' : 'records'}
-        </span>
+      <div className="mt-6 flex items-center justify-end gap-3">
         <CustomSearch
           textData={{ placeholder: 'Search by doctor or product', btnTitle: 'Search' }}
           onSearch={setSearch}

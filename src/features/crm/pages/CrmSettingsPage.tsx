@@ -9,7 +9,7 @@ export function CrmSettingsPage() {
   const { canUpdate } = useCrmPermissions();
   return (
     <CrmGuard>
-      <div className="w-full px-4 py-5">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
         <Link to="/crm" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="size-4" /> Back to leads
         </Link>

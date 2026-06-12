@@ -59,7 +59,7 @@ export function CreateDoctorAliasDialog({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <CustomDrawer anchor="right" title="Add doctor alias" open={open} onClose={handleClose} drawerWidth="30rem">
+    <CustomDrawer anchor="right" title="Add doctor alias" open={open} onClose={handleClose} drawerWidth="34rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <RHFSelect<CreateDoctorAliasFormValues>
           name="doctor_id"

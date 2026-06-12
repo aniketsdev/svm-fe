@@ -80,7 +80,7 @@ export function CreateUserDialog({ open, onClose, onCreated }: CreateUserDialogP
   };
 
   return (
-    <CustomDrawer anchor="right" title="Create user" open={open} onClose={handleClose} drawerWidth="38rem">
+    <CustomDrawer anchor="right" title="Create user" open={open} onClose={handleClose} drawerWidth="34rem">
       {createdUrl ? (
         <div className="flex flex-col gap-4">
           <p className="text-sm text-foreground">

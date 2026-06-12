@@ -10,7 +10,7 @@ import { CreateCourierDialog } from '../components/CreateCourierDialog';
 export function CouriersPage() {
   const [search, setSearch] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
-  const { couriers, count, isLoading, refetch } = useCouriers(search);
+  const { couriers, isLoading, refetch } = useCouriers(search);
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
@@ -32,10 +32,7 @@ export function CouriersPage() {
         </CustomButton>
       </div>
 
-      <div className="mt-6 flex items-center justify-between gap-3">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {count} {count === 1 ? 'record' : 'records'}
-        </span>
+      <div className="mt-6 flex items-center justify-end gap-3">
         <CustomSearch
           textData={{ placeholder: 'Search by name or code', btnTitle: 'Search' }}
           onSearch={setSearch}
