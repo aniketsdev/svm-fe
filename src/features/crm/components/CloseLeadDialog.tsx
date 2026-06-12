@@ -76,7 +76,7 @@ export function CloseLeadDialog({ leadUuid, outcome, onClose, onClosed }: CloseL
       title={outcome === 'WON' ? 'Mark lead as Won' : 'Mark lead as Lost'}
       open={outcome !== null}
       onClose={handleClose}
-      drawerWidth="34rem"
+      drawerWidth="40rem"
     >
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col gap-4">
         <RHFSelect<CloseFormValues>

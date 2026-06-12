@@ -54,7 +54,7 @@ export function ReminderDrawer({ leadUuid, reminder, open, onClose, onSaved }: R
       title={isEdit ? 'Reschedule follow-up' : 'Add follow-up'}
       open={open}
       onClose={onClose}
-      drawerWidth="32rem"
+      drawerWidth="40rem"
       drawerPadding="0px"
     >
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">

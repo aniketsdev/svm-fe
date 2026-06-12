@@ -57,7 +57,7 @@ export function CreateDoctorDialog({ open, onClose, onCreated }: CreateDoctorDia
   };
 
   return (
-    <CustomDrawer anchor="right" title="Add doctor" open={open} onClose={handleClose} drawerWidth="34rem">
+    <CustomDrawer anchor="right" title="Add doctor" open={open} onClose={handleClose} drawerWidth="40rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3">
           <RHFInput<CreateDoctorFormValues> name="name" control={control} label="Name" required placeholder="Enter name" />

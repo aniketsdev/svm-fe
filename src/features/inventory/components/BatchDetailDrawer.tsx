@@ -268,7 +268,7 @@ export function BatchDetailDrawer({ batch, onClose }: Props) {
       title={batch ? `Batch ${batch.batch_no}` : 'Batch'}
       open={batch !== null}
       onClose={handleClose}
-      drawerWidth="48rem"
+      drawerWidth="52rem"
     >
       {detailQuery.isPending && batch && <Skeleton />}
 

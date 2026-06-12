@@ -68,7 +68,7 @@ export function CreateDoctorPricingDialog({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <CustomDrawer anchor="right" title="Add doctor pricing" open={open} onClose={handleClose} drawerWidth="34rem">
+    <CustomDrawer anchor="right" title="Add doctor pricing" open={open} onClose={handleClose} drawerWidth="40rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <RHFSelect<CreateDoctorPricingFormValues>
           name="doctor_id"

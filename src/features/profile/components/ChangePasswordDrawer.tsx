@@ -59,7 +59,7 @@ export function ChangePasswordDrawer({ open, onClose }: ChangePasswordDrawerProp
       title="Change password"
       open={open}
       onClose={onClose}
-      drawerWidth="35rem"
+      drawerWidth="40rem"
       drawerPadding="0rem"
     >
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex h-full flex-col">

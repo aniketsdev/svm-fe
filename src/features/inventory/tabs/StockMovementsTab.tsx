@@ -123,25 +123,41 @@ export function StockMovementsTab() {
         lastMovementAt={movements[0]?.created_at}
       />
 
-      <div className="mt-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div className="inline-flex w-fit rounded-lg border border-border bg-card p-1 shadow-sm">
-          {(['stock', 'movements'] as const).map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => switchView(v)}
-              aria-pressed={view === v}
-              className={cn(
-                'rounded-md px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-                view === v ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              {v === 'stock' ? 'Stock on hand' : 'Movement ledger'}
-            </button>
-          ))}
+      <div className="mt-6 flex flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="inline-flex w-fit shrink-0 rounded-lg border border-border bg-card p-1 shadow-sm">
+            {(['stock', 'movements'] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => switchView(v)}
+                aria-pressed={view === v}
+                className={cn(
+                  'whitespace-nowrap rounded-md px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  view === v ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                {v === 'stock' ? 'Stock on hand' : 'Movement ledger'}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <CustomSearch
+              textData={{ placeholder: 'Search item, code, store or reference', btnTitle: 'Search' }}
+              onSearch={(val) => { setSearch(val); resetPage(); }}
+              hasStartSearchIcon
+              width="20rem"
+            />
+            {hasFilters && (
+              <CustomButton variant="outline" size="sm" icon={<RotateCcw className="size-4" />} onClick={resetFilters}>
+                Reset
+              </CustomButton>
+            )}
+          </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 lg:justify-end">
+        <div className="flex flex-wrap items-center justify-end gap-3">
           <div className="w-44">
             <CustomSelect name="store" placeholder="Store" value={storeId} items={storeItems} onChange={(e) => { setStoreId(e.target.value); resetPage(); }} />
           </div>
@@ -157,17 +173,6 @@ export function StockMovementsTab() {
                 <CustomSelect name="reason" placeholder="Reason" value={kind} items={KIND_ITEMS} onChange={(e) => { setKind(e.target.value as KindFilter); resetPage(); }} />
               </div>
             </>
-          )}
-          <CustomSearch
-            textData={{ placeholder: 'Search item, code, store or reference', btnTitle: 'Search' }}
-            onSearch={(val) => { setSearch(val); resetPage(); }}
-            hasStartSearchIcon
-            width="20rem"
-          />
-          {hasFilters && (
-            <CustomButton variant="outline" size="sm" icon={<RotateCcw className="size-4" />} onClick={resetFilters}>
-              Reset
-            </CustomButton>
           )}
         </div>
       </div>

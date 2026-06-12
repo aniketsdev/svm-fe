@@ -53,7 +53,7 @@ export function CreateRmCategoryDialog({ open, onClose, onCreated }: CreateRmCat
   };
 
   return (
-    <CustomDrawer anchor="right" title="Add RM category" open={open} onClose={handleClose} drawerWidth="30rem">
+    <CustomDrawer anchor="right" title="Add RM category" open={open} onClose={handleClose} drawerWidth="40rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3">
           <RHFInput<CreateRmCategoryFormValues> name="name" control={control} label="Name" required placeholder="Enter name" />

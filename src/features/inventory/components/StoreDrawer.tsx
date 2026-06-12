@@ -74,7 +74,7 @@ export function StoreDrawer({ open, editing, onClose, onSaved }: Props) {
       title={isEdit ? 'Edit store' : 'Add store'}
       open={open}
       onClose={handleClose}
-      drawerWidth="30rem"
+      drawerWidth="40rem"
       drawerPadding="0px"
     >
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">

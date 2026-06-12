@@ -58,7 +58,7 @@ export function CreateProductDialog({ open, onClose, onCreated }: CreateProductD
   };
 
   return (
-    <CustomDrawer anchor="right" title="Add product" open={open} onClose={handleClose} drawerWidth="34rem">
+    <CustomDrawer anchor="right" title="Add product" open={open} onClose={handleClose} drawerWidth="40rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <RHFInput<CreateProductFormValues> name="name" control={control} label="Name" required placeholder="Enter name" />
         <div className="grid grid-cols-2 gap-3">

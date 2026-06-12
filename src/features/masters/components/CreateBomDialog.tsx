@@ -78,7 +78,7 @@ export function CreateBomDialog({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <CustomDrawer anchor="right" title="Add BOM" open={open} onClose={handleClose} drawerWidth="44rem">
+    <CustomDrawer anchor="right" title="Add BOM" open={open} onClose={handleClose} drawerWidth="52rem">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-3">
           <RHFInput<CreateBomFormValues> name="code" control={control} label="Code" required placeholder="Enter code" />

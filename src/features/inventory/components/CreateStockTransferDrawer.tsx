@@ -77,7 +77,7 @@ export function CreateStockTransferDrawer({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <CustomDrawer anchor="right" title="New Stock Transfer" open={open} onClose={handleClose} drawerWidth="50rem" drawerPadding="0px">
+    <CustomDrawer anchor="right" title="New Stock Transfer" open={open} onClose={handleClose} drawerWidth="52rem" drawerPadding="0px">
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">

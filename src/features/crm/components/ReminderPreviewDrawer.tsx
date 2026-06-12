@@ -21,7 +21,7 @@ export function ReminderPreviewDrawer({ reminder, onClose }: ReminderPreviewDraw
     ? `${reminder.due_date}${reminder.due_time ? ` ${reminder.due_time.slice(0, 5)}` : ''}`
     : '';
   return (
-    <CustomDrawer anchor="right" title="Follow-up details" open={reminder !== null} onClose={onClose} drawerWidth="32rem">
+    <CustomDrawer anchor="right" title="Follow-up details" open={reminder !== null} onClose={onClose} drawerWidth="40rem">
       {reminder ? (
         <dl className="flex flex-col gap-4">
           <PreviewField label="Due" value={due} />
