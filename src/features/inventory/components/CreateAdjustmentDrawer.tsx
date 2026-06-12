@@ -78,42 +78,43 @@ export function CreateAdjustmentDrawer({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <CustomDrawer anchor="right" title="New Stock Adjustment" open={open} onClose={handleClose} drawerWidth="34rem">
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-3">
-          <RHFSelect<AdjustmentFormValues>
-            name="store_code"
-            control={control}
-            label="Store"
-            required
-            items={storeItems}
-            placeholder={storeItems.length ? 'Select store' : 'No stores yet'}
-          />
-          <RHFSelect<AdjustmentFormValues> name="kind" control={control} label="Type" required items={KIND_ITEMS} placeholder="Select type" />
+    <CustomDrawer anchor="right" title="New Stock Adjustment" open={open} onClose={handleClose} drawerWidth="34rem" drawerPadding="0px">
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-3">
+            <RHFSelect<AdjustmentFormValues>
+              name="store_code"
+              control={control}
+              label="Store"
+              required
+              items={storeItems}
+              placeholder={storeItems.length ? 'Select store' : 'No stores yet'}
+            />
+            <RHFSelect<AdjustmentFormValues> name="kind" control={control} label="Type" required items={KIND_ITEMS} placeholder="Select type" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <RHFSelect<AdjustmentFormValues>
+              name="material_code"
+              control={control}
+              label="Material"
+              required
+              items={materialItems}
+              placeholder={materialItems.length ? 'Select material' : 'No materials yet'}
+            />
+            <RHFInput<AdjustmentFormValues> name="batch_no" control={control} label="Batch no." required placeholder="Enter batch no." />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <RHFSelect<AdjustmentFormValues> name="direction" control={control} label="Direction" required items={DIRECTION_ITEMS} placeholder="Select direction" />
+            <RHFInput<AdjustmentFormValues> name="quantity" control={control} label="Quantity" required placeholder="Enter quantity" />
+          </div>
+          <RHFSelect<AdjustmentFormValues> name="reason" control={control} label="Reason" required items={REASON_ITEMS} placeholder="Select reason" />
+          <RHFTextarea<AdjustmentFormValues> name="notes" control={control} label="Notes" required placeholder="Explain the adjustment" minRow={2} />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <RHFSelect<AdjustmentFormValues>
-            name="material_code"
-            control={control}
-            label="Material"
-            required
-            items={materialItems}
-            placeholder={materialItems.length ? 'Select material' : 'No materials yet'}
-          />
-          <RHFInput<AdjustmentFormValues> name="batch_no" control={control} label="Batch no." required placeholder="Enter batch no." />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <RHFSelect<AdjustmentFormValues> name="direction" control={control} label="Direction" required items={DIRECTION_ITEMS} placeholder="Select direction" />
-          <RHFInput<AdjustmentFormValues> name="quantity" control={control} label="Quantity" required placeholder="Enter quantity" />
-        </div>
-        <RHFSelect<AdjustmentFormValues> name="reason" control={control} label="Reason" required items={REASON_ITEMS} placeholder="Select reason" />
-        <RHFTextarea<AdjustmentFormValues> name="notes" control={control} label="Notes" required placeholder="Explain the adjustment" minRow={2} />
-
-        <div className="mt-2 flex justify-end gap-3">
-          <CustomButton type="button" variant="outline" onClick={handleClose}>
+        <div className="shrink-0 flex justify-end gap-3 border-t border-border bg-background px-6 py-4">
+          <CustomButton type="button" variant="outline" onClick={handleClose} size="md">
             Cancel
           </CustomButton>
-          <CustomButton type="submit" variant="primary" loading={createMutation.isPending}>
+          <CustomButton type="submit" variant="primary" loading={createMutation.isPending} size="md">
             Create adjustment
           </CustomButton>
         </div>

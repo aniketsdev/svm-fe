@@ -61,63 +61,64 @@ export function CreateProcessingDrawer({ open, onClose, onCreated }: Props) {
   };
 
   return (
-    <CustomDrawer anchor="right" title="New Processing Order" open={open} onClose={handleClose} drawerWidth="40rem">
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-        {/* Input */}
-        <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Input — consumed</p>
-          <RHFSelect<ProcessingFormValues>
-            name="input_material_code"
-            control={control}
-            label="Input material"
-            required
-            items={materialItems}
-            placeholder={materialItems.length ? 'Select material' : 'No materials yet'}
-          />
-          <div className="grid grid-cols-2 gap-3">
+    <CustomDrawer anchor="right" title="New Processing Order" open={open} onClose={handleClose} drawerWidth="40rem" drawerPadding="0px">
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+          {/* Input */}
+          <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Input — consumed</p>
             <RHFSelect<ProcessingFormValues>
-              name="from_store_code"
+              name="input_material_code"
               control={control}
-              label="From store"
-              required
-              items={storeItems}
-              placeholder={storeItems.length ? 'Select store' : 'No stores yet'}
-            />
-            <RHFInput<ProcessingFormValues> name="quantity_to_consume" control={control} label="Quantity to consume" required placeholder="Enter quantity" />
-          </div>
-          <RHFInput<ProcessingFormValues> name="input_batch_no" control={control} label="Input batch (optional)" placeholder="Specific batch no." />
-        </div>
-
-        {/* Output */}
-        <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Output — produced</p>
-          <div className="grid grid-cols-2 gap-3">
-            <RHFSelect<ProcessingFormValues>
-              name="output_material_code"
-              control={control}
-              label="Output material"
+              label="Input material"
               required
               items={materialItems}
               placeholder={materialItems.length ? 'Select material' : 'No materials yet'}
             />
-            <RHFSelect<ProcessingFormValues>
-              name="to_store_code"
-              control={control}
-              label="To store"
-              required
-              items={storeItems}
-              placeholder={storeItems.length ? 'Select store' : 'No stores yet'}
-            />
+            <div className="grid grid-cols-2 gap-3">
+              <RHFSelect<ProcessingFormValues>
+                name="from_store_code"
+                control={control}
+                label="From store"
+                required
+                items={storeItems}
+                placeholder={storeItems.length ? 'Select store' : 'No stores yet'}
+              />
+              <RHFInput<ProcessingFormValues> name="quantity_to_consume" control={control} label="Quantity to consume" required placeholder="Enter quantity" />
+            </div>
+            <RHFInput<ProcessingFormValues> name="input_batch_no" control={control} label="Input batch (optional)" placeholder="Specific batch no." />
           </div>
+
+          {/* Output */}
+          <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Output — produced</p>
+            <div className="grid grid-cols-2 gap-3">
+              <RHFSelect<ProcessingFormValues>
+                name="output_material_code"
+                control={control}
+                label="Output material"
+                required
+                items={materialItems}
+                placeholder={materialItems.length ? 'Select material' : 'No materials yet'}
+              />
+              <RHFSelect<ProcessingFormValues>
+                name="to_store_code"
+                control={control}
+                label="To store"
+                required
+                items={storeItems}
+                placeholder={storeItems.length ? 'Select store' : 'No stores yet'}
+              />
+            </div>
+          </div>
+
+          <RHFTextarea<ProcessingFormValues> name="notes" control={control} label="Notes" placeholder="Enter notes" minRow={2} />
         </div>
-
-        <RHFTextarea<ProcessingFormValues> name="notes" control={control} label="Notes" placeholder="Enter notes" minRow={2} />
-
-        <div className="flex justify-end gap-3">
-          <CustomButton type="button" variant="outline" onClick={handleClose}>
+        <div className="shrink-0 flex justify-end gap-3 border-t border-border bg-background px-6 py-4">
+          <CustomButton type="button" variant="outline" onClick={handleClose} size="md">
             Cancel
           </CustomButton>
-          <CustomButton type="submit" variant="primary" loading={createMutation.isPending}>
+          <CustomButton type="submit" variant="primary" loading={createMutation.isPending} size="md">
             Create order
           </CustomButton>
         </div>
