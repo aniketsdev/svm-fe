@@ -116,7 +116,7 @@ export function UsersPage() {
   });
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
+    <div className="w-full px-4 py-6 sm:px-6">
       {/* Header: title left, search right (Activity-Log parity) */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>

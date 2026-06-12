@@ -72,7 +72,7 @@ export function MyFollowupsPage() {
 
   return (
     <CrmGuard>
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
+      <div className="w-full px-4 py-6 sm:px-6">
         <h1 className="text-2xl font-semibold text-foreground">My follow-ups</h1>
         <p className="mt-1 text-sm text-muted-foreground">Reminders due now or overdue, assigned to you.</p>
 
