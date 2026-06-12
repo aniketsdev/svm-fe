@@ -8,5 +8,7 @@ export interface DoctorAliasListItem {
   doctor_id: number;
   doctor_name: string;
   alias: string;
+  is_active: boolean;
+  media_count?: number;
   created_at: string;
 }

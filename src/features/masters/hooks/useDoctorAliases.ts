@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import type { MastersListQuery } from '../api/list-query';
 import {
   doctorAliasesQueryOptions,
   type DoctorAliasRow,
@@ -10,15 +11,15 @@ interface Envelope {
   status: number;
 }
 
-export function useDoctorAliases(search?: string) {
-  const query = useQuery(doctorAliasesQueryOptions(search));
-  const envelope = query.data as Envelope | undefined;
+export function useDoctorAliases(query: MastersListQuery) {
+  const result = useQuery({ ...doctorAliasesQueryOptions(query), placeholderData: (prev) => prev });
+  const envelope = result.data as Envelope | undefined;
   const aliases: DoctorAliasRow[] = envelope?.data.results ?? [];
 
   return {
     aliases,
     count: envelope?.data.count ?? 0,
-    isLoading: query.isPending,
-    refetch: query.refetch,
+    isLoading: result.isPending,
+    refetch: result.refetch,
   };
 }
