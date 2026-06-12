@@ -9,9 +9,13 @@ interface Props {
   orders: ProcessingRow[];
   loading: boolean;
   onRowClick: (o: ProcessingRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function ProcessingTable({ orders, loading, onRowClick }: Props) {
+export function ProcessingTable({ orders, loading, onRowClick, page, pageSize, total, onPaginationChange }: Props) {
   const columns = useMemo<ColumnDef<ProcessingRow, unknown>[]>(
     () => [
       {
@@ -38,6 +42,7 @@ export function ProcessingTable({ orders, loading, onRowClick }: Props) {
       {
         accessorKey: 'quantity_to_consume',
         header: 'Consume',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">{row.original.quantity_to_consume}</span>
         ),
@@ -45,6 +50,7 @@ export function ProcessingTable({ orders, loading, onRowClick }: Props) {
       {
         accessorKey: 'output_quantity',
         header: 'Output',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">{row.original.output_quantity ?? '—'}</span>
         ),
@@ -52,11 +58,13 @@ export function ProcessingTable({ orders, loading, onRowClick }: Props) {
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <ProcessingStatusBadge status={row.original.status} />,
       },
       {
         accessorKey: 'created_at',
         header: 'Created',
+        meta: { align: 'center' },
         cell: ({ row }) => <span className="text-muted-foreground">{formatDate(row.original.created_at)}</span>,
       },
     ],
@@ -70,8 +78,12 @@ export function ProcessingTable({ orders, loading, onRowClick }: Props) {
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={12}
-      getRowId={(row) => String(row.id)}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
+      getRowId={(row) => row.uuid}
       onRowClick={onRowClick}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">

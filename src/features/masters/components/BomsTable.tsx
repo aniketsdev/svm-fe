@@ -59,6 +59,7 @@ export function BomsTable({
         accessorKey: 'line_count',
         header: 'Lines',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
             {row.original.line_count} {row.original.line_count === 1 ? 'item' : 'items'}
@@ -89,6 +90,7 @@ export function BomsTable({
       {
         accessorKey: 'is_active',
         header: 'Active',
+        meta: { align: 'center' },
         cell: ({ row }) => <ActivePill active={row.original.is_active} />,
       },
       {

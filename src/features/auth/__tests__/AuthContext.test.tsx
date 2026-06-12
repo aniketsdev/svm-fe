@@ -16,7 +16,7 @@ import { useAuth } from '../hooks/useAuth';
 import type { AuthUser } from '../context/AuthContext';
 
 const TEST_USER: AuthUser = {
-  id: 7,
+  uuid: '77777777-7777-7777-7777-777777777777',
   email: 'jane@example.com',
   role: 'user',
   is_active: true,

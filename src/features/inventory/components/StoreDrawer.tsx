@@ -64,7 +64,7 @@ export function StoreDrawer({ open, editing, onClose, onSaved }: Props) {
   };
 
   const onSubmit = (d: StoreFormValues) => {
-    if (editing) update.mutate({ storeId: editing.id, data: d });
+    if (editing) update.mutate({ storeUuid: editing.uuid, data: d });
     else create.mutate({ data: d });
   };
 

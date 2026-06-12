@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import { CustomDrawer } from '../../../common/custom-drawer';
 import { cn } from '../../../lib/cn';
 import { formatDateTime, formatRelativeTime, prettyJson } from '../../../utils/format';
@@ -43,11 +42,6 @@ export function AuditDetailDialog({ entry, onClose }: AuditDetailDialogProps) {
   const after = prettyJson(detail?.after_state);
   const desc = row ? describeActivity(row.action, row.entity_type) : null;
 
-  const recordValue = row?.record_name
-    ? row.record_name
-    : row?.entity_type
-      ? `${row.entity_type.replace(/_/g, ' ')}${row.record_id != null ? ` #${row.record_id}` : ''}`
-      : '—';
 
   return (
     <CustomDrawer

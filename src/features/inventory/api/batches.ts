@@ -24,24 +24,24 @@ export function batchesQueryOptions(params: AdminListStockParams = {}) {
   return getAdminListStockQueryOptions(params);
 }
 
-export function batchDetailQueryOptions(batchId: number | null) {
-  return getAdminGetBatchQueryOptions(batchId ?? 0, { query: { enabled: batchId !== null } });
+export function batchDetailQueryOptions(batchUuid: string | null) {
+  return getAdminGetBatchQueryOptions(batchUuid ?? '', { query: { enabled: batchUuid !== null } });
 }
 
-export function batchLedgerQueryOptions(batchId: number | null, enabled: boolean) {
-  return getAdminGetBatchLedgerQueryOptions(batchId ?? 0, undefined, {
-    query: { enabled: batchId !== null && enabled },
+export function batchLedgerQueryOptions(batchUuid: string | null, enabled: boolean) {
+  return getAdminGetBatchLedgerQueryOptions(batchUuid ?? '', undefined, {
+    query: { enabled: batchUuid !== null && enabled },
   });
 }
 
-export function batchTimelineQueryOptions(batchId: number | null, enabled: boolean) {
-  return getAdminGetBatchTimelineQueryOptions(batchId ?? 0, {
-    query: { enabled: batchId !== null && enabled },
+export function batchTimelineQueryOptions(batchUuid: string | null, enabled: boolean) {
+  return getAdminGetBatchTimelineQueryOptions(batchUuid ?? '', {
+    query: { enabled: batchUuid !== null && enabled },
   });
 }
 
-export function batchTraceQueryOptions(batchId: number | null, enabled: boolean) {
-  return getAdminGetBatchTraceabilityQueryOptions(batchId ?? 0, {
-    query: { enabled: batchId !== null && enabled },
+export function batchTraceQueryOptions(batchUuid: string | null, enabled: boolean) {
+  return getAdminGetBatchTraceabilityQueryOptions(batchUuid ?? '', {
+    query: { enabled: batchUuid !== null && enabled },
   });
 }

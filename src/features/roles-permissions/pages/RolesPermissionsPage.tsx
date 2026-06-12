@@ -133,7 +133,7 @@ export function RolesPermissionsPage() {
       {/* Toolbar — status filter + create */}
       <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-          <div className="w-40">
+          <div className="w-44">
             <CustomSelect
               name="type"
               placeholder="Role Type"
@@ -142,7 +142,7 @@ export function RolesPermissionsPage() {
               onChange={(e) => handleType(e.target.value as TypeFilter)}
             />
           </div>
-          <div className="w-40">
+          <div className="w-44">
             <CustomSelect
               name="status"
               placeholder="Status"
@@ -151,15 +151,13 @@ export function RolesPermissionsPage() {
               onChange={(e) => handleStatus(e.target.value as StatusFilter)}
             />
           </div>
-          {/* <div className="w-40"> */}
           <CustomSearch
-          textData={{ placeholder: 'Search by role name', btnTitle: 'Search' }}
-          onSearch={handleSearch}
-          initialValue={search}
-          hasStartSearchIcon
-          width="28rem"
-        /></div>
-        {/* </div> */}
+            textData={{ placeholder: 'Search by role name', btnTitle: 'Search' }}
+            onSearch={handleSearch}
+            initialValue={search}
+            hasStartSearchIcon
+            width="20rem"
+          /></div>
       </div>
 
       {/* Table */}

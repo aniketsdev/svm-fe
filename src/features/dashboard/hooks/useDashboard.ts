@@ -25,8 +25,7 @@ export interface NameValue {
 }
 
 export function useDashboard() {
-  // 500 batches is plenty to aggregate from for the dashboard; counts use `total`.
-  const stockQ = useQuery(getAdminListStockQueryOptions({ limit: 500 }));
+  const stockQ = useQuery(getAdminListStockQueryOptions({ limit: 100 }));
   const storesQ = useQuery(getAdminListStoresQueryOptions());
   const materialsQ = useQuery(getAdminListMaterialsQueryOptions());
   const grnsQ = useQuery(getAdminListGrnsQueryOptions({ limit: 1 }));

@@ -58,6 +58,7 @@ export function LeadsTable({
         accessorKey: 'stage',
         header: 'Stage',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => <StageBadge stage={row.original.stage} />,
       },
       {
@@ -84,6 +85,7 @@ export function LeadsTable({
         id: 'estimated_annual_value',
         header: 'Est. value',
         // Server-sortable (sort=estimated_annual_value).
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="whitespace-nowrap text-foreground">
             {formatValue(row.original.estimated_annual_value)}
@@ -94,6 +96,7 @@ export function LeadsTable({
         id: 'updated_at',
         header: 'Updated',
         // Server-sortable (sort=updated_at).
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="whitespace-nowrap text-muted-foreground">
             {formatDateTime(row.original.updated_at)}

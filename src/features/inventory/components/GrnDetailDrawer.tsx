@@ -31,7 +31,7 @@ export function GrnDetailDrawer({ grn, onClose, onPosted }: Props) {
   const { toast } = useToast();
   const [confirmPost, setConfirmPost] = useState(false);
 
-  const query = useQuery(grnDetailQueryOptions(grn?.id ?? null));
+  const query = useQuery(grnDetailQueryOptions(grn?.uuid ?? null));
   const detail = (query.data as { data?: GrnDetail } | undefined)?.data;
   const isDraft = detail?.status === 'draft';
 
@@ -107,7 +107,7 @@ export function GrnDetailDrawer({ grn, onClose, onPosted }: Props) {
               </thead>
               <tbody>
                 {detail.lines.map((l) => (
-                  <tr key={l.id} className="border-b border-border/60 last:border-0">
+                  <tr key={l.uuid} className="border-b border-border/60 last:border-0">
                     <td className="px-3 py-2">
                       <div className="flex flex-col">
                         <span className="text-foreground">{l.material_name}</span>
@@ -162,7 +162,7 @@ export function GrnDetailDrawer({ grn, onClose, onPosted }: Props) {
         }
         onClose={() => setConfirmPost(false)}
         onConfirm={() => {
-          if (grn) postMutation.mutate({ grnId: grn.id, data: { confirm: true } });
+          if (grn) postMutation.mutate({ grnUuid: grn.uuid, data: { confirm: true } });
         }}
       />
     </CustomDrawer>

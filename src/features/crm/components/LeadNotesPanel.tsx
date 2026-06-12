@@ -5,7 +5,7 @@ import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import { ActionMenu, type ActionMenuItem } from '../../../common/action-menu';
 import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
 import { useToast } from '../../../common/common-snackbar';
-import { errorMessage } from '../../../utils/api-messages';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { formatDateTime } from '../../../utils/format';
 import { useAdminDeleteLeadNote } from '../../../sdk/crm';
 import { LEAD_ACTIVITY_PAGE_SIZE, personLabel, type NoteOut } from '../api/crm';
@@ -50,8 +50,8 @@ export function LeadNotesPanel({
 
   const deleteMutation = useAdminDeleteLeadNote({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Note deleted.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Note deleted.') });
         setDeleteId(null);
         onChanged();
       },
@@ -66,6 +66,7 @@ export function LeadNotesPanel({
     {
       id: 'created_at',
       header: 'Date',
+      meta: { align: 'center' },
       cell: ({ row }) => (
         <span className="whitespace-nowrap text-muted-foreground">{formatDateTime(row.original.created_at)}</span>
       ),
@@ -78,6 +79,7 @@ export function LeadNotesPanel({
     {
       id: 'interaction_type',
       header: 'Type',
+      meta: { align: 'center' },
       cell: ({ row }) => <span className="text-muted-foreground">{row.original.interaction_type ?? '—'}</span>,
     },
     {

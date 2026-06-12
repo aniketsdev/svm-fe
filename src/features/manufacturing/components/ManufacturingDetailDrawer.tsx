@@ -42,15 +42,15 @@ export function ManufacturingDetailDrawer({ order, onClose, onActed }: Props) {
   const { control, handleSubmit, reset, setError } = useCompleteManufacturingForm();
   const { handleApiError } = useFormApiErrors(setError);
 
-  const query = useQuery(manufacturingDetailQueryOptions(order?.id ?? null));
+  const query = useQuery(manufacturingDetailQueryOptions(order?.uuid ?? null));
   const detail = (query.data as { data?: ManufacturingDetail } | undefined)?.data;
-  const id = order?.id;
+  const id = order?.uuid;
 
   const isDone = detail ? detail.completed_at != null || detail.status === 'completed' : false;
   const isCancelled = detail?.status === 'cancelled';
   const canAct = Boolean(detail) && !isDone && !isCancelled;
 
-  const previewQuery = useQuery(manufacturingPreviewQueryOptions(order?.id ?? null, canAct));
+  const previewQuery = useQuery(manufacturingPreviewQueryOptions(order?.uuid ?? null, canAct));
   const preview = (previewQuery.data as { data?: ManufacturingPreview } | undefined)?.data;
 
   const complete = useAdminCompleteManufacturingOrder({
@@ -84,7 +84,7 @@ export function ManufacturingDetailDrawer({ order, onClose, onActed }: Props) {
 
   const onComplete = (d: CompleteManufacturingFormValues) =>
     complete.mutate({
-      orderId: id!,
+      orderUuid: id!,
       data: { actual_output_qty: d.actual_output_qty, expiry_date: d.expiry_date || null },
     });
 
@@ -243,7 +243,7 @@ export function ManufacturingDetailDrawer({ order, onClose, onActed }: Props) {
         title="Cancel manufacturing"
         message={detail ? `Cancel ${detail.mo_no}? This stops the production order.` : ''}
         onClose={() => setConfirmCancel(false)}
-        onConfirm={() => cancel.mutate({ orderId: id! })}
+        onConfirm={() => cancel.mutate({ orderUuid: id! })}
       />
     </CustomDrawer>
   );

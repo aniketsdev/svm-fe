@@ -9,6 +9,7 @@ import { CreateAdjustmentDrawer } from '../components/CreateAdjustmentDrawer';
 import { AdjustmentDetailDrawer } from '../components/AdjustmentDetailDrawer';
 import type { AdminListStockAdjustmentsParams, AdjustmentRow } from '../api/stock-adjustments';
 
+const PAGE_SIZE = 25;
 const ALL = 'all';
 const STATUS_ITEMS = [
   { value: ALL, label: 'All statuses' },
@@ -30,18 +31,23 @@ export function AdjustmentsTab() {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState(ALL);
   const [reason, setReason] = useState(ALL);
+  const [page, setPage] = useState(0);
 
   const params = useMemo<AdminListStockAdjustmentsParams>(
     () => ({
       search: search || undefined,
       status: status === ALL ? undefined : status,
       reason: reason === ALL ? undefined : reason,
-      limit: 100,
-      offset: 0,
+      limit: PAGE_SIZE,
+      offset: page * PAGE_SIZE,
     }),
-    [search, status, reason],
+    [search, status, reason, page],
   );
   const { adjustments, total, isLoading, refetch } = useStockAdjustments(params);
+
+  const handleSearch = (val: string) => { setSearch(val); setPage(0); };
+  const handleStatus = (val: string) => { setStatus(val); setPage(0); };
+  const handleReason = (val: string) => { setReason(val); setPage(0); };
 
   return (
     <div className="flex flex-col">
@@ -50,17 +56,17 @@ export function AdjustmentsTab() {
           {total} {total === 1 ? 'adjustment' : 'adjustments'}
         </span>
         <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-          <div className="w-40">
-            <CustomSelect name="status" placeholder="Status" value={status} items={STATUS_ITEMS} onChange={(e) => setStatus(e.target.value)} />
+          <div className="w-44">
+            <CustomSelect name="status" placeholder="Status" value={status} items={STATUS_ITEMS} onChange={(e) => handleStatus(e.target.value)} />
           </div>
-          <div className="w-48">
-            <CustomSelect name="reason" placeholder="Reason" value={reason} items={REASON_ITEMS} onChange={(e) => setReason(e.target.value)} />
+          <div className="w-44">
+            <CustomSelect name="reason" placeholder="Reason" value={reason} items={REASON_ITEMS} onChange={(e) => handleReason(e.target.value)} />
           </div>
           <CustomSearch
             textData={{ placeholder: 'Search adj. no. or material', btnTitle: 'Search' }}
-            onSearch={setSearch}
+            onSearch={handleSearch}
             hasStartSearchIcon
-            width="18rem"
+            width="20rem"
           />
           <CustomButton variant="primary" icon={<Plus className="size-4" />} onClick={() => setCreateOpen(true)}>
             New Adjustment
@@ -69,7 +75,15 @@ export function AdjustmentsTab() {
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <StockAdjustmentsTable adjustments={adjustments} loading={isLoading} onRowClick={setSelected} />
+        <StockAdjustmentsTable
+          adjustments={adjustments}
+          loading={isLoading}
+          onRowClick={setSelected}
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPaginationChange={({ pageIndex }) => setPage(pageIndex)}
+        />
       </div>
 
       <CreateAdjustmentDrawer open={createOpen} onClose={() => setCreateOpen(false)} onCreated={refetch} />

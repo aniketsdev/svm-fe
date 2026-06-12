@@ -9,9 +9,13 @@ interface Props {
   transfers: TransferRow[];
   loading: boolean;
   onRowClick: (t: TransferRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function StockTransfersTable({ transfers, loading, onRowClick }: Props) {
+export function StockTransfersTable({ transfers, loading, onRowClick, page, pageSize, total, onPaginationChange }: Props) {
   const columns = useMemo<ColumnDef<TransferRow, unknown>[]>(
     () => [
       {
@@ -45,6 +49,7 @@ export function StockTransfersTable({ transfers, loading, onRowClick }: Props) {
       {
         accessorKey: 'requested_at',
         header: 'Requested',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="text-muted-foreground">{formatDate(row.original.requested_at)}</span>
         ),
@@ -52,6 +57,7 @@ export function StockTransfersTable({ transfers, loading, onRowClick }: Props) {
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <DocStatusBadge status={row.original.status} />,
       },
     ],
@@ -65,8 +71,12 @@ export function StockTransfersTable({ transfers, loading, onRowClick }: Props) {
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={12}
-      getRowId={(row) => String(row.id)}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
+      getRowId={(row) => row.uuid}
       onRowClick={onRowClick}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">

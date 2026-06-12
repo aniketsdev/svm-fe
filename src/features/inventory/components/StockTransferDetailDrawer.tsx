@@ -38,9 +38,9 @@ export function StockTransferDetailDrawer({ transfer, onClose, onActed }: Props)
   const { toast } = useToast();
   const [pending, setPending] = useState<{ title: string; message: string; run: () => void } | null>(null);
 
-  const query = useQuery(transferDetailQueryOptions(transfer?.id ?? null));
+  const query = useQuery(transferDetailQueryOptions(transfer?.uuid ?? null));
   const detail = (query.data as { data?: StDetail } | undefined)?.data;
-  const id = transfer?.id;
+  const id = transfer?.uuid;
 
   const done = (msg: string) => (res: unknown) => {
     toast({ severity: 'success', message: successMessage(res, msg) });
@@ -125,7 +125,7 @@ export function StockTransferDetailDrawer({ transfer, onClose, onActed }: Props)
               </thead>
               <tbody>
                 {detail.lines.map((l) => (
-                  <tr key={l.id} className="border-b border-border/60 last:border-0">
+                  <tr key={l.uuid} className="border-b border-border/60 last:border-0">
                     <td className="px-3 py-2">
                       <div className="flex flex-col">
                         <span className="text-foreground">{l.material_name}</span>
@@ -158,7 +158,7 @@ export function StockTransferDetailDrawer({ transfer, onClose, onActed }: Props)
                     setPending({
                       title: 'Cancel transfer',
                       message: `Cancel ${detail.st_no}? This stops the transfer.`,
-                      run: () => cancel.mutate({ stId: id!, data: { confirm: true } }),
+                      run: () => cancel.mutate({ stUuid: id!, data: { confirm: true } }),
                     })
                   }
                 >
@@ -173,7 +173,7 @@ export function StockTransferDetailDrawer({ transfer, onClose, onActed }: Props)
                     setPending({
                       title: 'Approve transfer',
                       message: `Approve ${detail.st_no}?`,
-                      run: () => approve.mutate({ stId: id!, data: { confirm: true } }),
+                      run: () => approve.mutate({ stUuid: id!, data: { confirm: true } }),
                     })
                   }
                 >
@@ -188,7 +188,7 @@ export function StockTransferDetailDrawer({ transfer, onClose, onActed }: Props)
                     setPending({
                       title: 'Dispatch transfer',
                       message: `Dispatch ${detail.st_no} from ${detail.from_store?.store_name ?? 'source'}? Stock leaves the source store.`,
-                      run: () => dispatch.mutate({ stId: id!, data: { confirm: true } }),
+                      run: () => dispatch.mutate({ stUuid: id!, data: { confirm: true } }),
                     })
                   }
                 >
@@ -203,7 +203,7 @@ export function StockTransferDetailDrawer({ transfer, onClose, onActed }: Props)
                     setPending({
                       title: 'Receive transfer',
                       message: `Receive ${detail.st_no} at ${detail.to_store?.store_name ?? 'destination'}? Stock arrives at the destination.`,
-                      run: () => receive.mutate({ stId: id!, data: { confirm: true } }),
+                      run: () => receive.mutate({ stUuid: id!, data: { confirm: true } }),
                     })
                   }
                 >

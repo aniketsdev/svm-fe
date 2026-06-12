@@ -245,7 +245,7 @@ interface Props {
 
 export function BatchDetailDrawer({ batch, onClose }: Props) {
   const [tab, setTab] = useState<Tab>('overview');
-  const batchId = batch?.batch_id ?? null;
+  const batchId = batch?.batch_uuid ?? null;
 
   const detailQuery = useQuery(batchDetailQueryOptions(batchId));
   const detail = (detailQuery.data as { data?: BatchDetail } | undefined)?.data;

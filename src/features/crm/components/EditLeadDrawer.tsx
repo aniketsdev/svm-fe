@@ -3,7 +3,7 @@ import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
 import { useToast } from '../../../common/common-snackbar';
 import { useFormApiErrors } from '../../../hooks/useFormApiErrors';
-import { errorMessage } from '../../../utils/api-messages';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminUpdateLead } from '../../../sdk/crm';
 import type { LeadDetail } from '../../../sdk/schemas';
 import { useEditLeadForm } from '../hooks/useEditLeadForm';
@@ -43,8 +43,8 @@ export function EditLeadDrawer({ lead, onClose, onUpdated }: EditLeadDrawerProps
 
   const updateMutation = useAdminUpdateLead({
     mutation: {
-      onSuccess: () => {
-        toast({ severity: 'success', message: 'Lead updated.' });
+      onSuccess: (response) => {
+        toast({ severity: 'success', message: successMessage(response, 'Lead updated.') });
         onUpdated();
         onClose();
       },
@@ -66,11 +66,14 @@ export function EditLeadDrawer({ lead, onClose, onUpdated }: EditLeadDrawerProps
       title="Edit lead"
       open={lead !== null}
       onClose={onClose}
-      drawerWidth="40rem"
+      drawerWidth="44rem"
+      drawerPadding="0px"
     >
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col gap-4">
-        <LeadFormFields control={control} />
-        <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex justify-end gap-3 border-t border-border bg-background px-6 pt-4">
+      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex min-h-full flex-col">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-4">
+          <LeadFormFields control={control} />
+        </div>
+        <div className="shrink-0 flex justify-end gap-3 border-t border-border bg-background px-6 py-4">
           <CustomButton type="button" variant="outline" onClick={onClose} size="md">
             Cancel
           </CustomButton>

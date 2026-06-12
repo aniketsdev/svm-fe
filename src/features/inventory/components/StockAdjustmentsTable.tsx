@@ -16,9 +16,13 @@ interface Props {
   adjustments: AdjustmentRow[];
   loading: boolean;
   onRowClick: (a: AdjustmentRow) => void;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
 }
 
-export function StockAdjustmentsTable({ adjustments, loading, onRowClick }: Props) {
+export function StockAdjustmentsTable({ adjustments, loading, onRowClick, page, pageSize, total, onPaginationChange }: Props) {
   const columns = useMemo<ColumnDef<AdjustmentRow, unknown>[]>(
     () => [
       {
@@ -46,6 +50,7 @@ export function StockAdjustmentsTable({ adjustments, loading, onRowClick }: Prop
       {
         accessorKey: 'delta_quantity',
         header: 'Δ Qty',
+        meta: { align: 'center' },
         cell: ({ row }) => {
           const d = row.original.delta_quantity;
           const negative = d.trim().startsWith('-');
@@ -59,6 +64,7 @@ export function StockAdjustmentsTable({ adjustments, loading, onRowClick }: Prop
       {
         accessorKey: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <DocStatusBadge status={row.original.status} />,
       },
     ],
@@ -72,8 +78,12 @@ export function StockAdjustmentsTable({ adjustments, loading, onRowClick }: Prop
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={12}
-      getRowId={(row) => String(row.id)}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
+      getRowId={(row) => row.uuid}
       onRowClick={onRowClick}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">

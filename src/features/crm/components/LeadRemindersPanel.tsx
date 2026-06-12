@@ -4,7 +4,7 @@ import { CustomButton } from '../../../common/custom-buttons';
 import { CommonTable, type ColumnDef } from '../../../common/common-table';
 import { ActionMenu, type ActionMenuItem } from '../../../common/action-menu';
 import { useToast } from '../../../common/common-snackbar';
-import { errorMessage } from '../../../utils/api-messages';
+import { errorMessage, successMessage } from '../../../utils/api-messages';
 import { useAdminCompleteReminder, useAdminCancelReminder } from '../../../sdk/crm';
 import { LEAD_ACTIVITY_PAGE_SIZE, personLabel, type ReminderOut } from '../api/crm';
 import { ReminderDrawer } from './ReminderDrawer';
@@ -55,8 +55,8 @@ export function LeadRemindersPanel({
   };
 
   const onFail = (e: unknown) => toast({ severity: 'error', message: errorMessage(e) });
-  const completeMutation = useAdminCompleteReminder({ mutation: { onSuccess: () => { toast({ severity: 'success', message: 'Marked done.' }); onChanged(); }, onError: onFail } });
-  const cancelMutation = useAdminCancelReminder({ mutation: { onSuccess: () => { toast({ severity: 'success', message: 'Reminder cancelled.' }); onChanged(); }, onError: onFail } });
+  const completeMutation = useAdminCompleteReminder({ mutation: { onSuccess: (res) => { toast({ severity: 'success', message: successMessage(res, 'Marked done.') }); onChanged(); }, onError: onFail } });
+  const cancelMutation = useAdminCancelReminder({ mutation: { onSuccess: (res) => { toast({ severity: 'success', message: successMessage(res, 'Reminder cancelled.') }); onChanged(); }, onError: onFail } });
 
   const columns: ColumnDef<ReminderOut, unknown>[] = [
     {
@@ -82,6 +82,7 @@ export function LeadRemindersPanel({
     {
       id: 'status',
       header: 'Status',
+      meta: { align: 'center' },
       cell: ({ row }) => (
         <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_TONE[row.original.status] ?? 'bg-muted text-muted-foreground'}`}>
           {row.original.status}

@@ -12,7 +12,7 @@ export function ExpiringWatchlist({ batches }: { batches: StockListItem[] }) {
         const d = b.days_remaining ?? 0;
         const tone = d <= 7 ? 'text-destructive' : d <= 30 ? 'text-warning-60' : 'text-muted-foreground';
         return (
-          <li key={b.batch_id} className="flex items-center justify-between gap-3 py-2">
+          <li key={b.batch_uuid} className="flex items-center justify-between gap-3 py-2">
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-foreground">{b.material_name}</p>
               <p className="text-xs text-muted-foreground">

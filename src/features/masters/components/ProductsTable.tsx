@@ -57,6 +57,7 @@ export function ProductsTable({
         accessorKey: 'mrp',
         header: 'MRP',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-foreground">
             {formatCurrency(row.original.mrp)}
@@ -67,6 +68,7 @@ export function ProductsTable({
         accessorKey: 'gst_rate',
         header: 'GST',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="tabular-nums text-muted-foreground">
             {row.original.gst_rate != null ? `${row.original.gst_rate}%` : '—'}
@@ -77,6 +79,7 @@ export function ProductsTable({
         accessorKey: 'pack_size',
         header: 'Pack',
         enableSorting: false,
+        meta: { align: 'center' },
         cell: ({ row }) => <span className="text-foreground">{row.original.pack_size ?? '—'}</span>,
       },
       {
@@ -103,6 +106,7 @@ export function ProductsTable({
       {
         accessorKey: 'is_active',
         header: 'Active',
+        meta: { align: 'center' },
         cell: ({ row }) => <ActivePill active={row.original.is_active} />,
       },
       {

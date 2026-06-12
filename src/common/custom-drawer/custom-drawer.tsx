@@ -35,7 +35,6 @@ const CustomDrawer = ({
   drawerWidth,
   drawermargin,
   drawerPadding,
-  headerPadding,
   onClose,
   headerStyle,
   titleStyle,

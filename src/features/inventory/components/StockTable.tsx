@@ -25,7 +25,16 @@ function StatusPill({ status }: { status: StockStatus }) {
   );
 }
 
-export function StockTable({ stock, loading }: { stock: StockRow[]; loading: boolean }) {
+interface StockTableProps {
+  stock: StockRow[];
+  loading: boolean;
+  page: number;
+  pageSize: number;
+  total: number;
+  onPaginationChange: (state: { pageIndex: number; pageSize: number }) => void;
+}
+
+export function StockTable({ stock, loading, page, pageSize, total, onPaginationChange }: StockTableProps) {
   const columns = useMemo<ColumnDef<StockRow, unknown>[]>(
     () => [
       {
@@ -46,6 +55,7 @@ export function StockTable({ stock, loading }: { stock: StockRow[]; loading: boo
       {
         accessorKey: 'item_type',
         header: 'Type',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
             {inventoryTypeLabel(row.original.item_type)}
@@ -55,6 +65,7 @@ export function StockTable({ stock, loading }: { stock: StockRow[]; loading: boo
       {
         accessorKey: 'quantity',
         header: 'On hand',
+        meta: { align: 'center' },
         cell: ({ row }) => {
           const q = row.original.quantity;
           const status = stockStatus(q);
@@ -73,6 +84,7 @@ export function StockTable({ stock, loading }: { stock: StockRow[]; loading: boo
       {
         id: 'status',
         header: 'Status',
+        meta: { align: 'center' },
         cell: ({ row }) => <StatusPill status={stockStatus(row.original.quantity)} />,
       },
     ],
@@ -86,8 +98,12 @@ export function StockTable({ stock, loading }: { stock: StockRow[]; loading: boo
       loading={loading}
       enableSorting
       enablePagination
-      pageSize={12}
-      getRowId={(row) => `${row.store_id}-${row.item_type}-${row.item_id}`}
+      manualPagination
+      pageIndex={page}
+      pageSize={pageSize}
+      rowCount={total}
+      onPaginationChange={onPaginationChange}
+      getRowId={(row) => `${row.store_uuid}-${row.item_type}-${row.item_id}`}
       emptyState={
         <div className="py-12 text-center text-sm text-muted-foreground">
           No stock yet. Record a movement to get started.

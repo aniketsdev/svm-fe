@@ -43,10 +43,12 @@ export function LeadFormFields({ control }: LeadFormFieldsProps) {
         <RHFInput<LeadFormValues> name="city" control={control} label="City" placeholder="Enter city" />
         <RHFInput<LeadFormValues> name="state" control={control} label="State" placeholder="Enter state" />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="w-1/2">
         <RHFInput<LeadFormValues> name="zip_code" control={control} label="Zip code" placeholder="Enter zip code" />
       </div>
-      <RHFCheckbox<LeadFormValues> name="messaging_opt_in" control={control} label="Client opted in to WhatsApp/SMS follow-ups" />
+      <div className="rounded-lg border border-border bg-secondary/30 px-4 py-3">
+        <RHFCheckbox<LeadFormValues> name="messaging_opt_in" control={control} label="Client opted in to WhatsApp/SMS follow-ups" />
+      </div>
     </div>
   );
 }

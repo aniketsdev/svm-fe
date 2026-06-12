@@ -88,6 +88,7 @@ export function DoctorsTable({
       {
         accessorKey: 'is_active',
         header: 'Active',
+        meta: { align: 'center' },
         cell: ({ row }) => <ActivePill active={row.original.is_active} />,
       },
       {

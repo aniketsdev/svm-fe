@@ -9,6 +9,7 @@ import { CreateStockTransferDrawer } from '../components/CreateStockTransferDraw
 import { StockTransferDetailDrawer } from '../components/StockTransferDetailDrawer';
 import type { AdminListStockTransfersParams, TransferRow } from '../api/stock-transfers';
 
+const PAGE_SIZE = 25;
 const ALL = 'all';
 const STATUS_ITEMS = [
   { value: ALL, label: 'All statuses' },
@@ -24,17 +25,21 @@ export function TransfersTab() {
   const [selected, setSelected] = useState<TransferRow | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState(ALL);
+  const [page, setPage] = useState(0);
 
   const params = useMemo<AdminListStockTransfersParams>(
     () => ({
       search: search || undefined,
       status: status === ALL ? undefined : status,
-      limit: 100,
-      offset: 0,
+      limit: PAGE_SIZE,
+      offset: page * PAGE_SIZE,
     }),
-    [search, status],
+    [search, status, page],
   );
   const { transfers, total, isLoading, refetch } = useStockTransfers(params);
+
+  const handleSearch = (val: string) => { setSearch(val); setPage(0); };
+  const handleStatus = (val: string) => { setStatus(val); setPage(0); };
 
   return (
     <div className="flex flex-col">
@@ -49,12 +54,12 @@ export function TransfersTab() {
               placeholder="Status"
               value={status}
               items={STATUS_ITEMS}
-              onChange={(e) => setStatus(e.target.value)}
+              onChange={(e) => handleStatus(e.target.value)}
             />
           </div>
           <CustomSearch
             textData={{ placeholder: 'Search transfer no. or store', btnTitle: 'Search' }}
-            onSearch={setSearch}
+            onSearch={handleSearch}
             hasStartSearchIcon
             width="20rem"
           />
@@ -65,7 +70,15 @@ export function TransfersTab() {
       </div>
 
       <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <StockTransfersTable transfers={transfers} loading={isLoading} onRowClick={setSelected} />
+        <StockTransfersTable
+          transfers={transfers}
+          loading={isLoading}
+          onRowClick={setSelected}
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          onPaginationChange={({ pageIndex }) => setPage(pageIndex)}
+        />
       </div>
 
       <CreateStockTransferDrawer open={createOpen} onClose={() => setCreateOpen(false)} onCreated={refetch} />

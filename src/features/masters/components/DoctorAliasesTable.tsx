@@ -77,6 +77,7 @@ export function DoctorAliasesTable({
       {
         accessorKey: 'created_at',
         header: 'Created',
+        meta: { align: 'center' },
         cell: ({ row }) => (
           <span className="text-muted-foreground">{formatDate(row.original.created_at)}</span>
         ),
