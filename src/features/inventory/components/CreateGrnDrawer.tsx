@@ -1,4 +1,5 @@
 import { useFieldArray } from 'react-hook-form';
+import dayjs from 'dayjs';
 import { Plus, Trash2 } from 'lucide-react';
 import { CustomDrawer } from '../../../common/custom-drawer';
 import { CustomButton } from '../../../common/custom-buttons';
@@ -58,8 +59,8 @@ export function CreateGrnDrawer({ open, onClose, onCreated }: Props) {
         supplier_code: d.supplier_code,
         store_code: d.store_code,
         vendor_invoice_no: d.vendor_invoice_no || null,
-        vendor_invoice_date: d.vendor_invoice_date || null,
-        received_date: d.received_date || null,
+        vendor_invoice_date: d.vendor_invoice_date ? dayjs(d.vendor_invoice_date).format('YYYY-MM-DD') : null,
+        received_date: d.received_date ? dayjs(d.received_date).format('YYYY-MM-DD') : null,
         notes: d.notes || null,
         lines: d.lines.map((l) => ({
           material_code: l.material_code,
@@ -67,7 +68,7 @@ export function CreateGrnDrawer({ open, onClose, onCreated }: Props) {
           vendor_batch: l.vendor_batch || null,
           quantity: l.quantity,
           rate: l.rate,
-          expiry_date: l.expiry_date || null,
+          expiry_date: l.expiry_date ? dayjs(l.expiry_date).format('YYYY-MM-DD') : null,
         })),
       },
     });

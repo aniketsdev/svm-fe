@@ -99,6 +99,7 @@ import type {
   ReturnRequest,
   RmCategoryListItem,
   RmCategoryListResponse,
+  SetStatusRequest,
   StCreate,
   StDetail,
   StList,
@@ -113,6 +114,15 @@ import type {
   StoreUpdate,
   TimelineList,
   TraceabilityOut,
+  UpdateBomRequest,
+  UpdateCourierPartnerRequest,
+  UpdateDoctorAliasRequest,
+  UpdateDoctorPricingRequest,
+  UpdateDoctorRequest,
+  UpdateProductRequest,
+  UpdateRawMaterialRequest,
+  UpdateRmCategoryRequest,
+  UpdateVendorRequest,
   VendorListItem,
   VendorListResponse
 } from './schemas';
@@ -5421,6 +5431,184 @@ export const useAdminCreateVendor = <TError = ErrorType<HTTPValidationError>,
       > => {
       return useMutation(getAdminCreateVendorMutationOptions(options), queryClient);
     }
+    export type adminUpdateVendorResponse200 = {
+  data: VendorListItem
+  status: 200
+}
+
+export type adminUpdateVendorResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateVendorResponseSuccess = (adminUpdateVendorResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateVendorResponseError = (adminUpdateVendorResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateVendorResponse = (adminUpdateVendorResponseSuccess | adminUpdateVendorResponseError)
+
+export const getAdminUpdateVendorUrl = (vendorId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/vendors/${vendorId}`
+}
+
+/**
+ * @summary Update Vendor
+ */
+export const adminUpdateVendor = async (vendorId: number,
+    updateVendorRequest: UpdateVendorRequest, options?: RequestInit): Promise<adminUpdateVendorResponse> => {
+
+  return mutator<adminUpdateVendorResponse>(getAdminUpdateVendorUrl(vendorId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateVendorRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateVendorMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateVendor>>, TError,{vendorId: number;data: BodyType<UpdateVendorRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateVendor>>, TError,{vendorId: number;data: BodyType<UpdateVendorRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateVendor'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateVendor>>, {vendorId: number;data: BodyType<UpdateVendorRequest>}> = (props) => {
+          const {vendorId,data} = props ?? {};
+
+          return  adminUpdateVendor(vendorId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateVendorMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateVendor>>>
+    export type AdminUpdateVendorMutationBody = BodyType<UpdateVendorRequest>
+    export type AdminUpdateVendorMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Vendor
+ */
+export const useAdminUpdateVendor = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateVendor>>, TError,{vendorId: number;data: BodyType<UpdateVendorRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateVendor>>,
+        TError,
+        {vendorId: number;data: BodyType<UpdateVendorRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateVendorMutationOptions(options), queryClient);
+    }
+    export type adminSetVendorStatusResponse200 = {
+  data: VendorListItem
+  status: 200
+}
+
+export type adminSetVendorStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetVendorStatusResponseSuccess = (adminSetVendorStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetVendorStatusResponseError = (adminSetVendorStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetVendorStatusResponse = (adminSetVendorStatusResponseSuccess | adminSetVendorStatusResponseError)
+
+export const getAdminSetVendorStatusUrl = (vendorId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/vendors/${vendorId}/status`
+}
+
+/**
+ * @summary Set Vendor Status
+ */
+export const adminSetVendorStatus = async (vendorId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetVendorStatusResponse> => {
+
+  return mutator<adminSetVendorStatusResponse>(getAdminSetVendorStatusUrl(vendorId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetVendorStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetVendorStatus>>, TError,{vendorId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetVendorStatus>>, TError,{vendorId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetVendorStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetVendorStatus>>, {vendorId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {vendorId,data} = props ?? {};
+
+          return  adminSetVendorStatus(vendorId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetVendorStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetVendorStatus>>>
+    export type AdminSetVendorStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetVendorStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Vendor Status
+ */
+export const useAdminSetVendorStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetVendorStatus>>, TError,{vendorId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetVendorStatus>>,
+        TError,
+        {vendorId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetVendorStatusMutationOptions(options), queryClient);
+    }
     export type adminListDoctorsResponse200 = {
   data: DoctorListResponse
   status: 200
@@ -5634,6 +5822,184 @@ export const useAdminCreateDoctor = <TError = ErrorType<HTTPValidationError>,
         TContext
       > => {
       return useMutation(getAdminCreateDoctorMutationOptions(options), queryClient);
+    }
+    export type adminUpdateDoctorResponse200 = {
+  data: DoctorListItem
+  status: 200
+}
+
+export type adminUpdateDoctorResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateDoctorResponseSuccess = (adminUpdateDoctorResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateDoctorResponseError = (adminUpdateDoctorResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateDoctorResponse = (adminUpdateDoctorResponseSuccess | adminUpdateDoctorResponseError)
+
+export const getAdminUpdateDoctorUrl = (doctorId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctors/${doctorId}`
+}
+
+/**
+ * @summary Update Doctor
+ */
+export const adminUpdateDoctor = async (doctorId: number,
+    updateDoctorRequest: UpdateDoctorRequest, options?: RequestInit): Promise<adminUpdateDoctorResponse> => {
+
+  return mutator<adminUpdateDoctorResponse>(getAdminUpdateDoctorUrl(doctorId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateDoctorRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateDoctorMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctor>>, TError,{doctorId: number;data: BodyType<UpdateDoctorRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctor>>, TError,{doctorId: number;data: BodyType<UpdateDoctorRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateDoctor'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateDoctor>>, {doctorId: number;data: BodyType<UpdateDoctorRequest>}> = (props) => {
+          const {doctorId,data} = props ?? {};
+
+          return  adminUpdateDoctor(doctorId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateDoctorMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateDoctor>>>
+    export type AdminUpdateDoctorMutationBody = BodyType<UpdateDoctorRequest>
+    export type AdminUpdateDoctorMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Doctor
+ */
+export const useAdminUpdateDoctor = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctor>>, TError,{doctorId: number;data: BodyType<UpdateDoctorRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateDoctor>>,
+        TError,
+        {doctorId: number;data: BodyType<UpdateDoctorRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateDoctorMutationOptions(options), queryClient);
+    }
+    export type adminSetDoctorStatusResponse200 = {
+  data: DoctorListItem
+  status: 200
+}
+
+export type adminSetDoctorStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetDoctorStatusResponseSuccess = (adminSetDoctorStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetDoctorStatusResponseError = (adminSetDoctorStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetDoctorStatusResponse = (adminSetDoctorStatusResponseSuccess | adminSetDoctorStatusResponseError)
+
+export const getAdminSetDoctorStatusUrl = (doctorId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctors/${doctorId}/status`
+}
+
+/**
+ * @summary Set Doctor Status
+ */
+export const adminSetDoctorStatus = async (doctorId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetDoctorStatusResponse> => {
+
+  return mutator<adminSetDoctorStatusResponse>(getAdminSetDoctorStatusUrl(doctorId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetDoctorStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorStatus>>, TError,{doctorId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorStatus>>, TError,{doctorId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetDoctorStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetDoctorStatus>>, {doctorId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {doctorId,data} = props ?? {};
+
+          return  adminSetDoctorStatus(doctorId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetDoctorStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetDoctorStatus>>>
+    export type AdminSetDoctorStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetDoctorStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Doctor Status
+ */
+export const useAdminSetDoctorStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorStatus>>, TError,{doctorId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetDoctorStatus>>,
+        TError,
+        {doctorId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetDoctorStatusMutationOptions(options), queryClient);
     }
     export type adminListDoctorAliasesResponse200 = {
   data: DoctorAliasListResponse
@@ -5849,6 +6215,184 @@ export const useAdminCreateDoctorAlias = <TError = ErrorType<HTTPValidationError
       > => {
       return useMutation(getAdminCreateDoctorAliasMutationOptions(options), queryClient);
     }
+    export type adminUpdateDoctorAliasResponse200 = {
+  data: DoctorAliasListItem
+  status: 200
+}
+
+export type adminUpdateDoctorAliasResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateDoctorAliasResponseSuccess = (adminUpdateDoctorAliasResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateDoctorAliasResponseError = (adminUpdateDoctorAliasResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateDoctorAliasResponse = (adminUpdateDoctorAliasResponseSuccess | adminUpdateDoctorAliasResponseError)
+
+export const getAdminUpdateDoctorAliasUrl = (aliasId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctor-aliases/${aliasId}`
+}
+
+/**
+ * @summary Update Doctor Alias
+ */
+export const adminUpdateDoctorAlias = async (aliasId: number,
+    updateDoctorAliasRequest: UpdateDoctorAliasRequest, options?: RequestInit): Promise<adminUpdateDoctorAliasResponse> => {
+
+  return mutator<adminUpdateDoctorAliasResponse>(getAdminUpdateDoctorAliasUrl(aliasId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateDoctorAliasRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateDoctorAliasMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorAlias>>, TError,{aliasId: number;data: BodyType<UpdateDoctorAliasRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorAlias>>, TError,{aliasId: number;data: BodyType<UpdateDoctorAliasRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateDoctorAlias'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateDoctorAlias>>, {aliasId: number;data: BodyType<UpdateDoctorAliasRequest>}> = (props) => {
+          const {aliasId,data} = props ?? {};
+
+          return  adminUpdateDoctorAlias(aliasId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateDoctorAliasMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateDoctorAlias>>>
+    export type AdminUpdateDoctorAliasMutationBody = BodyType<UpdateDoctorAliasRequest>
+    export type AdminUpdateDoctorAliasMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Doctor Alias
+ */
+export const useAdminUpdateDoctorAlias = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorAlias>>, TError,{aliasId: number;data: BodyType<UpdateDoctorAliasRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateDoctorAlias>>,
+        TError,
+        {aliasId: number;data: BodyType<UpdateDoctorAliasRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateDoctorAliasMutationOptions(options), queryClient);
+    }
+    export type adminSetDoctorAliasStatusResponse200 = {
+  data: DoctorAliasListItem
+  status: 200
+}
+
+export type adminSetDoctorAliasStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetDoctorAliasStatusResponseSuccess = (adminSetDoctorAliasStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetDoctorAliasStatusResponseError = (adminSetDoctorAliasStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetDoctorAliasStatusResponse = (adminSetDoctorAliasStatusResponseSuccess | adminSetDoctorAliasStatusResponseError)
+
+export const getAdminSetDoctorAliasStatusUrl = (aliasId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctor-aliases/${aliasId}/status`
+}
+
+/**
+ * @summary Set Doctor Alias Status
+ */
+export const adminSetDoctorAliasStatus = async (aliasId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetDoctorAliasStatusResponse> => {
+
+  return mutator<adminSetDoctorAliasStatusResponse>(getAdminSetDoctorAliasStatusUrl(aliasId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetDoctorAliasStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>, TError,{aliasId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>, TError,{aliasId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetDoctorAliasStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>, {aliasId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {aliasId,data} = props ?? {};
+
+          return  adminSetDoctorAliasStatus(aliasId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetDoctorAliasStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>>
+    export type AdminSetDoctorAliasStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetDoctorAliasStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Doctor Alias Status
+ */
+export const useAdminSetDoctorAliasStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>, TError,{aliasId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetDoctorAliasStatus>>,
+        TError,
+        {aliasId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetDoctorAliasStatusMutationOptions(options), queryClient);
+    }
     export type adminListDoctorPricingResponse200 = {
   data: DoctorPricingListResponse
   status: 200
@@ -6062,6 +6606,184 @@ export const useAdminCreateDoctorPricing = <TError = ErrorType<HTTPValidationErr
         TContext
       > => {
       return useMutation(getAdminCreateDoctorPricingMutationOptions(options), queryClient);
+    }
+    export type adminUpdateDoctorPricingResponse200 = {
+  data: DoctorPricingListItem
+  status: 200
+}
+
+export type adminUpdateDoctorPricingResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateDoctorPricingResponseSuccess = (adminUpdateDoctorPricingResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateDoctorPricingResponseError = (adminUpdateDoctorPricingResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateDoctorPricingResponse = (adminUpdateDoctorPricingResponseSuccess | adminUpdateDoctorPricingResponseError)
+
+export const getAdminUpdateDoctorPricingUrl = (pricingId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctor-pricing/${pricingId}`
+}
+
+/**
+ * @summary Update Doctor Pricing
+ */
+export const adminUpdateDoctorPricing = async (pricingId: number,
+    updateDoctorPricingRequest: UpdateDoctorPricingRequest, options?: RequestInit): Promise<adminUpdateDoctorPricingResponse> => {
+
+  return mutator<adminUpdateDoctorPricingResponse>(getAdminUpdateDoctorPricingUrl(pricingId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateDoctorPricingRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateDoctorPricingMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorPricing>>, TError,{pricingId: number;data: BodyType<UpdateDoctorPricingRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorPricing>>, TError,{pricingId: number;data: BodyType<UpdateDoctorPricingRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateDoctorPricing'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateDoctorPricing>>, {pricingId: number;data: BodyType<UpdateDoctorPricingRequest>}> = (props) => {
+          const {pricingId,data} = props ?? {};
+
+          return  adminUpdateDoctorPricing(pricingId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateDoctorPricingMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateDoctorPricing>>>
+    export type AdminUpdateDoctorPricingMutationBody = BodyType<UpdateDoctorPricingRequest>
+    export type AdminUpdateDoctorPricingMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Doctor Pricing
+ */
+export const useAdminUpdateDoctorPricing = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateDoctorPricing>>, TError,{pricingId: number;data: BodyType<UpdateDoctorPricingRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateDoctorPricing>>,
+        TError,
+        {pricingId: number;data: BodyType<UpdateDoctorPricingRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateDoctorPricingMutationOptions(options), queryClient);
+    }
+    export type adminSetDoctorPricingStatusResponse200 = {
+  data: DoctorPricingListItem
+  status: 200
+}
+
+export type adminSetDoctorPricingStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetDoctorPricingStatusResponseSuccess = (adminSetDoctorPricingStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetDoctorPricingStatusResponseError = (adminSetDoctorPricingStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetDoctorPricingStatusResponse = (adminSetDoctorPricingStatusResponseSuccess | adminSetDoctorPricingStatusResponseError)
+
+export const getAdminSetDoctorPricingStatusUrl = (pricingId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/doctor-pricing/${pricingId}/status`
+}
+
+/**
+ * @summary Set Doctor Pricing Status
+ */
+export const adminSetDoctorPricingStatus = async (pricingId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetDoctorPricingStatusResponse> => {
+
+  return mutator<adminSetDoctorPricingStatusResponse>(getAdminSetDoctorPricingStatusUrl(pricingId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetDoctorPricingStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>, TError,{pricingId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>, TError,{pricingId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetDoctorPricingStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>, {pricingId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {pricingId,data} = props ?? {};
+
+          return  adminSetDoctorPricingStatus(pricingId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetDoctorPricingStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>>
+    export type AdminSetDoctorPricingStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetDoctorPricingStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Doctor Pricing Status
+ */
+export const useAdminSetDoctorPricingStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>, TError,{pricingId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetDoctorPricingStatus>>,
+        TError,
+        {pricingId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetDoctorPricingStatusMutationOptions(options), queryClient);
     }
     export type adminListProductsResponse200 = {
   data: ProductListResponse
@@ -6277,6 +6999,184 @@ export const useAdminCreateProduct = <TError = ErrorType<HTTPValidationError>,
       > => {
       return useMutation(getAdminCreateProductMutationOptions(options), queryClient);
     }
+    export type adminUpdateProductResponse200 = {
+  data: ProductListItem
+  status: 200
+}
+
+export type adminUpdateProductResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateProductResponseSuccess = (adminUpdateProductResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateProductResponseError = (adminUpdateProductResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateProductResponse = (adminUpdateProductResponseSuccess | adminUpdateProductResponseError)
+
+export const getAdminUpdateProductUrl = (productId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/products/${productId}`
+}
+
+/**
+ * @summary Update Product
+ */
+export const adminUpdateProduct = async (productId: number,
+    updateProductRequest: UpdateProductRequest, options?: RequestInit): Promise<adminUpdateProductResponse> => {
+
+  return mutator<adminUpdateProductResponse>(getAdminUpdateProductUrl(productId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateProductRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateProductMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProduct>>, TError,{productId: number;data: BodyType<UpdateProductRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProduct>>, TError,{productId: number;data: BodyType<UpdateProductRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateProduct'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateProduct>>, {productId: number;data: BodyType<UpdateProductRequest>}> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  adminUpdateProduct(productId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateProductMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateProduct>>>
+    export type AdminUpdateProductMutationBody = BodyType<UpdateProductRequest>
+    export type AdminUpdateProductMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Product
+ */
+export const useAdminUpdateProduct = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateProduct>>, TError,{productId: number;data: BodyType<UpdateProductRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateProduct>>,
+        TError,
+        {productId: number;data: BodyType<UpdateProductRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateProductMutationOptions(options), queryClient);
+    }
+    export type adminSetProductStatusResponse200 = {
+  data: ProductListItem
+  status: 200
+}
+
+export type adminSetProductStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetProductStatusResponseSuccess = (adminSetProductStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetProductStatusResponseError = (adminSetProductStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetProductStatusResponse = (adminSetProductStatusResponseSuccess | adminSetProductStatusResponseError)
+
+export const getAdminSetProductStatusUrl = (productId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/products/${productId}/status`
+}
+
+/**
+ * @summary Set Product Status
+ */
+export const adminSetProductStatus = async (productId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetProductStatusResponse> => {
+
+  return mutator<adminSetProductStatusResponse>(getAdminSetProductStatusUrl(productId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetProductStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetProductStatus>>, TError,{productId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetProductStatus>>, TError,{productId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetProductStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetProductStatus>>, {productId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {productId,data} = props ?? {};
+
+          return  adminSetProductStatus(productId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetProductStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetProductStatus>>>
+    export type AdminSetProductStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetProductStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Product Status
+ */
+export const useAdminSetProductStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetProductStatus>>, TError,{productId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetProductStatus>>,
+        TError,
+        {productId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetProductStatusMutationOptions(options), queryClient);
+    }
     export type adminListRawMaterialsResponse200 = {
   data: RawMaterialListResponse
   status: 200
@@ -6490,6 +7390,184 @@ export const useAdminCreateRawMaterial = <TError = ErrorType<HTTPValidationError
         TContext
       > => {
       return useMutation(getAdminCreateRawMaterialMutationOptions(options), queryClient);
+    }
+    export type adminUpdateRawMaterialResponse200 = {
+  data: RawMaterialListItem
+  status: 200
+}
+
+export type adminUpdateRawMaterialResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateRawMaterialResponseSuccess = (adminUpdateRawMaterialResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateRawMaterialResponseError = (adminUpdateRawMaterialResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateRawMaterialResponse = (adminUpdateRawMaterialResponseSuccess | adminUpdateRawMaterialResponseError)
+
+export const getAdminUpdateRawMaterialUrl = (materialId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/raw-materials/${materialId}`
+}
+
+/**
+ * @summary Update Raw Material
+ */
+export const adminUpdateRawMaterial = async (materialId: number,
+    updateRawMaterialRequest: UpdateRawMaterialRequest, options?: RequestInit): Promise<adminUpdateRawMaterialResponse> => {
+
+  return mutator<adminUpdateRawMaterialResponse>(getAdminUpdateRawMaterialUrl(materialId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateRawMaterialRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateRawMaterialMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRawMaterial>>, TError,{materialId: number;data: BodyType<UpdateRawMaterialRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRawMaterial>>, TError,{materialId: number;data: BodyType<UpdateRawMaterialRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateRawMaterial'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateRawMaterial>>, {materialId: number;data: BodyType<UpdateRawMaterialRequest>}> = (props) => {
+          const {materialId,data} = props ?? {};
+
+          return  adminUpdateRawMaterial(materialId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateRawMaterialMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateRawMaterial>>>
+    export type AdminUpdateRawMaterialMutationBody = BodyType<UpdateRawMaterialRequest>
+    export type AdminUpdateRawMaterialMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Raw Material
+ */
+export const useAdminUpdateRawMaterial = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRawMaterial>>, TError,{materialId: number;data: BodyType<UpdateRawMaterialRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateRawMaterial>>,
+        TError,
+        {materialId: number;data: BodyType<UpdateRawMaterialRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateRawMaterialMutationOptions(options), queryClient);
+    }
+    export type adminSetRawMaterialStatusResponse200 = {
+  data: RawMaterialListItem
+  status: 200
+}
+
+export type adminSetRawMaterialStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetRawMaterialStatusResponseSuccess = (adminSetRawMaterialStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetRawMaterialStatusResponseError = (adminSetRawMaterialStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetRawMaterialStatusResponse = (adminSetRawMaterialStatusResponseSuccess | adminSetRawMaterialStatusResponseError)
+
+export const getAdminSetRawMaterialStatusUrl = (materialId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/raw-materials/${materialId}/status`
+}
+
+/**
+ * @summary Set Raw Material Status
+ */
+export const adminSetRawMaterialStatus = async (materialId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetRawMaterialStatusResponse> => {
+
+  return mutator<adminSetRawMaterialStatusResponse>(getAdminSetRawMaterialStatusUrl(materialId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetRawMaterialStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRawMaterialStatus>>, TError,{materialId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetRawMaterialStatus>>, TError,{materialId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetRawMaterialStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetRawMaterialStatus>>, {materialId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {materialId,data} = props ?? {};
+
+          return  adminSetRawMaterialStatus(materialId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetRawMaterialStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetRawMaterialStatus>>>
+    export type AdminSetRawMaterialStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetRawMaterialStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Raw Material Status
+ */
+export const useAdminSetRawMaterialStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRawMaterialStatus>>, TError,{materialId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetRawMaterialStatus>>,
+        TError,
+        {materialId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetRawMaterialStatusMutationOptions(options), queryClient);
     }
     export type adminListRmCategoriesResponse200 = {
   data: RmCategoryListResponse
@@ -6705,6 +7783,184 @@ export const useAdminCreateRmCategory = <TError = ErrorType<HTTPValidationError>
       > => {
       return useMutation(getAdminCreateRmCategoryMutationOptions(options), queryClient);
     }
+    export type adminUpdateRmCategoryResponse200 = {
+  data: RmCategoryListItem
+  status: 200
+}
+
+export type adminUpdateRmCategoryResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateRmCategoryResponseSuccess = (adminUpdateRmCategoryResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateRmCategoryResponseError = (adminUpdateRmCategoryResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateRmCategoryResponse = (adminUpdateRmCategoryResponseSuccess | adminUpdateRmCategoryResponseError)
+
+export const getAdminUpdateRmCategoryUrl = (categoryId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/rm-categories/${categoryId}`
+}
+
+/**
+ * @summary Update Rm Category
+ */
+export const adminUpdateRmCategory = async (categoryId: number,
+    updateRmCategoryRequest: UpdateRmCategoryRequest, options?: RequestInit): Promise<adminUpdateRmCategoryResponse> => {
+
+  return mutator<adminUpdateRmCategoryResponse>(getAdminUpdateRmCategoryUrl(categoryId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateRmCategoryRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateRmCategoryMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRmCategory>>, TError,{categoryId: number;data: BodyType<UpdateRmCategoryRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRmCategory>>, TError,{categoryId: number;data: BodyType<UpdateRmCategoryRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateRmCategory'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateRmCategory>>, {categoryId: number;data: BodyType<UpdateRmCategoryRequest>}> = (props) => {
+          const {categoryId,data} = props ?? {};
+
+          return  adminUpdateRmCategory(categoryId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateRmCategoryMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateRmCategory>>>
+    export type AdminUpdateRmCategoryMutationBody = BodyType<UpdateRmCategoryRequest>
+    export type AdminUpdateRmCategoryMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Rm Category
+ */
+export const useAdminUpdateRmCategory = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateRmCategory>>, TError,{categoryId: number;data: BodyType<UpdateRmCategoryRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateRmCategory>>,
+        TError,
+        {categoryId: number;data: BodyType<UpdateRmCategoryRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateRmCategoryMutationOptions(options), queryClient);
+    }
+    export type adminSetRmCategoryStatusResponse200 = {
+  data: RmCategoryListItem
+  status: 200
+}
+
+export type adminSetRmCategoryStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetRmCategoryStatusResponseSuccess = (adminSetRmCategoryStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetRmCategoryStatusResponseError = (adminSetRmCategoryStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetRmCategoryStatusResponse = (adminSetRmCategoryStatusResponseSuccess | adminSetRmCategoryStatusResponseError)
+
+export const getAdminSetRmCategoryStatusUrl = (categoryId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/rm-categories/${categoryId}/status`
+}
+
+/**
+ * @summary Set Rm Category Status
+ */
+export const adminSetRmCategoryStatus = async (categoryId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetRmCategoryStatusResponse> => {
+
+  return mutator<adminSetRmCategoryStatusResponse>(getAdminSetRmCategoryStatusUrl(categoryId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetRmCategoryStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRmCategoryStatus>>, TError,{categoryId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetRmCategoryStatus>>, TError,{categoryId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetRmCategoryStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetRmCategoryStatus>>, {categoryId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {categoryId,data} = props ?? {};
+
+          return  adminSetRmCategoryStatus(categoryId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetRmCategoryStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetRmCategoryStatus>>>
+    export type AdminSetRmCategoryStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetRmCategoryStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Rm Category Status
+ */
+export const useAdminSetRmCategoryStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetRmCategoryStatus>>, TError,{categoryId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetRmCategoryStatus>>,
+        TError,
+        {categoryId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetRmCategoryStatusMutationOptions(options), queryClient);
+    }
     export type adminListBomsResponse200 = {
   data: BomListResponse
   status: 200
@@ -6919,6 +8175,184 @@ export const useAdminCreateBom = <TError = ErrorType<HTTPValidationError>,
       > => {
       return useMutation(getAdminCreateBomMutationOptions(options), queryClient);
     }
+    export type adminUpdateBomResponse200 = {
+  data: BomListItem
+  status: 200
+}
+
+export type adminUpdateBomResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateBomResponseSuccess = (adminUpdateBomResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateBomResponseError = (adminUpdateBomResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateBomResponse = (adminUpdateBomResponseSuccess | adminUpdateBomResponseError)
+
+export const getAdminUpdateBomUrl = (bomId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/boms/${bomId}`
+}
+
+/**
+ * @summary Update Bom
+ */
+export const adminUpdateBom = async (bomId: number,
+    updateBomRequest: UpdateBomRequest, options?: RequestInit): Promise<adminUpdateBomResponse> => {
+
+  return mutator<adminUpdateBomResponse>(getAdminUpdateBomUrl(bomId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateBomRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateBomMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBom>>, TError,{bomId: number;data: BodyType<UpdateBomRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBom>>, TError,{bomId: number;data: BodyType<UpdateBomRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateBom'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateBom>>, {bomId: number;data: BodyType<UpdateBomRequest>}> = (props) => {
+          const {bomId,data} = props ?? {};
+
+          return  adminUpdateBom(bomId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateBomMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateBom>>>
+    export type AdminUpdateBomMutationBody = BodyType<UpdateBomRequest>
+    export type AdminUpdateBomMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Bom
+ */
+export const useAdminUpdateBom = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateBom>>, TError,{bomId: number;data: BodyType<UpdateBomRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateBom>>,
+        TError,
+        {bomId: number;data: BodyType<UpdateBomRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateBomMutationOptions(options), queryClient);
+    }
+    export type adminSetBomStatusResponse200 = {
+  data: BomListItem
+  status: 200
+}
+
+export type adminSetBomStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetBomStatusResponseSuccess = (adminSetBomStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetBomStatusResponseError = (adminSetBomStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetBomStatusResponse = (adminSetBomStatusResponseSuccess | adminSetBomStatusResponseError)
+
+export const getAdminSetBomStatusUrl = (bomId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/boms/${bomId}/status`
+}
+
+/**
+ * @summary Set Bom Status
+ */
+export const adminSetBomStatus = async (bomId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetBomStatusResponse> => {
+
+  return mutator<adminSetBomStatusResponse>(getAdminSetBomStatusUrl(bomId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetBomStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetBomStatus>>, TError,{bomId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetBomStatus>>, TError,{bomId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetBomStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetBomStatus>>, {bomId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {bomId,data} = props ?? {};
+
+          return  adminSetBomStatus(bomId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetBomStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetBomStatus>>>
+    export type AdminSetBomStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetBomStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Bom Status
+ */
+export const useAdminSetBomStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetBomStatus>>, TError,{bomId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetBomStatus>>,
+        TError,
+        {bomId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetBomStatusMutationOptions(options), queryClient);
+    }
     export type adminListCourierPartnersResponse200 = {
   data: CourierPartnerListResponse
   status: 200
@@ -7132,4 +8566,182 @@ export const useAdminCreateCourierPartner = <TError = ErrorType<HTTPValidationEr
         TContext
       > => {
       return useMutation(getAdminCreateCourierPartnerMutationOptions(options), queryClient);
+    }
+    export type adminUpdateCourierPartnerResponse200 = {
+  data: CourierPartnerListItem
+  status: 200
+}
+
+export type adminUpdateCourierPartnerResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminUpdateCourierPartnerResponseSuccess = (adminUpdateCourierPartnerResponse200) & {
+  headers: Headers;
+};
+export type adminUpdateCourierPartnerResponseError = (adminUpdateCourierPartnerResponse422) & {
+  headers: Headers;
+};
+
+export type adminUpdateCourierPartnerResponse = (adminUpdateCourierPartnerResponseSuccess | adminUpdateCourierPartnerResponseError)
+
+export const getAdminUpdateCourierPartnerUrl = (courierId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/courier-partners/${courierId}`
+}
+
+/**
+ * @summary Update Courier Partner
+ */
+export const adminUpdateCourierPartner = async (courierId: number,
+    updateCourierPartnerRequest: UpdateCourierPartnerRequest, options?: RequestInit): Promise<adminUpdateCourierPartnerResponse> => {
+
+  return mutator<adminUpdateCourierPartnerResponse>(getAdminUpdateCourierPartnerUrl(courierId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateCourierPartnerRequest)
+  }
+);}
+
+
+
+
+export const getAdminUpdateCourierPartnerMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateCourierPartner>>, TError,{courierId: number;data: BodyType<UpdateCourierPartnerRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminUpdateCourierPartner>>, TError,{courierId: number;data: BodyType<UpdateCourierPartnerRequest>}, TContext> => {
+
+const mutationKey = ['adminUpdateCourierPartner'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminUpdateCourierPartner>>, {courierId: number;data: BodyType<UpdateCourierPartnerRequest>}> = (props) => {
+          const {courierId,data} = props ?? {};
+
+          return  adminUpdateCourierPartner(courierId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminUpdateCourierPartnerMutationResult = NonNullable<Awaited<ReturnType<typeof adminUpdateCourierPartner>>>
+    export type AdminUpdateCourierPartnerMutationBody = BodyType<UpdateCourierPartnerRequest>
+    export type AdminUpdateCourierPartnerMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Update Courier Partner
+ */
+export const useAdminUpdateCourierPartner = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminUpdateCourierPartner>>, TError,{courierId: number;data: BodyType<UpdateCourierPartnerRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminUpdateCourierPartner>>,
+        TError,
+        {courierId: number;data: BodyType<UpdateCourierPartnerRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminUpdateCourierPartnerMutationOptions(options), queryClient);
+    }
+    export type adminSetCourierPartnerStatusResponse200 = {
+  data: CourierPartnerListItem
+  status: 200
+}
+
+export type adminSetCourierPartnerStatusResponse422 = {
+  data: HTTPValidationError
+  status: 422
+}
+
+export type adminSetCourierPartnerStatusResponseSuccess = (adminSetCourierPartnerStatusResponse200) & {
+  headers: Headers;
+};
+export type adminSetCourierPartnerStatusResponseError = (adminSetCourierPartnerStatusResponse422) & {
+  headers: Headers;
+};
+
+export type adminSetCourierPartnerStatusResponse = (adminSetCourierPartnerStatusResponseSuccess | adminSetCourierPartnerStatusResponseError)
+
+export const getAdminSetCourierPartnerStatusUrl = (courierId: number,) => {
+
+
+
+
+  return `/api/v1/admin/masters/courier-partners/${courierId}/status`
+}
+
+/**
+ * @summary Set Courier Partner Status
+ */
+export const adminSetCourierPartnerStatus = async (courierId: number,
+    setStatusRequest: SetStatusRequest, options?: RequestInit): Promise<adminSetCourierPartnerStatusResponse> => {
+
+  return mutator<adminSetCourierPartnerStatusResponse>(getAdminSetCourierPartnerStatusUrl(courierId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(setStatusRequest)
+  }
+);}
+
+
+
+
+export const getAdminSetCourierPartnerStatusMutationOptions = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>, TError,{courierId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+): UseMutationOptions<Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>, TError,{courierId: number;data: BodyType<SetStatusRequest>}, TContext> => {
+
+const mutationKey = ['adminSetCourierPartnerStatus'];
+const {mutation: mutationOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>, {courierId: number;data: BodyType<SetStatusRequest>}> = (props) => {
+          const {courierId,data} = props ?? {};
+
+          return  adminSetCourierPartnerStatus(courierId,data,)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AdminSetCourierPartnerStatusMutationResult = NonNullable<Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>>
+    export type AdminSetCourierPartnerStatusMutationBody = BodyType<SetStatusRequest>
+    export type AdminSetCourierPartnerStatusMutationError = ErrorType<HTTPValidationError>
+
+    /**
+ * @summary Set Courier Partner Status
+ */
+export const useAdminSetCourierPartnerStatus = <TError = ErrorType<HTTPValidationError>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>, TError,{courierId: number;data: BodyType<SetStatusRequest>}, TContext>, }
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof adminSetCourierPartnerStatus>>,
+        TError,
+        {courierId: number;data: BodyType<SetStatusRequest>},
+        TContext
+      > => {
+      return useMutation(getAdminSetCourierPartnerStatusMutationOptions(options), queryClient);
     }

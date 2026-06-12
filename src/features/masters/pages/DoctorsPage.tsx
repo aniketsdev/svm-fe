@@ -1,52 +1,105 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Plus } from 'lucide-react';
-import { CustomButton } from '../../../common/custom-buttons';
-import { CustomSearch } from '../../../common/custom-search';
+import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
+import { useToast } from '../../../common/common-snackbar';
+import { errorMessage } from '../../../utils/api-messages';
+import { useAdminSetDoctorStatus } from '../../../sdk/inventory';
 import { useDoctors } from '../hooks/useDoctors';
+import { useMastersListState } from '../hooks/use-masters-list-state';
+import { MastersSectionLayout } from '../components/masters-section-layout';
 import { DoctorsTable } from '../components/DoctorsTable';
-import { CreateDoctorDialog } from '../components/CreateDoctorDialog';
+import { DoctorDrawer } from '../components/DoctorDrawer';
+import type { DoctorRow } from '../api/doctors';
+
+const SORTABLE = ['name', 'code', 'created_at', 'is_active'] as const;
+
+type DrawerState =
+  | { open: false }
+  | { open: true; doctor: DoctorRow | null; tab?: 'documents' };
 
 export function DoctorsPage() {
-  const [search, setSearch] = useState('');
-  const [createOpen, setCreateOpen] = useState(false);
-  const { doctors, isLoading, refetch } = useDoctors(search);
+  const { toast } = useToast();
+  const list = useMastersListState(SORTABLE);
+  const [drawer, setDrawer] = useState<DrawerState>({ open: false });
+  const [statusTarget, setStatusTarget] = useState<DoctorRow | null>(null);
+
+  const { doctors, count, isLoading, refetch } = useDoctors({
+    search: list.q,
+    page: list.page,
+    pageSize: list.pageSize,
+    sort: list.sort,
+    activeOnly: list.activeOnly,
+  });
+
+  const statusMutation = useAdminSetDoctorStatus({
+    mutation: {
+      onSuccess: () => {
+        toast({ severity: 'success', message: 'Doctor status updated.' });
+        setStatusTarget(null);
+        void refetch();
+      },
+      onError: (error) => toast({ severity: 'error', message: errorMessage(error) }),
+    },
+  });
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <Link
-            to="/masters"
-            className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="size-3.5" /> Masters
-          </Link>
-          <h1 className="text-2xl font-semibold text-foreground">Doctors</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Customer master — clinics, contact and billing state.
-          </p>
-        </div>
-        <CustomButton variant="primary" icon={<Plus className="size-4" />} onClick={() => setCreateOpen(true)}>
-          Add doctor
-        </CustomButton>
-      </div>
+    <MastersSectionLayout
+      title="Doctors"
+      description="Customer master — clinics, contact and billing state."
+      count={count}
+      searchPlaceholder="Search by name, code, clinic or city"
+      searchValue={list.q}
+      onSearch={list.setSearch}
+      addLabel="Add doctor"
+      onAdd={() => setDrawer({ open: true, doctor: null })}
+      activeOnly={list.activeOnly}
+      onActiveOnlyChange={list.setActiveOnly}
+    >
+      <DoctorsTable
+        doctors={doctors}
+        loading={isLoading}
+        rowCount={count}
+        pageIndex={list.page}
+        pageSize={list.pageSize}
+        sorting={list.sorting}
+        onPaginationChange={list.setPagination}
+        onSortingChange={list.setSorting}
+        onEdit={(doctor) => setDrawer({ open: true, doctor })}
+        onDocuments={(doctor) => setDrawer({ open: true, doctor, tab: 'documents' })}
+        onToggleStatus={setStatusTarget}
+      />
 
-      <div className="mt-6 flex items-center justify-end gap-3">
-        <CustomSearch
-          textData={{ placeholder: 'Search by name, code, clinic or city', btnTitle: 'Search' }}
-          onSearch={setSearch}
-          hasStartSearchIcon
-          width="22rem"
-        />
-      </div>
+      <DoctorDrawer
+        open={drawer.open}
+        doctor={drawer.open ? drawer.doctor : null}
+        initialTab={drawer.open ? drawer.tab : undefined}
+        onClose={() => setDrawer({ open: false })}
+        onSaved={() => void refetch()}
+      />
 
-      <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <DoctorsTable doctors={doctors} loading={isLoading} />
-      </div>
-
-      <CreateDoctorDialog open={createOpen} onClose={() => setCreateOpen(false)} onCreated={() => refetch()} />
-    </div>
+      <ConfirmationPopUp
+        open={statusTarget !== null}
+        onClose={() => setStatusTarget(null)}
+        onConfirm={() =>
+          statusTarget &&
+          statusMutation.mutate({ doctorId: statusTarget.id, data: { is_active: !statusTarget.is_active } })
+        }
+        title={statusTarget?.is_active ? 'Deactivate doctor' : 'Activate doctor'}
+        message={
+          statusTarget ? (
+            <>
+              {statusTarget.is_active ? 'Deactivate' : 'Activate'}{' '}
+              <span className="font-medium">{statusTarget.name}</span>?{' '}
+              {statusTarget.is_active
+                ? 'Existing references keep working; it will be hidden from “Active only” views.'
+                : 'It will be selectable again.'}
+            </>
+          ) : null
+        }
+        confirmLabel={statusTarget?.is_active ? 'Deactivate' : 'Activate'}
+        destructive={statusTarget?.is_active ?? false}
+        confirmDisabled={statusMutation.isPending}
+      />
+    </MastersSectionLayout>
   );
 }
 

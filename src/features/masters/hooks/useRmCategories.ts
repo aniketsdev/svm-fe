@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import type { MastersListQuery } from '../api/list-query';
 import {
   rmCategoriesQueryOptions,
   type RmCategoryRow,
@@ -10,15 +11,15 @@ interface RmCategoriesEnvelope {
   status: number;
 }
 
-export function useRmCategories(search?: string) {
-  const query = useQuery(rmCategoriesQueryOptions(search));
-  const envelope = query.data as RmCategoriesEnvelope | undefined;
+export function useRmCategories(query: MastersListQuery) {
+  const result = useQuery({ ...rmCategoriesQueryOptions(query), placeholderData: (prev) => prev });
+  const envelope = result.data as RmCategoriesEnvelope | undefined;
   const categories: RmCategoryRow[] = envelope?.data.results ?? [];
 
   return {
     categories,
     count: envelope?.data.count ?? 0,
-    isLoading: query.isPending,
-    refetch: query.refetch,
+    isLoading: result.isPending,
+    refetch: result.refetch,
   };
 }

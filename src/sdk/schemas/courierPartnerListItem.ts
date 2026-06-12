@@ -10,5 +10,6 @@ export interface CourierPartnerListItem {
   contact_phone?: string | null;
   tracking_url?: string | null;
   is_active: boolean;
+  media_count?: number;
   created_at: string;
 }

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import type { MastersListQuery } from '../api/list-query';
 import {
   doctorPricingQueryOptions,
   type DoctorPricingRow,
@@ -10,15 +11,15 @@ interface Envelope {
   status: number;
 }
 
-export function useDoctorPricing(search?: string) {
-  const query = useQuery(doctorPricingQueryOptions(search));
-  const envelope = query.data as Envelope | undefined;
+export function useDoctorPricing(query: MastersListQuery) {
+  const result = useQuery({ ...doctorPricingQueryOptions(query), placeholderData: (prev) => prev });
+  const envelope = result.data as Envelope | undefined;
   const pricing: DoctorPricingRow[] = envelope?.data.results ?? [];
 
   return {
     pricing,
     count: envelope?.data.count ?? 0,
-    isLoading: query.isPending,
-    refetch: query.refetch,
+    isLoading: result.isPending,
+    refetch: result.refetch,
   };
 }

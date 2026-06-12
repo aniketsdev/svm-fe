@@ -9,5 +9,6 @@ export interface RmCategoryListItem {
   code: string;
   description?: string | null;
   is_active: boolean;
+  media_count?: number;
   created_at: string;
 }

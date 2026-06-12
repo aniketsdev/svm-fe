@@ -1,6 +1,4 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeftRight } from 'lucide-react';
-import { CustomButton } from '../../../common/custom-buttons';
 import { CustomSearch } from '../../../common/custom-search';
 import { CustomSelect } from '../../../common/custom-select';
 import { useStockTransfers } from '../hooks/useStockTransfers';
@@ -20,8 +18,13 @@ const STATUS_ITEMS = [
   { value: 'cancelled', label: 'Cancelled' },
 ];
 
-export function TransfersTab() {
-  const [createOpen, setCreateOpen] = useState(false);
+type TransfersTabProps = {
+  /** Create-transfer drawer open state, owned by InventoryPage so the action button can live in the tabs row. */
+  createOpen: boolean;
+  onCreateOpenChange: (open: boolean) => void;
+};
+
+export function TransfersTab({ createOpen, onCreateOpenChange }: TransfersTabProps) {
   const [selected, setSelected] = useState<TransferRow | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState(ALL);
@@ -43,10 +46,7 @@ export function TransfersTab() {
 
   return (
     <div className="flex flex-col">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {total} {total === 1 ? 'transfer' : 'transfers'}
-        </span>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex flex-wrap items-center gap-3 sm:justify-end">
           <div className="w-44">
             <CustomSelect
@@ -63,9 +63,6 @@ export function TransfersTab() {
             hasStartSearchIcon
             width="20rem"
           />
-          <CustomButton variant="primary" icon={<ArrowLeftRight className="size-4" />} onClick={() => setCreateOpen(true)}>
-            New Transfer
-          </CustomButton>
         </div>
       </div>
 
@@ -81,7 +78,7 @@ export function TransfersTab() {
         />
       </div>
 
-      <CreateStockTransferDrawer open={createOpen} onClose={() => setCreateOpen(false)} onCreated={refetch} />
+      <CreateStockTransferDrawer open={createOpen} onClose={() => onCreateOpenChange(false)} onCreated={refetch} />
       <StockTransferDetailDrawer transfer={selected} onClose={() => setSelected(null)} onActed={refetch} />
     </div>
   );

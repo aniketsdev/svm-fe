@@ -1,52 +1,105 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Plus } from 'lucide-react';
-import { CustomButton } from '../../../common/custom-buttons';
-import { CustomSearch } from '../../../common/custom-search';
+import { ConfirmationPopUp } from '../../../common/confirmation-pop-up';
+import { useToast } from '../../../common/common-snackbar';
+import { errorMessage } from '../../../utils/api-messages';
+import { useAdminSetDoctorAliasStatus } from '../../../sdk/inventory';
 import { useDoctorAliases } from '../hooks/useDoctorAliases';
+import { useMastersListState } from '../hooks/use-masters-list-state';
+import { MastersSectionLayout } from '../components/masters-section-layout';
 import { DoctorAliasesTable } from '../components/DoctorAliasesTable';
-import { CreateDoctorAliasDialog } from '../components/CreateDoctorAliasDialog';
+import { DoctorAliasDrawer } from '../components/DoctorAliasDrawer';
+import type { DoctorAliasRow } from '../api/doctor-aliases';
+
+const SORTABLE = ['alias', 'created_at', 'is_active'] as const;
+
+type DrawerState =
+  | { open: false }
+  | { open: true; alias: DoctorAliasRow | null; tab?: 'documents' };
 
 export function DoctorAliasesPage() {
-  const [search, setSearch] = useState('');
-  const [createOpen, setCreateOpen] = useState(false);
-  const { aliases, isLoading, refetch } = useDoctorAliases(search);
+  const { toast } = useToast();
+  const list = useMastersListState(SORTABLE);
+  const [drawer, setDrawer] = useState<DrawerState>({ open: false });
+  const [statusTarget, setStatusTarget] = useState<DoctorAliasRow | null>(null);
+
+  const { aliases, count, isLoading, refetch } = useDoctorAliases({
+    search: list.q,
+    page: list.page,
+    pageSize: list.pageSize,
+    sort: list.sort,
+    activeOnly: list.activeOnly,
+  });
+
+  const statusMutation = useAdminSetDoctorAliasStatus({
+    mutation: {
+      onSuccess: () => {
+        toast({ severity: 'success', message: 'Alias status updated.' });
+        setStatusTarget(null);
+        void refetch();
+      },
+      onError: (error) => toast({ severity: 'error', message: errorMessage(error) }),
+    },
+  });
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <Link
-            to="/masters"
-            className="mb-2 inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="size-3.5" /> Masters
-          </Link>
-          <h1 className="text-2xl font-semibold text-foreground">Doctor Aliases</h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Alternate names a doctor may be referred to by.
-          </p>
-        </div>
-        <CustomButton variant="primary" icon={<Plus className="size-4" />} onClick={() => setCreateOpen(true)}>
-          Add alias
-        </CustomButton>
-      </div>
+    <MastersSectionLayout
+      title="Doctor Aliases"
+      description="Alternate names a doctor may be referred to by."
+      count={count}
+      searchPlaceholder="Search by doctor or alias"
+      searchValue={list.q}
+      onSearch={list.setSearch}
+      addLabel="Add alias"
+      onAdd={() => setDrawer({ open: true, alias: null })}
+      activeOnly={list.activeOnly}
+      onActiveOnlyChange={list.setActiveOnly}
+    >
+      <DoctorAliasesTable
+        aliases={aliases}
+        loading={isLoading}
+        rowCount={count}
+        pageIndex={list.page}
+        pageSize={list.pageSize}
+        sorting={list.sorting}
+        onPaginationChange={list.setPagination}
+        onSortingChange={list.setSorting}
+        onEdit={(alias) => setDrawer({ open: true, alias })}
+        onDocuments={(alias) => setDrawer({ open: true, alias, tab: 'documents' })}
+        onToggleStatus={setStatusTarget}
+      />
 
-      <div className="mt-6 flex items-center justify-end gap-3">
-        <CustomSearch
-          textData={{ placeholder: 'Search by doctor or alias', btnTitle: 'Search' }}
-          onSearch={setSearch}
-          hasStartSearchIcon
-          width="22rem"
-        />
-      </div>
+      <DoctorAliasDrawer
+        open={drawer.open}
+        alias={drawer.open ? drawer.alias : null}
+        initialTab={drawer.open ? drawer.tab : undefined}
+        onClose={() => setDrawer({ open: false })}
+        onSaved={() => void refetch()}
+      />
 
-      <div className="mt-4 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-        <DoctorAliasesTable aliases={aliases} loading={isLoading} />
-      </div>
-
-      <CreateDoctorAliasDialog open={createOpen} onClose={() => setCreateOpen(false)} onCreated={() => refetch()} />
-    </div>
+      <ConfirmationPopUp
+        open={statusTarget !== null}
+        onClose={() => setStatusTarget(null)}
+        onConfirm={() =>
+          statusTarget &&
+          statusMutation.mutate({ aliasId: statusTarget.id, data: { is_active: !statusTarget.is_active } })
+        }
+        title={statusTarget?.is_active ? 'Deactivate alias' : 'Activate alias'}
+        message={
+          statusTarget ? (
+            <>
+              {statusTarget.is_active ? 'Deactivate' : 'Activate'}{' '}
+              <span className="font-medium">{statusTarget.alias}</span>?{' '}
+              {statusTarget.is_active
+                ? 'Existing references keep working; it will be hidden from “Active only” views.'
+                : 'It will be selectable again.'}
+            </>
+          ) : null
+        }
+        confirmLabel={statusTarget?.is_active ? 'Deactivate' : 'Activate'}
+        destructive={statusTarget?.is_active ?? false}
+        confirmDisabled={statusMutation.isPending}
+      />
+    </MastersSectionLayout>
   );
 }
 

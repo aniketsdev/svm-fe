@@ -12,6 +12,7 @@ export interface BomListItem {
   product_name?: string | null;
   output_qty?: number | null;
   is_active: boolean;
+  media_count?: number;
   created_at: string;
   line_count: number;
   lines: BomLineItem[];

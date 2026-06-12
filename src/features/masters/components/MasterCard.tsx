@@ -9,6 +9,8 @@ export interface MasterSection {
   icon: ComponentType<{ className?: string }>;
   to?: string;
   ready?: boolean;
+  /** Live record count (feature 027); omitted → no badge. */
+  count?: number;
 }
 
 export function MasterCard({
@@ -17,6 +19,7 @@ export function MasterCard({
   icon: Icon,
   to,
   ready,
+  count,
 }: Omit<MasterSection, 'key'>) {
   const inner = (
     <div
@@ -34,11 +37,15 @@ export function MasterCard({
         >
           <Icon className="size-5" />
         </span>
-        {!ready && (
+        {!ready ? (
           <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
             Coming soon
           </span>
-        )}
+        ) : count !== undefined ? (
+          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
+            {count.toLocaleString()}
+          </span>
+        ) : null}
       </div>
       <div>
         <h3 className="text-sm font-semibold text-foreground">{label}</h3>
